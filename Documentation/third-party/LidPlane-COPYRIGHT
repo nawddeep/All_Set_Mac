@@ -1,0 +1,25 @@
+Lid Plane
+Copyright (c) 2026 Jhey
+SPDX-License-Identifier: GPL-3.0-or-later
+
+Starting with v0.3.2, this program is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program in LICENSE. If not, see https://www.gnu.org/licenses/.
+
+Corresponding source and build instructions are available alongside each
+versioned app download at https://github.com/jh3y/lid-plane/releases.
+Choose the source archive matching the app version and see DEVELOPMENT.md.
+
+Releases v0.3.1 and earlier were distributed under MIT. Their existing
+permissions remain unchanged; LICENSE-MIT preserves that historical notice.
+Historical binaries retained in dist/ remain under their original license.
+This notice does not offer v0.3.2 or later changes under MIT.

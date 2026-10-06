@@ -1,0 +1,15 @@
+{
+  "files.exclude": {
+    "**/.build": true,
+    "**/.swiftpm": true
+  },
+  "search.exclude": {
+    "**/.build": true,
+    "build": true
+  },
+  "[swift]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "swift.autoGenerateLaunchConfigurations": false
+}

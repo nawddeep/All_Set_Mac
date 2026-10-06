@@ -1,0 +1,183 @@
+name: CI
+
+# Continuous integration: checks every change to main and every pull request,
+# on the same macOS and Xcode generation the app is developed on (the code uses
+# the macOS 26 SDK). Tests that read this Mac's own sensors skip themselves
+# here: a CI virtual machine has no temperature sensors or Now Playing.
+#
+#   hygiene         nothing tracked that shouldn't be (build output, *.env, big files)
+#   build-and-test  zero-warning debug build and the Swift tests
+#   package         the release app built and packaged exactly as a release is
+#   screenshots     every page rendered, for review
+#   probe           idle CPU and scroll smoothness against budgets
+#   server-scripts  the wallpaper server scripts against a throwaway Postgres
+#
+# Releases are a separate workflow (release.yml), started by pushing a v* tag.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# One run per branch or pull request: a newer push cancels the older run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Nothing tracked that shouldn't be
+        run: scripts/check-repo-hygiene.sh
+
+  build-and-test:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build (0 warnings)
+        run: |
+          set -o pipefail
+          swift build 2>&1 | tee build.log
+          count=$(grep -c "warning:" build.log || true)
+          echo "Warnings: $count"
+          # The project keeps to zero warnings, so a new one fails the build.
+          if [ "$count" -gt 0 ]; then
+            grep "warning:" build.log | sort -u | head -40
+            echo "::error::swift build reported $count warning(s); the project keeps to 0"
+            exit 1
+          fi
+
+      - name: Test
+        run: swift test
+
+  package:
+    # The release build, packaged the way release.yml packages it, so a change
+    # that breaks the release (a missing resource, a signature that doesn't
+    # verify, a DMG that won't mount) fails here, not on release day.
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # the build number is the commit count
+      - name: Build the release app
+        run: ALLSET_APP_DIR="$PWD/dist/AllSet.app" scripts/build-app.sh
+      - name: Package and check
+        run: scripts/package-release.sh dist/AllSet.app dist ci
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AllSet-ci-build
+          path: |
+            dist/*.zip
+            dist/*.dmg
+            dist/SHA256SUMS.txt
+          retention-days: 7
+
+  screenshots:
+    # Every main-window page at three window sizes, from the real app
+    # (DEBUG `-renderPages`), uploaded as an artifact to review UI changes
+    # without sitting at the Mac.
+    runs-on: macos-26
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build
+        run: swift build
+
+      - name: Render pages
+        run: |
+          mkdir -p screenshots
+          # Watchdog: the harness quits by itself; this only guards a hang.
+          ( sleep 900; pkill -f ".build/debug/AllSet" ) &
+          # Exits non-zero, and lists what's missing in render-report.txt, unless every
+          # page was saved at every size: a partial set fails rather than passes.
+          .build/debug/AllSet -renderPages "$PWD/screenshots" -AppleLanguages '(en)'
+          cat screenshots/render-report.txt
+          ls screenshots | head -80
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: page-screenshots
+          path: screenshots/*.png
+          if-no-files-found: error
+          retention-days: 14
+
+      # The same pictures as small JPEGs on a `ci-screenshots` branch that only
+      # ever holds the latest set (force-pushed, one commit), for reviewers who
+      # can reach github.com but not the artifact store.
+      - name: Publish to the ci-screenshots branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p /tmp/publish && cd /tmp/publish
+          for f in "$GITHUB_WORKSPACE"/screenshots/*.png; do
+            sips -s format jpeg -s formatOptions 72 "$f" --out "$(basename "${f%.png}").jpg" >/dev/null
+          done
+          printf 'Screenshots of %s (%s)\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" > README.md
+          git init -q -b ci-screenshots
+          git add .
+          git -c user.name="All Set CI" -c user.email="ci@users.noreply.github.com" commit -qm "Screenshots of ${GITHUB_SHA::7} on $GITHUB_REF_NAME"
+          git push -qf "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ci-screenshots
+
+  probe:
+    # Idle CPU per page and scroll smoothness (missed frames while scrolling
+    # the busiest pages), from the real app (DEBUG `-probe`). Numbers only:
+    # compare runs to catch a page that got heavier.
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build
+        run: swift build
+
+      - name: Probe
+        run: |
+          set -o pipefail  # a probe that fails fails the step, not hidden behind tee
+          ( sleep 600; pkill -f ".build/debug/AllSet" ) &
+          .build/debug/AllSet -probe scroll -AppleLanguages '(en)' | tee probe.txt
+          .build/debug/AllSet -probe pages -AppleLanguages '(en)' | tee -a probe.txt
+          .build/debug/AllSet -probe galleryparts -AppleLanguages '(en)' | tee -a probe.txt
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat probe.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Budgets
+        # Fails past a ceiling in scripts/probe-budgets.json, or when a kind of
+        # measurement is missing. The ceilings start wide; tighten them from runs.
+        run: /usr/bin/python3 scripts/check_probe_budgets.py probe.txt
+
+  server-scripts:
+    # The wallpaper server scripts against a throwaway Postgres: deletes that
+    # can't remove another wallpaper's files or leave files and database
+    # disagreeing, the catalog's sharing rule and paging, catalog sync keeping
+    # keys, schema migrations, and a backup restored and verified by the drill.
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - name: Postgres
+        run: brew install postgresql@17
+      - name: Test
+        run: |
+          set -o pipefail
+          /usr/bin/python3 -m unittest -v scripts/test_wallpaper_library.py scripts/test_check_probe_budgets.py scripts/cloud/test_sync_catalog.py scripts/cloud/test_delete_service.py scripts/cloud/test_catalog_service.py scripts/cloud/test_migrate.py scripts/cloud/test_backup.py scripts/cloud/test_install_services.py 2>&1 | tee server-tests.log
+          # Skipped tests (no Postgres) would pass silently: require that none were.
+          ! grep -q "skipped" server-tests.log

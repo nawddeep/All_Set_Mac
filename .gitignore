@@ -1,0 +1,30 @@
+.DS_Store
+/.build
+/build
+/Packages
+xcuserdata/
+DerivedData/
+.swiftpm/
+*.xcodeproj
+.build-probe/
+
+# Raw wallpaper source datasets (personal, copyright-unclear, never committed —
+# the importer's own copies live in ~/Library/Application Support, not here)
+/wallpaper phase 1 data/
+/data set(widgets)/
+
+# Cloud sync credentials — never commit
+scripts/cloud/.env
+*.env
+.claude/settings.local.json
+
+# graphify knowledge graph (generated)
+graphify-out/
+
+# Shareable builds and the handout READMEs (not source)
+/dist
+__pycache__/
+
+# Notes kept on this Mac but not in the repository
+/client-opportunities-*.md
+/wallpaper_dataset_inventory.md

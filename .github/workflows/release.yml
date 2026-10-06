@@ -1,0 +1,196 @@
+name: Release
+
+# Continuous delivery: pushing a version tag builds, tests, packages and
+# publishes All Set as a GitHub Release.
+#
+#   git tag v1.2.0 && git push origin v1.2.0
+#
+# The release carries AllSet-<version>.zip, AllSet-<version>.dmg and
+# SHA256SUMS.txt. A tag with a suffix (v1.2.0-beta.1) is published as a
+# pre-release. The same job can be started by hand (Actions › Release › Run
+# workflow) for a tag that already exists.
+#
+# Signing. With no secrets set, the app is signed ad hoc: it runs, but macOS
+# Gatekeeper warns on first open (right-click › Open, once), and the release
+# notes say so. Add these repository secrets to sign with a Developer ID and
+# notarize instead (both steps then run, and the notes say so):
+#
+#   DEVELOPER_ID_CERT_P12        base64 of a "Developer ID Application" .p12
+#   DEVELOPER_ID_CERT_PASSWORD   its password
+#   APPLE_ID                     the Apple ID that notarizes
+#   APPLE_TEAM_ID                the team id
+#   APPLE_APP_PASSWORD           an app-specific password for that Apple ID
+#
+# The release never embeds a wallpaper-server address: that only comes from a
+# local scripts/local.env, which isn't in the repository.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release (for example v1.2.0)
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+      - name: Build (0 warnings)
+        run: |
+          set -o pipefail
+          swift build 2>&1 | tee build.log
+          if grep -q "warning:" build.log; then
+            grep "warning:" build.log | sort -u | head -40
+            echo "::error::a release is built with 0 warnings"
+            exit 1
+          fi
+      - name: Test
+        run: swift test
+      - name: Repository hygiene
+        run: scripts/check-repo-hygiene.sh
+
+  release:
+    needs: test
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0  # the build number is the commit count
+
+      - name: Version
+        id: version
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::$TAG isn't a version tag like v1.2.0 or v1.2.0-beta.1"
+            exit 1
+          fi
+          version="${TAG#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # The app's own version is numbers only (macOS expects that): 1.2.0-beta.1
+          # is 1.2.0 inside the app and 1.2.0-beta.1 on the files and the release.
+          echo "bundle_version=${version%%-*}" >> "$GITHUB_OUTPUT"
+          if [[ "$TAG" == *-* ]]; then echo "prerelease=true"; else echo "prerelease=false"; fi >> "$GITHUB_OUTPUT"
+
+      - name: Signing certificate
+        id: signing
+        env:
+          CERT: ${{ secrets.DEVELOPER_ID_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.DEVELOPER_ID_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          if [ -z "$CERT" ]; then
+            echo "No Developer ID certificate: signing ad hoc."
+            echo "identity=-" >> "$GITHUB_OUTPUT"
+            echo "notarize=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          keychain="$RUNNER_TEMP/release.keychain-db"
+          password="$(uuidgen)"
+          echo "$CERT" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 3600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm -f "$RUNNER_TEMP/cert.p12"
+          identity="$(security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application:[^"]*\)".*/\1/p' | head -1)"
+          if [ -z "$identity" ]; then
+            echo "::error::the certificate secret holds no Developer ID Application identity"
+            exit 1
+          fi
+          echo "identity=$identity" >> "$GITHUB_OUTPUT"
+          if [ -n "$APPLE_ID" ] && [ -n "$APPLE_TEAM_ID" ] && [ -n "$APPLE_APP_PASSWORD" ]; then
+            echo "notarize=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::signed with a Developer ID but not notarized: set APPLE_ID, APPLE_TEAM_ID and APPLE_APP_PASSWORD"
+            echo "notarize=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the app
+        env:
+          ALLSET_VERSION: ${{ steps.version.outputs.bundle_version }}
+          ALLSET_SIGN_IDENTITY: ${{ steps.signing.outputs.identity }}
+        run: ALLSET_APP_DIR="$PWD/dist/AllSet.app" scripts/build-app.sh
+
+      - name: Notarize the app
+        if: steps.signing.outputs.notarize == 'true'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          ditto -c -k --keepParent dist/AllSet.app "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
+          xcrun stapler staple dist/AllSet.app
+
+      - name: Package and check
+        run: scripts/package-release.sh dist/AllSet.app dist "${{ steps.version.outputs.version }}"
+
+      - name: Notarize the disk image
+        if: steps.signing.outputs.notarize == 'true'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          xcrun notarytool submit "dist/AllSet-$VERSION.dmg" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
+          xcrun stapler staple "dist/AllSet-$VERSION.dmg"
+          # Stapling changed the disk image: its checksum is taken again.
+          (cd dist && shasum -a 256 "AllSet-$VERSION.zip" "AllSet-$VERSION.dmg" > SHA256SUMS.txt)
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          IDENTITY: ${{ steps.signing.outputs.identity }}
+          NOTARIZED: ${{ steps.signing.outputs.notarize }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          {
+            echo "## Install"
+            echo
+            echo "Download **AllSet-$VERSION.dmg**, open it and drag All Set to Applications. Requires macOS 14.2 or later."
+            echo
+            if [ "$NOTARIZED" = "true" ]; then
+              echo "Signed with a Developer ID and notarized by Apple."
+            elif [ "$IDENTITY" != "-" ]; then
+              echo "Signed with a Developer ID, **not notarized**: macOS may warn the first time. Right-click All Set › Open, once."
+            else
+              echo "**Not signed by an identified developer.** macOS will say it can't check All Set for malicious software. The first time, right-click All Set in Applications › Open › Open. After that it opens normally."
+            fi
+            echo
+            echo "Check a download: \`shasum -a 256 -c SHA256SUMS.txt\`"
+          } > "$RUNNER_TEMP/notes.md"
+          files=("dist/AllSet-$VERSION.zip" "dist/AllSet-$VERSION.dmg" "dist/SHA256SUMS.txt")
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # Run again for the same tag: replace the files, keep the release.
+            gh release upload "$TAG" "${files[@]}" --clobber
+          else
+            flags=(--title "All Set $VERSION" --notes-file "$RUNNER_TEMP/notes.md" --generate-notes --verify-tag)
+            if [ "$PRERELEASE" = "true" ]; then flags+=(--prerelease); fi
+            gh release create "$TAG" "${files[@]}" "${flags[@]}"
+          fi
+
+      - name: Remove the signing keychain
+        if: always()
+        run: security delete-keychain "$RUNNER_TEMP/release.keychain-db" 2>/dev/null || true

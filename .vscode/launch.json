@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "name": "Debug AllSet",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "target": "AllSet",
+      "configuration": "debug",
+      "preLaunchTask": "Build (debug)"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "name": "Debug AllSet (notch open)",
+      "args": [
+        "-previewNotch",
+        "home"
+      ],
+      "cwd": "${workspaceFolder}",
+      "target": "AllSet",
+      "configuration": "debug",
+      "preLaunchTask": "Build (debug)"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "name": "Release AllSet",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "target": "AllSet",
+      "configuration": "release",
+      "preLaunchTask": "Build (release)"
+    }
+  ]
+}

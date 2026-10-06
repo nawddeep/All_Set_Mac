@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>AllSet</string>
+    <key>CFBundleDisplayName</key>
+    <string>All Set</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.pratik.allset</string>
+    <key>CFBundleExecutable</key>
+    <string>AllSet</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.2</string>
+    <key>NSAudioCaptureUsageDescription</key>
+    <string>All Set passes an app's sound through its volume slider so you can turn that one app up or down.</string>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>All Set shows your upcoming events in the Calendar widget.</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.pratik.allset</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>allset</string>
+            </array>
+        </dict>
+    </array>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <!-- No App Transport Security exception here: the personal library server's
+         address is not part of the source. scripts/build-app.sh adds a plain-HTTP
+         exception for exactly that one host (Tailscale already encrypts the link)
+         from ALLSET_LIBRARY_SERVER_HOST or scripts/local.env (git-ignored). -->
+</dict>
+</plist>

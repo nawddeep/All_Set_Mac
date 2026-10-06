@@ -1,0 +1,9 @@
+{
+  "_note": "Ceilings for the CI probe (.github/workflows/ci.yml, job probe). Set wide on purpose: no CI baseline was available when they were added (2026-10-06), so they catch a page that got several times heavier or a probe that measured nothing, not small drift. Tighten each to about 1.5x its usual CI value once a few runs are in.",
+  "page_cpu_percent": 40,
+  "scroll_cpu_percent": 160,
+  "scroll_max_frame_ms": 1500,
+  "scroll_hitches": 60,
+  "gallery_part_worst_ms": 3000,
+  "required": ["page", "scroll", "gallery part"]
+}

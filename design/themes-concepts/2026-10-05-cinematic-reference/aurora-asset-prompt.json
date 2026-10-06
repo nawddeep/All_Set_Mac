@@ -1,0 +1,8 @@
+{
+  "mode": "built-in image_gen",
+  "use_case": "photorealistic-natural",
+  "prompt": "Create a production-quality original wallpaper asset for the Midnight Aurora theme in a premium macOS desktop customization app. Landscape 16:10. A cinematic Nordic fjord at night, jagged distant snowy peaks in the middle distance, still dark water reflecting bright turquoise cyan aurora with a restrained violet band toward the right, graceful luminous vertical aurora curtains across a dark midnight navy starry sky. Rich photographic detail, coherent natural landscape, controlled cyan-violet highlights, calm dark areas left and right for legible desktop widgets. The fjord and mountains form the lower half, the northern lights fill the upper half. No text, no UI, no clocks, no calendar, no widgets, no frames, no people, no logos or watermark. High-end realistic night landscape photography with atmospheric blue depth and cinematic color grading.",
+  "workspace_asset": "Sources/AllSetCore/Resources/ThemeArt/midnight-aurora.jpg",
+  "output": "JPEG, quality 91, 1586 × 992",
+  "references": []
+}

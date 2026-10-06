@@ -1,0 +1,36 @@
+{
+  "mode": "Built-in image generation; two reference edits, four original generations",
+  "referenceWidgets": "design/widgets-concepts/2026-10-05/01-widget-library.png",
+  "referenceWallpaper": "design/wallpaper-concepts/2026-10-05-v2/03-immersive-cinema.png",
+  "backgrounds": [
+    {
+      "name": "alpine-afterglow",
+      "path": "/Users/pratiksmac/Downloads/all set/design/wallpaper-concepts/2026-10-05-v2/03-immersive-cinema.png",
+      "prompt": "Edit the supplied All Set Wallpaper UI screenshot into ONLY its clean underlying landscape wallpaper image. Preserve the exact alpine snowy mountain range, calm lake reflections, stars, orange-pink horizon at right and indigo blue twilight sky, composition, photographic detail and lighting. Remove EVERY user-interface element: navigation, app label, buttons, captions, toolbar, filmstrip and window corners. Reconstruct the covered landscape naturally with continuous lake and forest below, sky above. Image should be edge-to-edge scenic wallpaper 16:10; no text, no UI, no borders, no watermarks. Match original mountains and color grading closely. This is a bundled original scenic asset for the real native app, not another UI mockup."
+    },
+    {
+      "name": "widgets-midnight",
+      "path": "/Users/pratiksmac/.codex/generated_images/01a10a54-8515-7653-b271-340c620962b9/exec-2c6609e8-1cf5-4e58-a612-10ee4b33360d.png",
+      "prompt": "Edit the supplied All Set Widgets UI screenshot into ONLY its exact dark-blue underlying scenic page background. Preserve the same very dark midnight navy-blue sky with faint stars, snowy mountain silhouettes behind the carousel, dark lake reflections in the middle and dark rocky foreground on the lower sides. Preserve the reference's overall dark blue exposure and almost-black bottom; do not brighten it to the Wallpaper screenshot. Remove ALL UI: navigation, category bar, app title, weather and clock widgets, luminous widget rim, analog dial, labels, controls, all library cards and section panel. Reconstruct covered mountain/lake/background areas naturally; full edge-to-edge landscape 16:10. No text, numbers, charts, widget shapes, glowing rectangles, UI, border, watermark. Keep mountains at roughly upper quarter to middle and subtle lake below. This is just the original clean dark scenic backdrop for the actual native Widgets page. Do not produce a UI mockup."
+    }
+  ],
+  "filmstrip": [
+    {
+      "name": "cinema-coast",
+      "prompt": "Original photorealistic landscape wallpaper, 16:10, dramatic rugged green coastal cliffs above deep sapphire ocean, breaking white waves, pink-blue twilight sky and warm light grazing the rocks. Premium cinematic aerial photography. No buildings, people, text, frames, UI or watermarks. Match a native dark blue wallpaper gallery, crisp detail and believable natural lighting."
+    },
+    {
+      "name": "cinema-dunes",
+      "prompt": "Original photorealistic landscape wallpaper, 16:10, graceful pale amber desert dunes at golden sunset, vast open sky with soft wispy clouds, warm orange and bronze palette, deep natural shadowed sand ripples, distant hazy mountains. Premium cinematic landscape photography, no people, text, frames, UI or watermarks."
+    },
+    {
+      "name": "cinema-orbit",
+      "prompt": "Original cinematic astronomical wallpaper, 16:10, enormous deep indigo planet with a delicate violet illuminated crescent, vibrant magenta and violet nebula clouds and a tiny distant moon, sparse bright stars, realistic cosmic texture. Premium coherent space art with dark blues, purple rim illumination. No text, frames, UI, logos or watermarks."
+    }
+  ],
+  "weather": {
+    "filename": "cinema-weather-day.png",
+    "prompt": "Create a premium photorealistic weather illustration asset on a truly transparent background: a radiant golden sun partially emerging behind soft voluminous white and pale blue cumulus clouds, as seen in a beautiful desktop weather widget. Sun upper left, cloud cluster sweeping diagonally across lower right. Realistic fine cloud texture, gentle warm halo, cool blue shadow tones, no sky rectangle, no frame, no text, no interface, no rain. Single isolated compact composition with ample transparent edge padding. High quality believable 3D atmospheric light, not a flat symbol.",
+    "transparent_background": true
+  }
+}

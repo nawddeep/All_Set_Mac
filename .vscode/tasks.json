@@ -1,0 +1,77 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build (debug)",
+      "type": "shell",
+      "command": "swift build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    },
+    {
+      "label": "Build (release)",
+      "type": "shell",
+      "command": "swift build -c release",
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    },
+    {
+      "label": "Run",
+      "type": "shell",
+      "command": "make run",
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    },
+    {
+      "label": "Preview notch (Home)",
+      "type": "shell",
+      "command": "make preview TAB=home",
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    },
+    {
+      "label": "Preview notch (System)",
+      "type": "shell",
+      "command": "make preview TAB=system",
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    },
+    {
+      "label": "Test",
+      "type": "shell",
+      "command": "make test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    },
+    {
+      "label": "Build .app bundle",
+      "type": "shell",
+      "command": "./scripts/build-app.sh",
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    },
+    {
+      "label": "Build & open .app",
+      "type": "shell",
+      "command": "make open",
+      "problemMatcher": [
+        "$swiftc"
+      ]
+    }
+  ]
+}
