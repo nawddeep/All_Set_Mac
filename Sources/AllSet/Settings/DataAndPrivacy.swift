@@ -78,10 +78,10 @@ enum AppData {
                 return "Couldn\u{2019}t replace what was there: \(error.localizedDescription)"
             }
         }
-        let root = root, version = version
-        nonisolated(unsafe) let settings = UserDefaults.standard.persistentDomain(forName: settingsDomain) ?? [:]
+        let root = root, version = version, domain = settingsDomain
         let result = await Task.detached(priority: .userInitiated) { () -> Result<DataArchive.Manifest, Error> in
-            Result { try DataArchive.export(from: root, settings: settings, to: destination, options: options, appVersion: version) }
+            let settings = UserDefaults.standard.persistentDomain(forName: domain) ?? [:]
+            return Result { try DataArchive.export(from: root, settings: settings, to: destination, options: options, appVersion: version) }
         }.value
         switch result {
         case .success(let manifest):
