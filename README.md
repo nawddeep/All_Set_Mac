@@ -2,7 +2,7 @@
 
 A coordinated desktop for the Mac, built with SwiftUI: themes, widgets and live wallpapers, with a Dynamic Island on the notch and a system monitor.
 
-What is fixed, open or waiting on a decision is tracked in `Documentation/Reports/2026-10-06-audit-repairs.md`. Dated reports beside it are history, not current defects. The wallpaper server is described in `Documentation/operations.md`.
+What is fixed, open or waiting on a decision is tracked in `Documentation/Reports/2026-10-06-audit-repairs.md`. Dated reports beside it are history, not current defects. The wallpaper server is described in `Documentation/wallpaper-library/operations.md`.
 
 - **Notch hub**: hover over or click the notch to open a panel with Now Playing controls and live stats. While closed, live activities appear beside the notch: now playing, volume changes, charging, low battery, and audio output switches.
 - **System monitor**: CPU per core (efficiency and performance cores shown separately), GPU, memory and pressure, network, disk space and I/O, SoC/SSD/battery temperatures, battery health, cycles and power draw.
@@ -60,33 +60,37 @@ Use `make run` rather than `swift run`: `swift run` builds only the app, not the
 ## Layout
 ```
 Sources/
-  AllSet/              The app: notch panel, menu bar, settings (SwiftUI + AppKit)
-    Notch/             NotchController (window, hover, activities) and its views
-    Widgets/           DesktopWidgetController (one desktop-level window per widget), widget views, ArtView
-    Studio/            Widget gallery, library pages, widget customizer
-    Wallpaper/         WallpaperController (desktop-level window per screen) and wallpaper pages
-    Workspace/         Accessibility wrappers, hot keys, WindowManager, WorkspaceController, pages
-    Clipboard/         ClipboardMonitor, the ⌃⌥V picker, OCR, Clipboard and Shelf pages
-    Design/            Design tokens, shared components, the window backdrop and the floating navigation
-    MainWindow.swift   The main window: its pages, under the floating navigation
-  AllSetCore/          Everything testable without UI
-    System/            CPU, GPU, memory, network, disk, battery, temperature readers
-    Media/             Now Playing: MediaController and the helper protocol
-    Widgets/           Widget models, themes (WidgetTheme), timers, layout math, and WidgetStore (saved to
+  AllSet/              The app (SwiftUI + AppKit)
+    App/               Entry point, AppDelegate, AppServices, the main window, its navigation, ⌘K and the menu bar
+    Design/            Tokens/, Motion/, Components/, Backdrop/, and Widget/ (how every widget is styled)
+    Features/          One folder per feature:
+      Notch/           NotchController (window, hover, activities) and its views
+      Widgets/         DesktopWidgetController (one desktop-level window per widget), WidgetHostView, ArtView;
+                       Studio/ (gallery, customizer, image picker); Kinds/ grouped by what each widget does
+      Themes/          The Themes page: hero carousel, rails, previews
+      Wallpaper/       WallpaperController (desktop-level window per screen) and wallpaper pages
+      Workspace/       Accessibility wrappers, hot keys, WindowManager, WorkspaceController, pages
+      Clipboard/       ClipboardMonitor, the ⌃⌥V picker, OCR, Clipboard and Shelf pages
+      Mixer/ Knock/ Notes/ Screenshot/ LidPlane/ Settings/
+    Debug/             DEBUG-only harnesses behind -renderPages, -renderDesign and -probe
+  AllSetCore/          Everything testable without UI; folders share names with Features/
+    Widgets/           Widget models, design themes, timers, layout math, and WidgetStore (saved to
                        ~/Library/Application Support/AllSet/widgets.json)
-    Weather/ Calendar/ Open-Meteo client and EventKit events for widgets
-    Aesthetics/        Art styles and palettes, photo sources, ImageLibrary, PhotoSearch (Openverse)
-    Search/            SearchMatch (fuzzy names) and AestheticSearch (aesthetic vocabulary, typos, pacing)
+    Themes/            Theme sets, the theme library, and the original desktop setups (WidgetTheme)
     Wallpaper/         WallpaperStore: live wallpaper settings and imported videos
+    Imagery/           Art styles and palettes, photo sources, ImageLibrary, PhotoSearch (Wallhaven, Openverse)
+    System/ Media/     CPU, GPU, memory, network, disk, battery, temperature readers; Now Playing
+    Weather/ Calendar/ Open-Meteo client and EventKit events for widgets
     Workspace/         Window layout math, snap zones, shortcuts, WorkspaceStore
     Clipboard/         ClipboardStore (history) and ShelfStore
-    Audio/ Power/      Volume/output device and power source monitors
+    Mixer/ Power/      Per-app volume, output devices, and the power source monitor
+    Support/           Storage, Security, Concurrency, Performance, Text and Display helpers
   MediaHelper/         Objective-C helper that /usr/bin/perl loads (see below)
   CPrivateAPIs/        Declarations for private IOKit HID functions (temperatures)
-Tests/AllSetCoreTests  Unit tests, plus live checks against this Mac and the helper
+Tests/AllSetCoreTests  Unit tests in folders that mirror AllSetCore, plus live checks against this Mac and the helper
 Resources/              Info.plist and AppIcon.icns (redraw it with `swift scripts/make-icon.swift`)
 scripts/build-app.sh   Packages the release build into build/AllSet.app
-Documentation/         HANDOFF (how things work, debug tools), spec/architecture/report (wallpaper library), dated reports
+Documentation/         Start at Documentation/README.md: HANDOFF, the architecture map, the wallpaper library, dated reports
 ```
 
 ## How the tricky parts work

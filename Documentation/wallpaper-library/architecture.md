@@ -29,7 +29,7 @@ scripts/
 Sources/AllSetCore/Wallpaper/
   WallpaperLibrary.swift LibraryVideo, WallpaperLibraryCatalog, LibrarySort
   WallpaperStore.swift   owns the catalog; resolves a wallpaper to a URL
-Sources/AllSet/Wallpaper/
+Sources/AllSet/Features/Wallpaper/
   WallpaperController.swift  plays it (LoopingVideo / MovingStill)
   WallpaperPages.swift       LibrarySection, LibraryTile
 ~/Library/Application Support/AllSet/Wallpaper/Library/   (not in the repo)
