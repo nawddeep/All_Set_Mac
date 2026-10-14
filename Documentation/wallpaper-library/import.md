@@ -1,6 +1,6 @@
 # Importing a live-wallpaper library
 
-Working log and final report. Numbers are labelled **[measured]** or **[reasoned]**, following `docs/perf-audit.md`.
+Working log and final report. Numbers are labelled **[measured]** or **[reasoned]**, following `Documentation/perf-audit.md`.
 
 > **UI since then (2026-10-01):** the Live Wallpaper page is now **Desktop → Wallpaper**: a full-bleed hero, then source pills (Aerial Videos, Art, My Videos). The Photos and My Photos tabs are gone. The Library section still follows your own videos under My Videos. This log describes the page as it was when the import was built.
 
@@ -26,7 +26,7 @@ On launch, a `.video` whose file is gone falls back to art.
 - There's no catalog, search, favourites or recents for user videos. My Videos is a flat list of file names.
 
 ### Playback
-`WallpaperController` (`AllSet/Wallpaper/WallpaperController.swift`):
+`WallpaperController` (`AllSet/Features/Wallpaper/WallpaperController.swift`):
 - one borderless window per screen, drawing `WallpaperRoot`;
 - `.video` plays through `LoopingVideo`, which borrows from **`SharedVideoPlayers`** (one AVPlayer per URL, reference-counted, paused and released when its last viewer goes);
 - playback is gated in `updatePlayback()` on lock, sleep, occlusion and ≥ 15 % uncovered, `PerformancePolicy.pausesDecorativeMotion` (Low Power, heat, Reduce Motion) and the "pause on battery" option;
@@ -35,7 +35,7 @@ On launch, a `.video` whose file is gone falls back to art.
 Every source flows through this one path, so anything that resolves to a video URL inherits all of it.
 
 ### Gallery UI
-`LiveWallpaperPage` (`AllSet/Wallpaper/WallpaperPages.swift`) has tabs: Aerial Videos, Art, Photos, My Photos, My Videos.
+`LiveWallpaperPage` (`AllSet/Features/Wallpaper/WallpaperPages.swift`) has tabs: Aerial Videos, Art, Photos, My Photos, My Videos.
 - My Videos (`VideosPage`) is a `LazyVGrid` of `VideoTile`s.
 - Each tile makes its thumbnail on appear with `AVAssetImageGenerator` (it decodes the video; the thumbnail isn't kept on disk).
 - A tile plays a `LoopingVideo` preview on hover.
@@ -288,8 +288,8 @@ There's no separate logic: it's `WallpaperController.updatePlayback()`, which do
 - `scripts/wallpaper_library.py`: inventory and importer.
 - `scripts/playcheck.swift`, `scripts/playcost.swift`: playback test and decode-cost measurement.
 - `Sources/AllSetCore/Wallpaper/WallpaperLibrary.swift`: `LibraryVideo`, `WallpaperLibraryCatalog`, `LibrarySort`.
-- `Tests/AllSetCoreTests/WallpaperLibraryTests.swift`.
-- `docs/wallpaper-import.md`: this file.
+- `Tests/AllSetCoreTests/Wallpaper/WallpaperLibraryTests.swift`.
+- `Documentation/wallpaper-library/import.md`: this file.
 
 ### Files changed
 - `AllSetCore`:

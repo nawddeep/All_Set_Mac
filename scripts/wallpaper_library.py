@@ -457,7 +457,7 @@ def decode_texture(package, name, work, wetex, frames=False):
 
 # The smallest movement that counts as the wallpaper moving: how much the most
 # changed 1/144th of the picture differs across the loop, 0-255. Measured on
-# rendered loops (docs/wallpaper-import.md): encoder noise on a static scene
+# rendered loops (Documentation/wallpaper-library/import.md): encoder noise on a static scene
 # of a static picture measured 0.33, so 2.0 is six times that: a loop has to
 # visibly move to beat the sharper still. Rain shimmering on water measured 2.5.
 MOTION_VISIBLE = 2.0
@@ -1339,7 +1339,7 @@ def resolution_tag(width, height):
 
 
 def needs_transcode(record):
-    """Why a file can't be played as it is, or None. Measured (docs/wallpaper-import.md):
+    """Why a file can't be played as it is, or None. Measured (Documentation/wallpaper-library/import.md):
     larger than the hardware decoder's 4096×2304 falls back to software (75 % of a core);
     more than 60 frames a second doubles decoding for frames a 60 Hz screen never shows."""
     reasons = []

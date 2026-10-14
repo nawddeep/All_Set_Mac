@@ -156,7 +156,7 @@ Each section remembers the last page you were on. Detail pages (a theme set, a w
 
 ## 5. Themes page — approved cinematic design, 2026-10-05
 
-Reference: `design/themes-concepts/2026-10-05-cinematic-reference/themes-preview.png`. Native captures: `build/review/selected-design/`, including the actual signed Dock app. Implementation: `Documentation/Reports/2026-10-05-themes-cinematic-design.md`; latest toolbar/cache refinement and measurements: `Documentation/Reports/2026-10-05-themes-toolbar-smoothness.md`. Other sections retain their earlier measurements unless stated otherwise.
+Reference: `Documentation/design/themes-concepts/2026-10-05-cinematic-reference/themes-preview.png`. Native captures: `build/review/selected-design/`, including the actual signed Dock app. Implementation: `Documentation/Reports/2026-10-05-themes-cinematic-design.md`; latest toolbar/cache refinement and measurements: `Documentation/Reports/2026-10-05-themes-toolbar-smoothness.md`. Other sections retain their earlier measurements unless stated otherwise.
 
 ### Structure
 

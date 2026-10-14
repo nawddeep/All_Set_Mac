@@ -2,7 +2,9 @@
 
 Working log for the audit. Phases are appended in order. Every number says how it was obtained: **[measured]** means a profiler or OS counter on this Mac; **[reasoned]** means static analysis of the code.
 
-Inventory corrections to the brief: the code has 54 widget kinds (not 52), 49 themes (not 43) and 41 palettes (not 33). The inventory file is `CONTENT.md`.
+_File paths below are as they were during the audit (September 2026). The 2026-10-15 restructure moved most source files; `Documentation/restructure-plan.md`, Appendix A, maps every old path to its new one._
+
+Inventory corrections to the brief: the code has 54 widget kinds (not 52), 49 themes (not 43) and 41 palettes (not 33). The inventory file is `CONTENT.md` (now `Documentation/content.md`).
 
 ---
 
