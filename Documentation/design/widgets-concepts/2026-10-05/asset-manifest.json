@@ -1,7 +1,7 @@
 {
   "mode": "Built-in image generation; two reference edits, four original generations",
-  "referenceWidgets": "design/widgets-concepts/2026-10-05/01-widget-library.png",
-  "referenceWallpaper": "design/wallpaper-concepts/2026-10-05-v2/03-immersive-cinema.png",
+  "referenceWidgets": "Documentation/design/widgets-concepts/2026-10-05/01-widget-library.png",
+  "referenceWallpaper": "Documentation/design/wallpaper-concepts/2026-10-05-v2/03-immersive-cinema.png",
   "backgrounds": [
     {
       "name": "alpine-afterglow",
