@@ -1,10 +1,10 @@
 # Rename and split proposals (later change)
 
-_Written 2026-10-14 alongside [restructure-plan.md](restructure-plan.md). **Nothing here is done in the file-layout change**, which only moves files. Each item below changes Swift source, so it gets its own change, build and test run._
+_Written 2026-10-14, revised 2026-10-15, alongside [restructure-plan.md](restructure-plan.md). **Nothing here is done in the file-layout change**, which only moves files. Each item below changes Swift source, so it gets its own change, build and test run._
 
 ## 1. Types named "Theme" that aren't themes
 
-In the app, a *theme* is a `ThemeSet`: what the Themes page offers. Four other types use the word for something else. The table in `restructure-plan.md` describes what each one is.
+45 non-test types have "Theme" in the name, covering five concepts (C1 to C5 in `restructure-plan.md`, section 4). In the app, a *theme* is a `ThemeSet` (C4), what the Themes page offers. Its 36 types read correctly and stay. The other four concepts use the word for something else.
 
 | Today | Proposed | Why | Size of change |
 |---|---|---|---|
@@ -25,24 +25,26 @@ Before renaming any `public` Core type:
 | `SendableImage` in `AllSet/Design/Motion/LiveLayers.swift` (and in `AllSetCore/Screenshot/AIImageEditors.swift`) | Rename the app's copy, e.g. `LayerImage` | The same name in both targets: inside the app, the local one shadows Core's. |
 | `LidPlane/EffectDefaults.swift` (declares `LidPlaneDefaults`) | File → `LidPlaneDefaults.swift` | A file rename only. It was left out of the layout change because it isn't on that change's problem list. |
 
-## 3. Split the mixed widget files: one widget kind per file
+## 3. Split the mixed widget files: one widget per file
 
-These files hold widgets from more than one `WidgetKind.category`. The layout change places each whole file by majority; splitting puts every widget in its own category folder. The pieces are moved as they are, but this edits file contents, which is why it's separate from the layout change.
+Ten widget files hold widgets that do different jobs. The layout change places each whole file in the folder of its biggest job (`restructure-plan.md`, section 5). Splitting puts every widget in the folder for what it does. The pieces are moved as they are, but this edits file contents, which is why it's separate from the layout change.
 
-| File (folder after layout change) | Move out to its own file |
-|---|---|
-| `Productivity/FocusWidgets` | `StopwatchWidget` → `Time/` (shares `TickingText`; decide where that lives first) |
-| `Productivity/ProductivityWidgets` | `DateWidget` → `Time/`; `ReadingWidget` + `BookCover` → `Lifestyle/` |
-| `System/SystemWidgets` | `NowPlayingWidget` + `SampleTrack` → `Lifestyle/` (or `Music/`); `NoteWidget` → `Productivity/` |
-| `System/DarkWidgets` | `DotsWidget` + `DotGrid` → `Time/`; `NeonSignWidget` → `Aesthetic/`; `TerminalWidget` stays |
-| `Lifestyle/AestheticWidgets` | `AmbientWidget` → `Aesthetic/`; `CountdownWidget` → `Time/`; `QuoteWidget` own file; `PhotoWidget` stays |
-| `Aesthetic/SceneWidgets` | `MoonWidget` + `NightSky`, `Starfield`, `MoonDisc` → `Lifestyle/` |
-| `Aesthetic/DecorWidgets` | `ShortcutsWidget` + `ShortcutButton`, `ShortcutLauncher` → `Productivity/` |
-| `Aesthetic/LifestyleAndAestheticWidgets` | `AirQualityWidget` + `AQIScale` → `Lifestyle/`; then rename what's left (Retro Window, Enso, Magazine) |
-| `Music/MusicWidgets` | `WordArtWidget` + `WordArtText`, `GlitterTexture` → `Aesthetic/` |
-| `Mystic/MysticWidgets` | `SpiralWidget`, `CharmWidget`, `LabelWidget` and their helpers → `Aesthetic/` |
+| File (folder after layout change) | Move out to its own file | Why |
+|---|---|---|
+| `Focus/FocusWidgets` | `StopwatchWidget` → `Time/` | It times, rather than plans. It shares `TickingText`, so decide where that lives first. |
+| `Focus/ProductivityWidgets` | `DateWidget` → `Time/`; `NextEventWidget` → `Calendar/` | "Today, big" is a date; "what's next" is an event. Check whether `openCalendarApp` is shared with `CalendarWidget` before moving it. |
+| `System/SystemWidgets` | `NowPlayingWidget` + `SampleTrack` → `Music/`; `NoteWidget` → `Focus/` | Neither reads the Mac's system state. |
+| `System/DarkWidgets` | `DotsWidget` + `DotGrid` → `Time/`; `NeonSignWidget` → `Decor/`; `TerminalWidget` stays | "Every day as a dot" is a calendar of days; the neon sign is decoration. |
+| `Time/LifestyleAndAestheticWidgets` | `AirQualityWidget` + `AQIScale` → `Weather/`; then name the rest after what they are (Retro Window, Enso, Magazine) | Air quality is a weather reading. |
+| `Decor/AestheticWidgets` | `CountdownWidget` → `Time/`; `PhotoWidget`, `QuoteWidget`, `AmbientWidget` each in its own file | A countdown is time. The other three are separate widgets that share one file. |
+| `Decor/DecorWidgets` | `ShortcutsWidget` + `ShortcutButton`, `ShortcutLauncher` → `Focus/` | An app/site launcher, not decoration. |
+| `Decor/SceneWidgets` | `VinylWidget` + `Record` → `Music/`; `MoonWidget` + `NightSky`, `Starfield`, `MoonDisc` → `Weather/` | "Spins while music plays"; "tonight's moon". |
+| `Music/MusicWidgets` | `VHSWidget` + `Scanlines`, `WordArtWidget` + `WordArtText`, `GlitterTexture` → `Decor/` | Neither plays or shows music. |
+| `Decor/MysticWidgets` | One file per widget, in `Decor/` (or a `Decor/Mystic/` subfolder) | Eight widgets in 1,030 lines. |
 
 Shared helpers used by more than one widget (for example `Typeface`, `TickingText` and the `Color` extensions) should go in `Kinds/Shared/`, not be duplicated.
+
+Once split, the genre file names (`AestheticWidgets`, `DarkWidgets`, `DecorWidgets`, `LifestyleAndAestheticWidgets`, `MysticWidgets`) disappear, because each new file is named after its widget.
 
 ## 4. Split the mixed test files
 
