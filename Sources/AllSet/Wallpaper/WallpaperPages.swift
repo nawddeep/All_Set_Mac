@@ -166,6 +166,62 @@ private struct WallpaperHero: View {
     }
 }
 
+/// The live wallpapers that come with All Set, a rail per mood. First on the
+/// page, so a new install has plenty to pick from with nothing imported.
+private struct BuiltInSection: View {
+    let services: AppServices
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Space.m) {
+            SectionHeader(title: "Built in",
+                          subtitle: "\(BuiltInWallpaper.all.count) live wallpapers drawn on your Mac. Point at one to see it move.")
+            ForEach(BuiltInWallpaper.Category.allCases) { category in
+                VStack(alignment: .leading, spacing: DS.Space.xs) {
+                    Text(category.title).dsText(.headline)
+                    MediaRail(items: BuiltInWallpaper.inCategory(category), cardWidth: 220) { wallpaper in
+                        BuiltInTile(wallpaper: wallpaper,
+                                    isCurrent: services.wallpaper.config.source == wallpaper.source) {
+                            services.pickWallpaper(wallpaper.source)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// One built-in wallpaper: still until the pointer rests on it.
+private struct BuiltInTile: View {
+    let wallpaper: BuiltInWallpaper
+    let isCurrent: Bool
+    let onUse: () -> Void
+
+    @State private var isHovering = false
+
+    var body: some View {
+        Button(action: onUse) {
+            VStack(alignment: .leading, spacing: DS.Space.xs) {
+                ArtView(piece: wallpaper.piece, animated: isHovering, frameRate: 24)
+                    .frame(width: 220, height: 138)
+                    .clipShape(RoundedRectangle(cornerRadius: DS.Radius.media, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: DS.Radius.media, style: .continuous)
+                            .strokeBorder(isCurrent ? Color.cyan.opacity(0.8) : Color.white.opacity(0.14), lineWidth: isCurrent ? 1.5 : 1)
+                    }
+                Text(wallpaper.name).dsText(.body).lineLimit(1)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .frame(width: 220, height: 162, alignment: .top)
+        .onHover { isHovering = $0 }
+        .help(isCurrent ? "On your desktop now" : "Set \(wallpaper.name) as your wallpaper")
+        .accessibilityLabel(wallpaper.name)
+        .accessibilityValue(isCurrent ? "Current wallpaper" : "")
+        .accessibilityHint("Sets it as your wallpaper")
+    }
+}
+
 /// Your own videos, then the imported wallpaper library.
 private struct VideosSection: View {
     let services: AppServices
@@ -181,6 +237,7 @@ private struct VideosSection: View {
         let store = services.wallpaper
         let videos = store.videos
         VStack(alignment: .leading, spacing: DS.Space.section) {
+            BuiltInSection(services: services)
             VStack(alignment: .leading, spacing: DS.Space.m) {
                 HStack(alignment: .bottom, spacing: DS.Space.m) {
                     SectionHeader(title: "Your videos",
@@ -201,8 +258,8 @@ private struct VideosSection: View {
                         }
                     }
                 } else if store.library.isEmpty {
-                    EmptyState(symbol: "film.stack", title: "Drop videos here",
-                               message: "Screen-sized loops look best. Videos are copied into All Set.",
+                    EmptyState(symbol: "film.stack", title: "Add your own videos",
+                               message: "Drop MP4 or MOV files here. Screen-sized loops look best. Videos are copied into All Set.",
                                actionTitle: "Import Videos…", action: { importVideos() })
                         .background {
                             RoundedRectangle(cornerRadius: DS.Radius.media, style: .continuous)
