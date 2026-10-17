@@ -20,7 +20,12 @@ struct ThemeComposition: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let scale = max(geometry.size.width / Self.canvas.width, geometry.size.height / Self.canvas.height)
+            // A design traced from a picture has its own canvas, centred as its wallpaper is.
+            let traced = set.setup.flatMap { FunkyThemes.canvas(for: $0.id) }
+            let canvas = traced ?? Self.canvas
+            let scale = max(geometry.size.width / canvas.width, geometry.size.height / canvas.height)
+            let shift = traced == nil ? .zero : CGSize(width: (geometry.size.width - canvas.width * scale) / 2,
+                                                       height: (geometry.size.height - canvas.height * scale) / 2)
             ZStack(alignment: .topLeading) {
                 ThemeWallpaper(set: set, services: services, dark: dark, isLive: isLive)
                     .frame(width: geometry.size.width, height: geometry.size.height)
@@ -28,14 +33,17 @@ struct ThemeComposition: View {
                     ForEach(widgets) { widget in
                         WidgetBody(instance: widget, services: services)
                             .modifier(CompositionShadow(hasCard: widget.hasCard))
+                            // Its own size from a corner drag, as the desktop draws it.
+                            .scaleEffect(x: widget.scale, y: widget.scale * widget.stretch, anchor: .topLeading)
                             .offset(x: widget.offset.x, y: widget.offset.y)
                     }
                 }
-                .frame(width: Self.canvas.width, height: Self.canvas.height, alignment: .topLeading)
+                .frame(width: canvas.width, height: canvas.height, alignment: .topLeading)
                 .environment(\.widgetIsVisible, false)
                 .environment(\.widgetIsPreview, true)
                 .environment(\.colorScheme, dark ? .dark : .light)
                 .scaleEffect(scale, anchor: .topLeading)
+                .offset(shift)
                 // Scaling changes drawing, not layout. Keep the full-sized
                 // widget canvas from enlarging and cropping the wallpaper.
                 .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)

@@ -91,11 +91,11 @@ public struct WidgetTheme: Identifiable, Sendable {
                              (bounds.height >= 720 || item.row < 3))
         }
         return visibleKit.map { item in
-            let offset = CGPoint(x: WidgetLayout.margin + Double(item.column) * step,
-                                 y: WidgetLayout.margin + Double(item.row) * step)
+            let offset = item.origin ?? CGPoint(x: WidgetLayout.margin + Double(item.column) * step,
+                                                y: WidgetLayout.margin + Double(item.row) * step)
             var widget = styled(WidgetInstance(kind: item.kind, size: item.size, screenName: screenName, offset: offset))
             item.configure(&widget, self)
-            widget.offset = WidgetLayout.snap(widget.offset, size: widget.footprint, within: bounds)
+            if item.origin == nil { widget.offset = WidgetLayout.snap(widget.offset, size: widget.footprint, within: bounds) }
             return widget
         }
     }
@@ -113,14 +113,18 @@ public struct KitItem: Sendable {
     public let size: WidgetSize
     public let column: Int
     public let row: Int
+    /// An exact spot in layout points instead of a grid cell, for layouts
+    /// traced from a picture (`FunkyThemes`); kept as given, not snapped.
+    public let origin: CGPoint?
     public let configure: @Sendable (inout WidgetInstance, WidgetTheme) -> Void
 
-    public init(_ kind: WidgetKind, _ size: WidgetSize, _ column: Int, _ row: Int,
+    public init(_ kind: WidgetKind, _ size: WidgetSize, _ column: Int, _ row: Int, origin: CGPoint? = nil,
                 _ configure: @escaping @Sendable (inout WidgetInstance, WidgetTheme) -> Void = { _, _ in }) {
         self.kind = kind
         self.size = size
         self.column = column
         self.row = row
+        self.origin = origin
         self.configure = configure
     }
 }

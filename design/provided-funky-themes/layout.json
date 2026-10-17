@@ -1,0 +1,107 @@
+{
+  "about": "Where each supplied design's live widgets sit, in pixels of the 1586x992 source. 'clear' is the painted widget's inside: the script paints it over with the card's own colour and the live widget is sized (scale and stretch) to fill it. 'dock' is the painted Dock, replaced from the artwork above it. Sizes: S, M, L.",
+  "themes": [
+    {"id": "midnightScrapbook", "file": "All_Set_Funky_Themes_Batch_1/01_Midnight_Scrapbook.png", "dock": null, "widgets": [
+      {"kind": "clock", "size": "M", "clear": [95, 195, 395, 340], "ink": "1B1916"},
+      {"kind": "calendar", "size": "L", "clear": [66, 425, 416, 712], "ink": "EFE6D6"},
+      {"kind": "nowPlaying", "size": "M", "clear": [1187, 150, 1540, 398], "ink": "EFE6D6"},
+      {"kind": "todo", "size": "L", "clear": [1196, 458, 1530, 768], "ink": "2A2520"}]},
+    {"id": "pinkMotelPop", "file": "All_Set_Funky_Themes_Batch_1/02_Pink_Motel_Pop.png", "dock": [428, 893, 1182, 980], "widgets": [
+      {"kind": "calendar", "size": "L", "clear": [382, 150, 662, 426], "ink": "5E3A40"},
+      {"kind": "clock", "size": "M", "clear": [712, 126, 1068, 270], "ink": "1A1416", "face": "flip"},
+      {"kind": "nowPlaying", "size": "M", "clear": [716, 312, 1102, 466], "ink": "453134"},
+      {"kind": "todo", "size": "L", "clear": [432, 497, 692, 764], "ink": "453134"}]},
+    {"id": "creamIndieDiary", "file": "All_Set_Funky_Themes_Batch_1/03_Cream_Indie_Diary.png", "dock": [468, 890, 1120, 982], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [72, 92, 418, 270], "ink": "3D332C"},
+      {"kind": "calendar", "size": "L", "clear": [70, 320, 420, 580], "ink": "4A3F37"},
+      {"kind": "nowPlaying", "size": "M", "clear": [70, 626, 445, 846], "ink": "4A3F37"},
+      {"kind": "todo", "size": "L", "clear": [1262, 388, 1542, 668], "ink": "4A3F37"}]},
+    {"id": "chromeFangEditorial", "file": "All_Set_Funky_Themes_Batch_1/04_Chrome_Fang_Editorial.png", "dock": [478, 900, 1112, 982], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [52, 90, 408, 250], "ink": "F5F2EA"},
+      {"kind": "nowPlaying", "size": "M", "clear": [54, 284, 662, 462], "ink": "242429"},
+      {"kind": "todo", "size": "L", "clear": [54, 497, 370, 722], "ink": "242429"},
+      {"kind": "calendar", "size": "L", "clear": [407, 498, 708, 722], "ink": "F1EEE8"}]},
+    {"id": "laceCityNoir", "file": "All_Set_Funky_Themes_Batch_1/05_Lace_City_Noir.png", "dock": [345, 890, 1245, 975], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [52, 86, 392, 262], "ink": "F1E9DC"},
+      {"kind": "nowPlaying", "size": "M", "clear": [50, 302, 588, 498], "ink": "F1E9DC"},
+      {"kind": "todo", "size": "L", "clear": [50, 538, 308, 756], "ink": "F1E9DC"},
+      {"kind": "calendar", "size": "L", "clear": [347, 538, 586, 756], "ink": "F1E9DC"}]},
+    {"id": "vinylBlossom", "file": "All_Set_Funky_Themes_Batch_1/06_Vinyl_Blossom.png", "dock": [430, 900, 1160, 982], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [40, 72, 346, 226], "ink": "1A1614"},
+      {"kind": "calendar", "size": "L", "clear": [718, 66, 956, 282], "ink": "3A302C"},
+      {"kind": "nowPlaying", "size": "M", "clear": [940, 350, 1306, 595], "ink": "3A302C"},
+      {"kind": "todo", "size": "L", "clear": [779, 645, 1018, 856], "ink": "584745"}]},
+    {"id": "paperHeartsCafe", "file": "All_Set_Funky_Themes_Batch_1/07_Paper_Hearts_Cafe.png", "dock": null, "widgets": [
+      {"kind": "clock", "size": "M", "clear": [95, 128, 365, 288], "ink": "2E2520"},
+      {"kind": "calendar", "size": "M", "clear": [105, 402, 400, 600], "ink": "3A2E26"},
+      {"kind": "nowPlaying", "size": "M", "clear": [1140, 160, 1538, 428], "ink": "3A2E26"},
+      {"kind": "todo", "size": "L", "clear": [160, 645, 418, 893], "ink": "3A2E26"}]},
+    {"id": "acidStarlet", "file": "All_Set_Funky_Themes_Batch_1/08_Acid_Starlet.png", "dock": [412, 895, 1175, 975], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [48, 82, 340, 243], "ink": "F1F0D9"},
+      {"kind": "nowPlaying", "size": "M", "clear": [50, 276, 363, 484], "ink": "F1F0D9"},
+      {"kind": "weather", "size": "M", "clear": [50, 552, 330, 650], "ink": "F1F0D9"},
+      {"kind": "calendar", "size": "L", "clear": [952, 96, 1258, 312], "ink": "F1F0D9"},
+      {"kind": "todo", "size": "L", "clear": [1298, 88, 1543, 293], "ink": "2A2620"}]},
+    {"id": "softGrungePolaroid", "file": "All_Set_Funky_Themes_Batch_1/09_Soft_Grunge_Polaroid.png", "dock": null, "widgets": [
+      {"kind": "date", "size": "S", "clear": [80, 132, 305, 268], "ink": "2B2622"},
+      {"kind": "clock", "size": "M", "clear": [400, 112, 662, 268], "ink": "EDE3D3"},
+      {"kind": "nowPlaying", "size": "M", "clear": [60, 299, 592, 484], "ink": "3A3236"},
+      {"kind": "todo", "size": "M", "clear": [75, 520, 332, 712], "ink": "2B2622"},
+      {"kind": "weather", "size": "S", "clear": [68, 765, 205, 918], "ink": "EFE6DA"}]},
+    {"id": "monochromeDiva", "file": "All_Set_Funky_Themes_Batch_1/10_Monochrome_Diva.png", "dock": [342, 888, 1250, 975], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [55, 95, 396, 302], "ink": "F4ECDD"},
+      {"kind": "calendar", "size": "S", "clear": [438, 95, 644, 302], "ink": "F4ECDD"},
+      {"kind": "nowPlaying", "size": "M", "clear": [55, 340, 460, 478], "ink": "F4ECDD"},
+      {"kind": "todo", "size": "L", "clear": [55, 515, 348, 735], "ink": "1F1B18"}]},
+    {"id": "velvetCherryNoir", "file": "All_Set_Funky_Themes_Batch_2/01_Velvet_Cherry_Noir.png", "dock": [355, 872, 1222, 957], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [96, 92, 452, 265], "ink": "F6E3D7"},
+      {"kind": "calendar", "size": "L", "clear": [502, 92, 795, 320], "ink": "F6E3D7"},
+      {"kind": "nowPlaying", "size": "M", "clear": [96, 302, 463, 456], "ink": "F6E3D7"},
+      {"kind": "todo", "size": "L", "clear": [188, 495, 463, 718], "ink": "F6E3D7"}]},
+    {"id": "blueHazeDiary", "file": "All_Set_Funky_Themes_Batch_2/02_Blue_Haze_Diary.png", "dock": [420, 893, 1170, 977], "widgets": [
+      {"kind": "calendar", "size": "L", "clear": [433, 148, 690, 402], "ink": "2B3A4A"},
+      {"kind": "clock", "size": "M", "clear": [740, 135, 1098, 293], "ink": "FFFFFF"},
+      {"kind": "nowPlaying", "size": "M", "clear": [740, 338, 1121, 483], "ink": "2B3A4A"},
+      {"kind": "todo", "size": "L", "clear": [452, 518, 728, 788], "ink": "2B3A4A"}]},
+    {"id": "olivePaperStudio", "file": "All_Set_Funky_Themes_Batch_2/03_Olive_Paper_Studio.png", "dock": [372, 885, 1215, 965], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [92, 140, 355, 296], "ink": "2A2E22"},
+      {"kind": "calendar", "size": "L", "clear": [452, 100, 750, 376], "ink": "2A2E22"},
+      {"kind": "nowPlaying", "size": "M", "clear": [40, 344, 408, 600], "ink": "2A2E22"},
+      {"kind": "todo", "size": "L", "clear": [452, 414, 736, 693], "ink": "2A2E22"}]},
+    {"id": "electricPopGrid", "file": "All_Set_Funky_Themes_Batch_2/04_Electric_Pop_Grid.png", "dock": [382, 893, 1200, 970], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [70, 142, 386, 336], "ink": "F6B8D8"},
+      {"kind": "calendar", "size": "L", "clear": [425, 142, 706, 393], "ink": "1E1A20"},
+      {"kind": "nowPlaying", "size": "M", "clear": [747, 142, 1186, 345], "ink": "1E1A20"},
+      {"kind": "todo", "size": "L", "clear": [425, 435, 706, 678], "ink": "1E1A20"}]},
+    {"id": "plumStardust", "file": "All_Set_Funky_Themes_Batch_2/05_Plum_Stardust.png", "dock": [410, 893, 1185, 975], "widgets": [
+      {"kind": "calendar", "size": "L", "clear": [389, 142, 673, 398], "ink": "F3D6E0"},
+      {"kind": "clock", "size": "M", "clear": [712, 122, 1068, 264], "ink": "F3D6E0", "face": "flip"},
+      {"kind": "nowPlaying", "size": "M", "clear": [717, 297, 1123, 460], "ink": "F3D6E0"},
+      {"kind": "todo", "size": "L", "clear": [440, 482, 688, 783], "ink": "F3D6E0"}]},
+    {"id": "sepiaLibraryClub", "file": "All_Set_Funky_Themes_Batch_2/06_Sepia_Library_Club.png", "dock": [420, 893, 1215, 975], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [480, 112, 805, 268], "ink": "E8C98A"},
+      {"kind": "nowPlaying", "size": "M", "clear": [480, 307, 805, 456], "ink": "EED8B4"},
+      {"kind": "calendar", "size": "L", "clear": [845, 112, 1136, 356], "ink": "EED8B4"},
+      {"kind": "todo", "size": "L", "clear": [847, 400, 1120, 674], "ink": "3A2C20"}]},
+    {"id": "silverBubbleGoth", "file": "All_Set_Funky_Themes_Batch_2/07_Silver_Bubble_Goth.png", "dock": [388, 882, 1200, 968], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [144, 137, 433, 313], "ink": "F4E8E4"},
+      {"kind": "calendar", "size": "L", "clear": [477, 135, 756, 370], "ink": "F4E8E4"},
+      {"kind": "nowPlaying", "size": "M", "clear": [805, 135, 1208, 370], "ink": "F4E8E4"},
+      {"kind": "todo", "size": "L", "clear": [452, 424, 740, 693], "ink": "F4E8E4"}]},
+    {"id": "peachFilmBloom", "file": "All_Set_Funky_Themes_Batch_2/08_Peach_Film_Bloom.png", "dock": [420, 893, 1205, 975], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [70, 100, 440, 268], "ink": "FFF6EE"},
+      {"kind": "calendar", "size": "L", "clear": [490, 88, 766, 323], "ink": "5A3A2E"},
+      {"kind": "nowPlaying", "size": "M", "clear": [70, 307, 463, 451], "ink": "5A3A2E"},
+      {"kind": "todo", "size": "L", "clear": [167, 490, 468, 708], "ink": "5A3A2E"}]},
+    {"id": "forestInkMoodboard", "file": "All_Set_Funky_Themes_Batch_2/09_Forest_Ink_Moodboard.png", "dock": [400, 895, 1192, 975], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [510, 134, 913, 293], "ink": "EAE2CB", "face": "flip"},
+      {"kind": "nowPlaying", "size": "M", "clear": [495, 332, 913, 488], "ink": "EAE2CB"},
+      {"kind": "calendar", "size": "L", "clear": [960, 134, 1288, 386], "ink": "EAE2CB"},
+      {"kind": "todo", "size": "L", "clear": [815, 540, 1075, 830], "ink": "2F3326"}]},
+    {"id": "creamModPoster", "file": "All_Set_Funky_Themes_Batch_2/10_Cream_Mod_Poster.png", "dock": [428, 890, 1188, 975], "widgets": [
+      {"kind": "clock", "size": "M", "clear": [445, 115, 775, 278], "ink": "111111", "face": "flip"},
+      {"kind": "nowPlaying", "size": "M", "clear": [445, 319, 775, 466], "ink": "3E352B"},
+      {"kind": "calendar", "size": "L", "clear": [812, 115, 1096, 356], "ink": "3E352B"},
+      {"kind": "todo", "size": "L", "clear": [457, 512, 728, 770], "ink": "3E352B"}]}
+  ]
+}

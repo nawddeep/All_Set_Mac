@@ -231,7 +231,12 @@ extension AppServices {
         let layout = set.widgets(screenName: screen?.localizedName, bounds: Self.unbounded).map { $0.placed(on: screen) }
         let personal = ThemeSet.personalized(layout, with: themePhotos.sources(for: set.id))
         if let id = set.setup?.id, FunkyThemes.design(id) != nil {
-            let fitted = FunkyThemes.fitted(personal, in: screen?.visibleFrame.size ?? CGSize(width: 1440, height: 860))
+            // The wallpaper fills the whole screen; offsets start below the menu bar.
+            let frame = screen?.frame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
+            let visible = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1440, height: 863)
+            let fitted = FunkyThemes.fitted(personal, id: id, screen: frame.size,
+                                            visible: CGRect(x: visible.minX - frame.minX, y: frame.maxY - visible.maxY,
+                                                            width: visible.width, height: visible.height))
             if let screen {
                 settings.screenFits[screen.stableID] = ScreenFit(scale: fitted.scale, size: screen.frame.size)
             } else {

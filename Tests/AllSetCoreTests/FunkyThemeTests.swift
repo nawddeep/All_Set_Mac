@@ -14,50 +14,70 @@ import Testing
             #expect(set.added == "2026-10-18")
             #expect(set.isDark == design.dark)
             #expect(ThemeLibrary.search(set.name).contains { $0.id == set.id })
+            let placements = try #require(FunkyThemes.layouts[design.theme.id])
             let widgets = set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))
-            #expect((8...10).contains(widgets.count))
+            #expect(widgets.count == placements.count)
             #expect(widgets.contains { $0.kind == .clock })
             #expect(widgets.contains { $0.kind == .nowPlaying })
             #expect(widgets.contains { $0.kind == .todo })
+            #expect(widgets.contains { $0.kind == .calendar || $0.kind == .date })
             #expect(widgets.allSatisfy { $0.kind.supportedSizes.contains($0.size) })
             #expect(widgets.allSatisfy { !$0.options.animateArt && !$0.options.neonFlicker })
+            // Stretch squeezes the drawing on the desktop, so it stays too small to see.
+            #expect(widgets.allSatisfy { (0.92...1.08).contains($0.stretch) })
+            #expect(widgets.allSatisfy { WidgetInstance.scaleRange.contains($0.scale) })
+            // Laid out where traced, not snapped to the grid or squeezed into the bounds.
+            #expect(zip(widgets, placements).allSatisfy { $0.offset == $1.origin })
             let picks = try #require(ThemeCardArt.curated[set.id])
             #expect(widgets.indices.contains(picks.hero))
         }
     }
 
-    @Test func installationFitsBothDisplayRatiosWithoutOverlapsOrOversizedCards() throws {
+    @Test func widgetsLandOnTheCardsDrawnForThemOnAnyScreen() throws {
+        let screens: [(screen: CGSize, visible: CGRect)] = [
+            (CGSize(width: 1440, height: 900), CGRect(x: 0, y: 37, width: 1440, height: 863)),
+            (CGSize(width: 1512, height: 982), CGRect(x: 0, y: 38, width: 1512, height: 870)),
+            (CGSize(width: 1920, height: 1080), CGRect(x: 0, y: 25, width: 1920, height: 1055)),
+            (CGSize(width: 2560, height: 1600), CGRect(x: 0, y: 25, width: 2560, height: 1575)),
+        ]
         for design in FunkyThemes.all {
+            let id = design.theme.id
+            let placements = try #require(FunkyThemes.layouts[id])
             let layout = design.theme.kitWidgets(screenName: nil, bounds: CGSize(width: 10_000, height: 10_000))
-            for bounds in [CGSize(width: 800, height: 600), CGSize(width: 1440, height: 900), CGSize(width: 1920, height: 1080)] {
-                let fit = FunkyThemes.fitted(layout, in: bounds)
-                #expect(fit.scale <= 1.1)
+            for (screen, visible) in screens {
+                let fit = FunkyThemes.fitted(layout, id: id, screen: screen, visible: visible)
+                let cover = max(screen.width / FunkyThemes.picture.width, screen.height / FunkyThemes.picture.height)
+                let crop = CGPoint(x: (screen.width - FunkyThemes.picture.width * cover) / 2,
+                                   y: (screen.height - FunkyThemes.picture.height * cover) / 2)
                 let frames = fit.widgets.map {
-                    CGRect(x: $0.offset.x * fit.scale, y: $0.offset.y * fit.scale,
+                    CGRect(x: visible.minX + $0.offset.x * fit.scale, y: visible.minY + $0.offset.y * fit.scale,
                            width: $0.footprint.width * fit.scale, height: $0.footprint.height * fit.scale)
                 }
+                for (frame, placement) in zip(frames, placements) {
+                    // The widget's centre is where the wallpaper's card is, as the picture is cropped to fill.
+                    let traced = CGPoint(x: placement.origin.x + placement.size.dimensions.width * placement.scale / 2,
+                                         y: placement.origin.y + placement.size.dimensions.height * placement.scale * placement.stretch / 2)
+                    // Unless it came in from an edge the screen's shape cut off.
+                    let nudged = abs(frame.minY - visible.minY) < 0.5 || abs(frame.maxY - screen.height) < 0.5
+                    #expect(abs(frame.midX - (crop.x + traced.x * cover)) < 1, "\(id) drifts across")
+                    #expect(nudged || abs(frame.midY - (crop.y + traced.y * cover)) < 1, "\(id) drifts down")
+                    #expect(abs(frame.midY - (crop.y + traced.y * cover)) < 40, "\(id) is far from its card")
+                    #expect(frame.minX >= 0 && frame.maxX <= screen.width && frame.minY >= visible.minY && frame.maxY <= screen.height,
+                            "\(id) leaves the screen at \(screen)")
+                }
                 for (index, rect) in frames.enumerated() {
-                    #expect(CGRect(origin: .zero, size: bounds).contains(rect), "\(design.theme.id) clips")
                     for other in frames.dropFirst(index + 1) {
-                        #expect(!rect.insetBy(dx: 1, dy: 1).intersects(other), "\(design.theme.id) overlaps")
+                        #expect(!rect.insetBy(dx: 1, dy: 1).intersects(other), "\(id) overlaps")
                     }
                 }
-                let occupied = frames.reduce(0) { $0 + $1.width * $1.height }
-                #expect(occupied / (bounds.width * bounds.height) < 0.78)
             }
         }
     }
 
-    @Test func galleryPreservesEveryLookAndPhotoSlotsAcceptPersonalImages() throws {
-        let personal: ImageSource = .bundled("edit-botanical-paper.jpg")
+    @Test func galleryEntriesAreTheThemesOwnWidgets() throws {
         for design in FunkyThemes.all {
             let set = try #require(ThemeLibrary.set("setup.\(design.theme.id)"))
             let widgets = set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))
-            let personalized = ThemeSet.personalized(widgets, with: [personal])
-            for widget in personalized where [.photo, .polaroids].contains(widget.kind) {
-                #expect(!widget.options.images.isEmpty)
-                #expect(widget.options.images.allSatisfy { $0 == personal })
-            }
             for entry in ThemeWidgetCatalog.widgets(in: set.id) {
                 let index = try #require(Int(entry.id.split(separator: "/").last ?? ""))
                 #expect(entry.instance.options == widgets[index].options)
@@ -69,23 +89,20 @@ import Testing
         }
     }
 
-    @Test @MainActor func sourceDerivedArtIsBundledAndWallpapersHaveFullDesktopResolution() async throws {
+    @Test @MainActor func wallpapersAreBundledAtFullDesktopResolution() async throws {
         let library = ImageLibrary()
         for design in FunkyThemes.all {
             guard case .photo(let wallpaper) = design.theme.wallpaper else { Issue.record("Missing wallpaper"); continue }
+            guard case .bundled = wallpaper else { Issue.record("Remote wallpaper in supplied theme"); continue }
             let file = try #require(library.fileURL(for: wallpaper))
             let source = try #require(CGImageSourceCreateWithURL(file as CFURL, nil))
             let properties = try #require(CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any])
             #expect(properties[kCGImagePropertyPixelWidth] as? Int == 2880)
             #expect(properties[kCGImagePropertyPixelHeight] as? Int == 1800)
-            var sources = Set<ImageSource>([wallpaper])
+            #expect(await library.image(for: wallpaper, maxPixels: 768) != nil)
             for widget in design.theme.kitWidgets(screenName: nil, bounds: CGSize(width: 1136, height: 768)) {
-                sources.formUnion(widget.options.images)
+                #expect(widget.options.images.isEmpty)
                 #expect(widget.options.background == nil)
-            }
-            for image in sources {
-                guard case .bundled = image else { Issue.record("Remote image in supplied theme"); continue }
-                #expect(await library.image(for: image, maxPixels: 768) != nil)
             }
         }
     }

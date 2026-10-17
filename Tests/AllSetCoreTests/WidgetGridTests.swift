@@ -107,7 +107,8 @@ import Testing
     }
 
     @Test func cleanUpKeepsAThemesShape() {
-        for set in ThemeLibrary.all {
+        // The supplied designs sit on cards in their wallpaper, off the grid (`FunkyThemeTests`).
+        for set in ThemeLibrary.all where !set.collections.contains(.funkyThemes) {
             let layout = set.widgets(screenName: nil, bounds: CGSize(width: 10_000, height: 10_000))
             let fitted = WidgetLayout.fitted(layout, in: airBounds, range: 0.7...1.6)
             let bounds = CGSize(width: airBounds.width / fitted.scale, height: airBounds.height / fitted.scale)

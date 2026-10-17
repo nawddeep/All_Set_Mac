@@ -8,7 +8,8 @@ import Testing
 
     @Test func everySetIsCompleteAndLaidOutCleanly() {
         #expect(Set(ThemeLibrary.all.map(\.id)).count == ThemeLibrary.all.count)
-        for set in ThemeLibrary.all {
+        // The supplied designs are traced from pictures, not laid on this grid (`FunkyThemeTests`).
+        for set in ThemeLibrary.all where !set.collections.contains(.funkyThemes) {
             let widgets = set.widgets(screenName: nil, bounds: canvas)
             #expect(widgets.count >= 5, "\(set.id) is too small to be a set")
             if set.setup == nil {

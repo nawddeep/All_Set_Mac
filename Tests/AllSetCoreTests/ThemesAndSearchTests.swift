@@ -107,7 +107,8 @@ import Testing
 @Suite struct ThemeTests {
     @Test func kitsFitAndDontOverlap() {
         let bounds = CGSize(width: 1136, height: 768)
-        for theme in WidgetTheme.all {
+        // The supplied designs are traced from pictures, not laid on this grid (`FunkyThemeTests`).
+        for theme in WidgetTheme.all where FunkyThemes.design(theme.id) == nil {
             let widgets = theme.kitWidgets(screenName: nil, bounds: bounds)
             #expect(widgets.count == theme.kit.count)
             let rects = widgets.map { CGRect(origin: $0.offset, size: $0.size.dimensions) }
