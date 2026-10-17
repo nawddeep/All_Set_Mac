@@ -6,7 +6,7 @@
 
 Request: integrate all supplied designs into All Set, preserving the user's designs, and rebuild. Do not create replacement themes or generate artwork.
 
-Read the supplied attachment, `Documentation/HOW_THEMES_ARE_MADE.md`, `Documentation/THEMES_IN_DEPTH.md`, and the current handoff. Inspected all 20 PNG designs in `/Users/pratiksmac/Desktop/themes_update/`. The two batch folders each contain ten PNGs and no separate wallpaper, photo, or layered source assets. All 20 PNGs are 1586×992 flattened desktop mockups with painted widgets and a menu bar; 19 also show a Dock. No supplied title exactly matches a current theme title. The current documented catalogue contains 111 themes.
+Read the supplied attachment, `Documentation/HOW_THEMES_ARE_MADE.md`, `Documentation/THEMES_IN_DEPTH.md`, and the current handoff. Inspected all 20 PNG designs in `themes_update`. The two batch folders each contain ten PNGs and no separate wallpaper, photo, or layered source assets. All 20 PNGs are 1586×992 flattened desktop mockups with painted widgets and a menu bar; 19 also show a Dock. No supplied title exactly matches a current theme title. The current documented catalogue contains 111 themes.
 
 The attachment is explicitly adopted by the user's request (“I have given you the prompt as well”). Its relevant constraints are: show all decomposition tables before code; ask for clean backgrounds if only flattened mockups exist; do not invent or generate replacement artwork; stop and list unsupported styling before adding it; run the app only with a throwaway `CFFIXED_USER_HOME`.
 
