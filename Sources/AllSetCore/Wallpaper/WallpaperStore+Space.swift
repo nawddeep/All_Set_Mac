@@ -348,7 +348,7 @@ extension WallpaperStore {
     /// The folder videos live in, for downloads to land in.
     public var videosFolder: URL { directory.appendingPathComponent("Videos") }
 
-    /// Picks up files that arrived in the videos folder, like downloaded aerials.
+    /// Picks up files that arrived in the videos folder, like videos copied in by hand.
     public func reloadVideos() {
         let folder = directory.appendingPathComponent("Videos")
         let urls = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.creationDateKey])) ?? []
