@@ -3,6 +3,7 @@
 Things only the owner can do. Ordered by priority at the end of the run.
 
 ## To do
+- **Run `Documentation/RELEASE_CHECKLIST.md`** before the first public release (macOS 14, 15 and 26; one and two monitors; permissions denied and revoked; VoiceOver; clean-machine install, Sparkle update, uninstall).
 - **Run the release checklist on real macOS 14 and 15 Macs** (`Documentation/RELEASE_CHECKLIST.md`): All Set has only ever run on macOS 26.
 - **Public content: decide and provision.** Read `Documentation/public-content-backend.md`. Decide which wallpapers may be public and get written licences (none of the 986 Workshop items can be). Then create a Cloudflare R2 bucket with a custom domain, generate the list-signing key, and follow its migration steps.
 - **Sparkle update key.** Run `.build/artifacts/sparkle/Sparkle/bin/generate_keys` once (after `swift build`); it stores the private key in your login keychain and prints the public key. Then `generate_keys -x sparkle_private.key`, put that file's contents in the GitHub secret `SPARKLE_PRIVATE_KEY`, delete the file, and put the public key in the repository **variable** `SPARKLE_PUBLIC_KEY`. Releases then publish `appcast.xml` and the app checks it. Feed: `https://github.com/nawddeep/All_Set_Mac/releases/latest/download/appcast.xml` (change `SUFeedURL` in Resources/Info.plist if releases live elsewhere). If you paste the key into Info.plist instead, update `UpdateConfigurationTests.theShippedInfoPlistIsStillThePlaceholder`.

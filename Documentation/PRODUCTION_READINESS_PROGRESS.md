@@ -79,7 +79,7 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T9.1 Logic into AllSetCore
 - [x] T9.2 Smoke test harness
 - [x] T9.3 De-flake
-- [ ] T9.4 Release checklist
+- [x] T9.4 Release checklist
 - [ ] T9.5 Accessibility
 
 ### Phase 10: repo hygiene
