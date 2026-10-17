@@ -51,67 +51,76 @@ struct RemovedWidget: Equatable {
     let id = UUID()
 }
 
-/// The app's long-lived models, shared by the notch, widgets, menu bar and settings.
+/// The app's long-lived models, shared by the notch, widgets, menu bar and
+/// settings. Each part of the app is a feature (`AppFeatures.swift`) that owns
+/// its stores and starts and stops as a unit; this holds the features, starts
+/// them in order, and keeps the short names (`services.widgets`,
+/// `services.clipboard`…) every page uses.
 @MainActor
 final class AppServices {
     /// First, so it sees the data folder as the last version left it.
     let extras = ExtrasSettings()
     let settings = AppSettings()
-    let monitor = SystemMonitor()
-    let media = MediaController()
-    let volume = VolumeMonitor()
-    let power = PowerSourceMonitor()
-    let widgets = WidgetStore(fileURL: AppServices.widgetsFileURL)
-    /// Finishes focus-timer phases on time, whether or not a focus widget is showing.
-    private(set) lazy var focusTimers = FocusTimerCoordinator(widgets: widgets) { breakEnded in
-        NSSound(named: breakEnded ? "Glass" : "Hero")?.play()
-    }
-    /// Durable records of desktop changes: an unfinished preview, the previous desktop.
-    let desktopJournal = DesktopJournal(directory: AppServices.widgetsFileURL.deletingLastPathComponent())
-    let weather = WeatherService()
-    let themeStats = ThemeStats()
-    /// The person's own photos for each theme set.
-    let themePhotos = ThemePhotos()
-    private(set) lazy var themePreviews: ThemePreviewCache = {
-        hasThemePreviews = true
-        return ThemePreviewCache(photos: themePhotos)
-    }()
-    /// Whether the previews exist yet, so freeing memory doesn't create them.
-    private var hasThemePreviews = false
-    let github = GitHubService()
-    let status = StatusService()
-    /// Wallpaper-aware accents for design themes.
-    let themes = ThemeManager()
-    let calendar = CalendarService()
-    let images = ImageLibrary()
-    let search = PhotoSearch()
-    let wallpaper = WallpaperStore()
-    let workspaces = WorkspaceStore()
-    let clipboard = ClipboardStore()
-    let shelf = ShelfStore()
-    let appVolumes = AppVolumeStore()
-    lazy var mixer = MixerController(store: appVolumes, output: volume)
-    private(set) lazy var knockStore = KnockStore(enabledWithoutFile: extras.isLegacyInstall)
-    let notes = NotesStore()
-    lazy var knocks = KnockController(services: self)
-    lazy var screenshotShortcut = ScreenshotShortcutController(services: self)
-    lazy var clipboardMonitor = ClipboardMonitor(services: self)
-    lazy var workspaceController = WorkspaceController(services: self)
+    let ui = UIState()
     /// Set by the app delegate.
     weak var windowManager: WindowManager?
-    let ui = UIState()
     /// Set by the app delegate so pages can drive the island (for "Try it").
     weak var notch: NotchController?
 
-    /// The library server's API key (`AllSet library <key>` saves it). Read from
-    /// the Keychain when a library request first needs it, never at launch, and
-    /// again after the command says it changed.
+    // MARK: Features
+
+    let island = IslandFeature()
+    let widgetsFeature = WidgetsFeature(fileURL: AppServices.widgetsFileURL)
+    private(set) lazy var themesFeature = ThemesFeature(journalDirectory: AppServices.widgetsFileURL.deletingLastPathComponent(),
+                                                        services: self)
+    let wallpaperFeature = WallpaperFeature()
+    private(set) lazy var workspacesFeature = WorkspacesFeature(services: self)
+    private(set) lazy var clipboardFeature = ClipboardFeature(services: self)
+    let shelfFeature = ShelfFeature()
+    private(set) lazy var mixerFeature = MixerFeature(output: island.volume, extras: extras)
+    private(set) lazy var knocksFeature = KnocksFeature(services: self, enabledWithoutFile: extras.isLegacyInstall)
+    private(set) lazy var screenshotFeature = ScreenshotFeature(services: self)
+
+    /// In the order they start; they stop in reverse.
+    private var features: [any AppFeature] {
+        [widgetsFeature, island, themesFeature, mixerFeature, knocksFeature, screenshotFeature, workspacesFeature,
+         clipboardFeature, shelfFeature, wallpaperFeature]
+    }
+
+    // MARK: Short names
+
+    var monitor: SystemMonitor { island.monitor }
+    var media: MediaController { island.media }
+    var volume: VolumeMonitor { island.volume }
+    var power: PowerSourceMonitor { island.power }
+    var notes: NotesStore { island.notes }
+    var widgets: WidgetStore { widgetsFeature.store }
+    var focusTimers: FocusTimerCoordinator { widgetsFeature.focusTimers }
+    var weather: WeatherService { widgetsFeature.weather }
+    var github: GitHubService { widgetsFeature.github }
+    var status: StatusService { widgetsFeature.status }
+    var calendar: CalendarService { widgetsFeature.calendar }
+    var images: ImageLibrary { widgetsFeature.images }
+    var search: PhotoSearch { widgetsFeature.search }
+    var desktopJournal: DesktopJournal { themesFeature.journal }
+    var themeStats: ThemeStats { themesFeature.stats }
+    var themePhotos: ThemePhotos { themesFeature.photos }
+    var themePreviews: ThemePreviewCache { themesFeature.previews }
+    /// Wallpaper-aware accents for design themes.
+    var themes: ThemeManager { themesFeature.manager }
+    var wallpaper: WallpaperStore { wallpaperFeature.store }
+    var workspaces: WorkspaceStore { workspacesFeature.store }
+    var workspaceController: WorkspaceController { workspacesFeature.controller }
+    var clipboard: ClipboardStore { clipboardFeature.store }
+    var clipboardMonitor: ClipboardMonitor { clipboardFeature.monitor }
+    var shelf: ShelfStore { shelfFeature.store }
+    var appVolumes: AppVolumeStore { mixerFeature.volumes }
+    var mixer: MixerController { mixerFeature.controller }
+    var knockStore: KnockStore { knocksFeature.store }
+    var knocks: KnockController { knocksFeature.controller }
+    var screenshotShortcut: ScreenshotShortcutController { screenshotFeature.shortcut }
+
     private var linkThrottle = DeepLinkThrottle()
-    private var libraryKey: String?
-    private var hasReadLibraryKey = false
-    private var libraryChanges: NSObjectProtocol?
-    private var libraryReload: Task<Void, Never>?
-    private var publicLibraryUpdates: Task<Void, Never>?
 
     func start() {
         // A preview the app quit or crashed in the middle of: the real desktop comes back.
@@ -120,10 +129,6 @@ final class AppServices {
         startWatchingMemory()
         applyMonitorPace()
         observe({ [settings] in settings.refreshInterval }) { [weak self] _ in self?.applyMonitorPace() }
-        // Any timer due while the app was closed finishes now; then each on time.
-        focusTimers.finishDuePhases()
-        focusTimers.reschedule()
-        observe({ [widgets] in widgets.widgets.map(\.options.focus.endsAt) }) { [weak self] _ in self?.focusTimers.reschedule() }
         // What the downloaded-photo cache must never evict: the wallpaper's
         // photo (the system wallpaper reads that file itself) and every photo
         // a widget shows. Anything else downloads again if it's wanted.
@@ -133,104 +138,13 @@ final class AppServices {
             if case .photo(let source) = wallpaper.config.source { sources.append(source) }
             return sources
         }
-        Task { await images.trimDownloadedPhotos() }
-        monitor.start()
-        media.start()
-        volume.start()
-        // The mixer taps Core Audio only while it's on as an extra.
-        if extras.isOn(.mixer) { mixer.start() }
-        observe({ [extras] in extras.isOn(.mixer) }) { [weak self] on in
-            guard let self else { return }
-            if on { mixer.start() } else { mixer.stop() }
-        }
-        knocks.start()
-        power.start()
-        calendar.start()
-        themes.start(services: self)
-        // New installs get ⌃⌥⌘5, which takes nothing from macOS; an install from
-        // before keeps what it had when it never chose (no shortcut).
-        if extras.isLegacyInstall, UserDefaults.standard.object(forKey: "screenshot.shortcut") == nil {
-            settings.screenshotShortcut = .off
-        }
-        screenshotShortcut.start()
-        startLibrary()
-    }
-
-    /// The wallpaper library someone else serves: where it is, the key that
-    /// opens it, and showing what the `library` command downloads as it lands.
-    private func startLibrary() {
-        // A public library is built in (scripts/build-app.sh): its list and
-        // files are open to anyone, so there is no key and nothing to set up.
-        if let address = Bundle.main.object(forInfoDictionaryKey: "AllSetPublicLibraryURL") as? String,
-           let server = URL(string: address), server.host != nil {
-            startPublicLibrary(server)
-            return
-        }
-        // A copy made for someone else has the library's address built in
-        // (scripts/build-app.sh), so there is nothing for them to set up.
-        if wallpaper.config.libraryServerURL == nil,
-           let builtIn = Bundle.main.object(forInfoDictionaryKey: "AllSetLibraryServerURL") as? String {
-            wallpaper.config.libraryServerURL = builtIn
-        }
-        wallpaper.libraryBearer = { [weak self] in
-            guard let self else { return nil }
-            if !hasReadLibraryKey {
-                libraryKey = LibraryKey.read()
-                hasReadLibraryKey = true
-            }
-            return libraryKey
-        }
-        libraryChanges = DistributedNotificationCenter.default().addObserver(
-            forName: LibraryKey.changed, object: nil, queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.libraryChanged() }
-        }
-    }
-
-    /// Keeps this Mac's list the public library's: now, then a few times a day.
-    /// Pictures and wallpapers download when the pages ask for them
-    /// (`WallpaperStore`). A Mac with a library of its own keeps it, and its
-    /// wallpapers keep coming from wherever they did.
-    private func startPublicLibrary(_ server: URL) {
-        let sync = LibrarySync(server: server, key: nil, directory: wallpaper.libraryDirectory)
-        guard !sync.hasOwnLibrary else { return }
-        // The library's key, if this Mac has one, belongs to another server:
-        // nothing sent to this one carries it.
-        wallpaper.libraryBearer = nil
-        wallpaper.config.libraryServerURL = server.absoluteString
-        publicLibraryUpdates = Task { [weak self] in
-            while !Task.isCancelled {
-                if (try? await sync.update()) != nil { self?.wallpaper.reloadLibrary() }
-                try? await Task.sleep(for: .seconds(6 * 60 * 60))
-            }
-        }
-    }
-
-    /// The command reports every wallpaper it downloads; the list is read again
-    /// at most once a second however fast they come.
-    private func libraryChanged() {
-        hasReadLibraryKey = false
-        guard libraryReload == nil else { return }
-        libraryReload = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(1))
-            self?.libraryReload = nil
-            self?.wallpaper.reloadLibrary()
-        }
+        for feature in features { feature.start() }
     }
 
     func stop() {
-        focusTimers.stop()
         // A preview nobody kept isn't the desktop: quitting puts the real one back.
         if ui.themePreview != nil { endThemePreview(keep: false) }
-        knocks.stop()
-        screenshotShortcut.stop()
-        notes.save()
-        if extras.isOn(.mixer) { mixer.stop() }
-        media.stop()
-        monitor.stop()
-        widgets.saveNow()
-        if clipboard.settings.clearOnQuit { clipboard.clear() }
-        clipboard.save()
+        for feature in features.reversed() { feature.stop() }
     }
 
     // MARK: Memory
@@ -255,7 +169,7 @@ final class AppServices {
     /// or redrawn the next time it's needed; nothing on screen disappears,
     /// since views hold what they show.
     func releaseCachedPictures(keeping fraction: Double) {
-        if hasThemePreviews { themePreviews.purge() }
+        if themesFeature.hasPreviews { themePreviews.purge() }
         images.trimCaches(to: fraction)
         ArtworkCache.trim(to: fraction)
     }
