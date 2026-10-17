@@ -101,12 +101,14 @@ IDENTITY="${ALLSET_SIGN_IDENTITY:--}"
 if [ -z "${ALLSET_SIGN_IDENTITY:-}" ] && security find-certificate -c "All Set Development" >/dev/null 2>&1; then
   IDENTITY="All Set Development"
 fi
-SIGN_OPTIONS=()
+# Every identity, ad hoc included, signs with the hardened runtime and the
+# app's entitlements, so a dev build fails the same way a notarized one would.
+SIGN_OPTIONS=(--options runtime)
 if [[ "$IDENTITY" == "Developer ID Application"* ]]; then
-  SIGN_OPTIONS=(--options runtime --timestamp)
+  SIGN_OPTIONS+=(--timestamp)
 fi
-codesign --force ${SIGN_OPTIONS[@]+"${SIGN_OPTIONS[@]}"} --sign "$IDENTITY" "$APP_DIR/Contents/Frameworks/$HELPER"
-codesign --force ${SIGN_OPTIONS[@]+"${SIGN_OPTIONS[@]}"} --sign "$IDENTITY" "$APP_DIR"
+codesign --force "${SIGN_OPTIONS[@]}" --sign "$IDENTITY" "$APP_DIR/Contents/Frameworks/$HELPER"
+codesign --force "${SIGN_OPTIONS[@]}" --entitlements Resources/AllSet.entitlements --sign "$IDENTITY" "$APP_DIR"
 codesign --verify --deep --strict "$APP_DIR"
 
 VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST")"
