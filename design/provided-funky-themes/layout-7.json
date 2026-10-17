@@ -1,0 +1,757 @@
+{
+ "about": "Batch 7: Indie Music Vinyl Core. See layout.json.",
+ "themes": [
+  {
+   "id": "sunsetStereoClub",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/a_cozy_cinematic_warm_toned_desktop_wallpaper_de_6_batch_1.png",
+   "dock": [
+    368,
+    893,
+    1205,
+    980
+   ],
+   "meta": {
+    "title": "Sunset Stereo Club",
+    "tagline": "A golden-hour listening room with vinyl, speakers and a sleeping cat.",
+    "card": "F4E8D8",
+    "ink": "3A1E1A",
+    "accent": "E27B3A",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "indie",
+     "retro",
+     "night"
+    ],
+    "tags": "indie music vinyl sunset stereo club record listening room cat golden hour amber",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      58,
+      66,
+      414,
+      252
+     ],
+     "ink": "3A1018"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      60,
+      276,
+      302,
+      564
+     ],
+     "ink": "3A2A20"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      320,
+      274,
+      604,
+      508
+     ],
+     "ink": "3A2A20"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      641,
+      83,
+      1010,
+      526
+     ],
+     "ink": "F6EBDD"
+    }
+   ]
+  },
+  {
+   "id": "dreampopRecordDiary",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/a_cozy_pastel_toned_stylish_desktop_wallpaper_sce_8_batch_3.png",
+   "dock": [
+    412,
+    890,
+    1170,
+    975
+   ],
+   "meta": {
+    "title": "Dreampop Record Diary",
+    "tagline": "Lavender dusk, a pink turntable and a handwritten record diary.",
+    "card": "F4E3E6",
+    "ink": "4A2E40",
+    "accent": "C97BB5",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "dreamy",
+    "charm": "heart",
+    "collections": [
+     "indie",
+     "dreamy",
+     "pop"
+    ],
+    "tags": "indie music dreampop record diary lavender pink dusk turntable butterfly headphones",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      22,
+      30,
+      396,
+      300
+     ],
+     "ink": "FBDCEB"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      518,
+      52,
+      788,
+      346
+     ],
+     "ink": "4A3A40"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      808,
+      52,
+      1094,
+      446
+     ],
+     "ink": "F4E8F0"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      332,
+      361,
+      546,
+      610
+     ],
+     "ink": "4A3A40"
+    }
+   ]
+  },
+  {
+   "id": "goldenHourTurntable",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/a_cozy_warm_toned_desktop_laptop_screen_aesthetic_9_batch_4.png",
+   "dock": [
+    302,
+    882,
+    1285,
+    972
+   ],
+   "meta": {
+    "title": "Golden Hour Turntable",
+    "tagline": "Warm wood, a spinning turntable and a calm cream dashboard.",
+    "card": "F2E6D2",
+    "ink": "3A2A1E",
+    "accent": "B5832F",
+    "dark": false,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "indie",
+     "retro",
+     "minimal"
+    ],
+    "tags": "indie music golden hour turntable warm wood plants cream tasks vinyl cafe",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      38,
+      60,
+      334,
+      314
+     ],
+     "ink": "3A2A1E"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      352,
+      60,
+      650,
+      314
+     ],
+     "ink": "3A2A1E"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      40,
+      326,
+      476,
+      528
+     ],
+     "ink": "F0E6D4"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1210,
+      58,
+      1552,
+      318
+     ],
+     "ink": "3A2A1E"
+    }
+   ]
+  },
+  {
+   "id": "velvetVinylClub",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/a_wide_cinematic_desktop_wallpaper_ui_mockup_in_1_batch_1.png",
+   "dock": [
+    478,
+    908,
+    1108,
+    975
+   ],
+   "meta": {
+    "title": "Velvet Vinyl Club",
+    "tagline": "Burgundy velvet, a turntable and red-taped polaroid prints.",
+    "card": "3A1A20",
+    "ink": "F4E4DA",
+    "accent": "C8505F",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "heart",
+    "collections": [
+     "indie",
+     "night",
+     "retro"
+    ],
+    "tags": "indie music velvet vinyl club burgundy red turntable polaroid tape wine",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      48,
+      46,
+      350,
+      262
+     ],
+     "ink": "F3E6DC"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      366,
+      38,
+      722,
+      284
+     ],
+     "ink": "EEDFD6"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      288,
+      306,
+      836,
+      534
+     ],
+     "ink": "F4E4DA"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      44,
+      280,
+      274,
+      536
+     ],
+     "ink": "3A2A20"
+    }
+   ]
+  },
+  {
+   "id": "peachTapeMotel",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/a_wide_cozy_desktop_macos_style_aesthetic_collage_2_batch_2.png",
+   "dock": [
+    432,
+    893,
+    1155,
+    980
+   ],
+   "meta": {
+    "title": "Peach Tape Motel",
+    "tagline": "A peach sunset motel, palm trees and a cassette on a pink quilt.",
+    "card": "F6E4DA",
+    "ink": "4A2A22",
+    "accent": "E0705A",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "heart",
+    "collections": [
+     "indie",
+     "retro",
+     "pop"
+    ],
+    "tags": "indie music peach tape motel sunset palm cassette quilt polaroid pink",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      358,
+      52,
+      665,
+      264
+     ],
+     "ink": "F6E8DE"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      690,
+      52,
+      938,
+      260
+     ],
+     "ink": "F4E4DA"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      965,
+      50,
+      1355,
+      258
+     ],
+     "ink": "4A2A22"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      52,
+      412,
+      348,
+      640
+     ],
+     "ink": "3A2A20"
+    }
+   ]
+  },
+  {
+   "id": "electricMixtape",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/a_wide_desktop_desktop_ui_styled_scene_like_a_mac_3_batch_3.png",
+   "dock": [
+    368,
+    890,
+    1220,
+    978
+   ],
+   "meta": {
+    "title": "Electric Mixtape",
+    "tagline": "Cobalt foil, a clear cassette and hot-pink stars.",
+    "card": "1C2147",
+    "ink": "F2EEFF",
+    "accent": "FF5BB5",
+    "dark": true,
+    "font": "standard",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "star",
+    "collections": [
+     "indie",
+     "pop",
+     "neon"
+    ],
+    "tags": "indie music electric mixtape cobalt blue pink cassette foil stars headphones cd neon",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      28,
+      60,
+      412,
+      270
+     ],
+     "ink": "FF5BB5"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      28,
+      298,
+      356,
+      568
+     ],
+     "ink": "F2EEFF"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      28,
+      588,
+      330,
+      826
+     ],
+     "ink": "F2EEFF"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      564,
+      392,
+      1112,
+      640
+     ],
+     "ink": "F2EEFF"
+    }
+   ]
+  },
+  {
+   "id": "paperHeartsPlaylist",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/a_wide_desktop_wallpaper_screenshot_style_illust_10_batch_5.png",
+   "dock": [
+    335,
+    895,
+    1225,
+    975
+   ],
+   "meta": {
+    "title": "Paper Hearts Playlist",
+    "tagline": "Cherry-red hearts, a cassette and a handwritten playlist card.",
+    "card": "F4E6D8",
+    "ink": "4A1E22",
+    "accent": "B3202E",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "heart",
+    "collections": [
+     "indie",
+     "retro",
+     "dreamy"
+    ],
+    "tags": "indie music paper hearts playlist cherry red cassette handwritten lamp polaroid vinyl",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      52,
+      60,
+      378,
+      300
+     ],
+     "ink": "A82230"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      402,
+      68,
+      696,
+      318
+     ],
+     "ink": "4A2A22"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      50,
+      338,
+      462,
+      580
+     ],
+     "ink": "4A2A22"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      730,
+      82,
+      988,
+      332
+     ],
+     "ink": "4A2A22"
+    }
+   ]
+  },
+  {
+   "id": "midnightRecordRoom",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/wide_cinematic_desktop_style_scene_a_nocturnal_mo_4_batch_4.png",
+   "dock": [
+    458,
+    908,
+    1130,
+    975
+   ],
+   "meta": {
+    "title": "Midnight Record Room",
+    "tagline": "A moonlit city window, a lamp and a late-night turntable.",
+    "card": "16192A",
+    "ink": "E6E8F4",
+    "accent": "9AA6D8",
+    "dark": true,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "cool",
+    "charm": "moon",
+    "collections": [
+     "indie",
+     "night",
+     "cinematic"
+    ],
+    "tags": "indie music midnight record room moon city window lamp turntable night blue",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      40,
+      52,
+      350,
+      264
+     ],
+     "ink": "F4F4FA",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      40,
+      278,
+      330,
+      520
+     ],
+     "ink": "E6E8F4"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      40,
+      540,
+      300,
+      790
+     ],
+     "ink": "D8DCEA"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      682,
+      278,
+      1008,
+      712
+     ],
+     "ink": "E6E8F4"
+    }
+   ]
+  },
+  {
+   "id": "indigoVinylNotes",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/wide_desktop_wallpaper_os_interface_scene_cinemat_7_batch_2.png",
+   "dock": [
+    430,
+    890,
+    1165,
+    975
+   ],
+   "meta": {
+    "title": "Indigo Vinyl Notes",
+    "tagline": "An indigo skyline, a chrome lamp and a turntable under night lights.",
+    "card": "1E2038",
+    "ink": "E8E8FA",
+    "accent": "8B7CE8",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "cool",
+    "charm": "moon",
+    "collections": [
+     "indie",
+     "night",
+     "cinematic"
+    ],
+    "tags": "indie music indigo vinyl notes skyline night lamp turntable polaroid blue purple",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      38,
+      60,
+      370,
+      262
+     ],
+     "ink": "D8D6F2"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      38,
+      274,
+      292,
+      500
+     ],
+     "ink": "E0E0F2"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      512,
+      58,
+      990,
+      534
+     ],
+     "ink": "E8E8FA"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1022,
+      256,
+      1228,
+      540
+     ],
+     "ink": "E8E8FA"
+    }
+   ]
+  },
+  {
+   "id": "cocoaCassetteStudio",
+   "file": "batch/All_Set_Funky_Themes_Batch_7_Indie_Music_Vinyl_Core/wide_warm_cozy_desktop_wallpaper_ui_mockup_sce_5_batch_5.png",
+   "dock": [
+    418,
+    893,
+    1222,
+    978
+   ],
+   "meta": {
+    "title": "Cocoa Cassette Studio",
+    "tagline": "Cocoa browns, a latte and a cassette on a warm wooden desk.",
+    "card": "4A3A32",
+    "ink": "F2E4D6",
+    "accent": "C07A4A",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "indie",
+     "retro",
+     "minimal"
+    ],
+    "tags": "indie music cocoa cassette studio coffee latte warm wood desk notebook vinyl",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      68,
+      62,
+      452,
+      320
+     ],
+     "ink": "F2E2D2",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      468,
+      64,
+      764,
+      318
+     ],
+     "ink": "EDE0D2"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      186,
+      332,
+      906,
+      556
+     ],
+     "ink": "F0E4D6"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      918,
+      332,
+      1278,
+      552
+     ],
+     "ink": "3A2A20"
+    }
+   ]
+  }
+ ]
+}
