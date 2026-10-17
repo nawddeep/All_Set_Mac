@@ -220,6 +220,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         #endif
 
         services.start()
+        // Does nothing until the owner's update key is in Info.plist.
+        Updater.shared.start()
+        // Crash and hang reports, kept on this Mac only.
+        Diagnostics.shared.start()
         if !skipped.contains("notch") {
             let notch = NotchController(services: services)
             notch.start()

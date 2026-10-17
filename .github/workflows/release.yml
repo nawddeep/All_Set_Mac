@@ -134,6 +134,7 @@ jobs:
           ALLSET_VERSION: ${{ steps.version.outputs.bundle_version }}
           ALLSET_SIGN_IDENTITY: ${{ steps.signing.outputs.identity }}
           ALLSET_PUBLIC_LIBRARY_URL: ${{ vars.ALLSET_PUBLIC_LIBRARY_URL }}
+          ALLSET_SPARKLE_PUBLIC_KEY: ${{ vars.SPARKLE_PUBLIC_KEY }}
         run: ALLSET_APP_DIR="$PWD/dist/AllSet.app" scripts/build-app.sh
 
       - name: Notarize the app
@@ -158,6 +159,27 @@ jobs:
           scripts/notarize.sh dmg "dist/AllSet-$VERSION.dmg"
           # Stapling changed the disk image: its checksum is taken again.
           (cd dist && shasum -a 256 "AllSet-$VERSION.zip" "AllSet-$VERSION.dmg" > SHA256SUMS.txt)
+
+      - name: Update feed (Sparkle appcast)
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # Without the private key there's no feed, and apps built without the
+          # public key never look for one.
+          if [ -z "$SPARKLE_PRIVATE_KEY" ]; then
+            echo "No SPARKLE_PRIVATE_KEY secret: no appcast for this release."
+            exit 0
+          fi
+          feed="$RUNNER_TEMP/appcast"
+          mkdir -p "$feed"
+          cp "dist/AllSet-$VERSION.zip" "$feed/"
+          key="$RUNNER_TEMP/sparkle.key"
+          printf '%s' "$SPARKLE_PRIVATE_KEY" > "$key"
+          .build/artifacts/sparkle/Sparkle/bin/generate_appcast --ed-key-file "$key" \
+            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/$TAG/" "$feed"
+          rm -f "$key"
+          cp "$feed/appcast.xml" dist/appcast.xml
 
       - name: Publish the release
         env:
@@ -191,6 +213,7 @@ jobs:
             echo "Check a download: \`shasum -a 256 -c SHA256SUMS.txt\`"
           } > "$RUNNER_TEMP/notes.md"
           files=("dist/AllSet-$VERSION.zip" "dist/AllSet-$VERSION.dmg" "dist/SHA256SUMS.txt")
+          if [ -f dist/appcast.xml ]; then files+=("dist/appcast.xml"); fi
           if gh release view "$TAG" >/dev/null 2>&1; then
             # Run again for the same tag: replace the files, keep the release.
             gh release upload "$TAG" "${files[@]}" --clobber

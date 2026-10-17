@@ -132,7 +132,9 @@ struct ActivitySettings: View {
 
 struct AboutSettings: View {
     private var version: String {
-        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Development build"
+        let info = Bundle.main.infoDictionary ?? [:]
+        guard let short = info["CFBundleShortVersionString"] as? String else { return "Development build" }
+        return "\(short) (build \(info["CFBundleVersion"] as? String ?? "-"))"
     }
 
     var body: some View {
@@ -150,6 +152,23 @@ struct AboutSettings: View {
                 }
             }
             .padding(.vertical, 8)
+        }
+        Section {
+            LabeledContent {
+                Button("Check for Updates\u{2026}") { Updater.shared.checkForUpdates() }
+                    .disabled(!Updater.shared.isAvailable)
+            } label: {
+                Text("Updates")
+                Text(Updater.shared.isAvailable
+                     ? "All Set checks for signed updates once a day."
+                     : "This build doesn't have updates set up yet; download new versions from the project's Releases page.")
+            }
+            LabeledContent {
+                Button("Export Diagnostics\u{2026}") { Diagnostics.shared.export() }
+            } label: {
+                Text("Diagnostics")
+                Text("\(Diagnostics.reportCount) crash or hang reports kept on this Mac. Export zips them with the last day of All Set's log, to send with a bug report. Nothing is sent automatically.")
+            }
         }
     }
 }

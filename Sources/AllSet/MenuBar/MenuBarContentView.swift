@@ -98,6 +98,9 @@ struct MenuBarContentView: View {
             HStack(spacing: 14) {
                 Button("Open All Set") { services.openWindow() }
                 Button("Widgets") { services.openWindow(.gallery(nil)) }
+                if Updater.shared.isAvailable {
+                    Button("Check for Updates\u{2026}") { Updater.shared.checkForUpdates() }
+                }
                 Spacer()
                 Button("Quit") { NSApp.terminate(nil) }
             }

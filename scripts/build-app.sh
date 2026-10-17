@@ -17,6 +17,12 @@ rm -rf "$APP_DIR"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Frameworks" "$APP_DIR/Contents/Resources"
 cp "$BIN_DIR/$APP_NAME" "$APP_DIR/Contents/MacOS/$APP_NAME"
 cp "$BIN_DIR/$HELPER" "$APP_DIR/Contents/Frameworks/$HELPER"
+# Sparkle (updates): SwiftPM leaves the framework next to the binary; the app
+# finds it in Contents/Frameworks.
+if [ -d "$BIN_DIR/Sparkle.framework" ]; then
+  ditto "$BIN_DIR/Sparkle.framework" "$APP_DIR/Contents/Frameworks/Sparkle.framework"
+  install_name_tool -add_rpath "@executable_path/../Frameworks" "$APP_DIR/Contents/MacOS/$APP_NAME" 2>/dev/null || true
+fi
 cp Resources/Info.plist "$APP_DIR/Contents/Info.plist"
 
 # Version: ALLSET_VERSION sets the marketing version (else Info.plist's);
@@ -85,6 +91,14 @@ if [ -n "${ALLSET_LIBRARY_SERVER_URL:-}" ]; then
   /usr/libexec/PlistBuddy -c "Add :AllSetLibraryServerURL string $ALLSET_LIBRARY_SERVER_URL" "$APP_DIR/Contents/Info.plist"
   echo "Wallpaper library: $ALLSET_LIBRARY_SERVER_URL built into the app"
 fi
+# Updates: Sparkle stays switched off (no checks, no network) until the
+# owner's EdDSA public key replaces the placeholder in Info.plist, or arrives
+# here as ALLSET_SPARKLE_PUBLIC_KEY (the release workflow passes the repository
+# variable SPARKLE_PUBLIC_KEY).
+if [ -n "${ALLSET_SPARKLE_PUBLIC_KEY:-}" ]; then
+  /usr/libexec/PlistBuddy -c "Set :SUPublicEDKey $ALLSET_SPARKLE_PUBLIC_KEY" "$APP_DIR/Contents/Info.plist"
+  echo "Updates: Sparkle public key built in"
+fi
 if [ -f Resources/AppIcon.icns ]; then
   cp Resources/AppIcon.icns "$APP_DIR/Contents/Resources/"
 fi
@@ -104,11 +118,29 @@ fi
 # Every identity, ad hoc included, signs with the hardened runtime and the
 # app's entitlements, so a dev build fails the same way a notarized one would.
 SIGN_OPTIONS=(--options runtime)
+ENTITLEMENTS=Resources/AllSet.entitlements
 if [[ "$IDENTITY" == "Developer ID Application"* ]]; then
   SIGN_OPTIONS+=(--timestamp)
+else
+  # Library validation only loads frameworks signed by the app's own team. A
+  # Developer ID build has one (app and Sparkle share it); the self-signed dev
+  # certificate and ad hoc signing have none, so for those builds only the
+  # check is relaxed. Releases never get this key.
+  ENTITLEMENTS="$(mktemp -t allset-dev-entitlements).plist"
+  cp Resources/AllSet.entitlements "$ENTITLEMENTS"
+  /usr/libexec/PlistBuddy -c "Add :com.apple.security.cs.disable-library-validation bool true" "$ENTITLEMENTS"
 fi
 codesign --force "${SIGN_OPTIONS[@]}" --sign "$IDENTITY" "$APP_DIR/Contents/Frameworks/$HELPER"
-codesign --force "${SIGN_OPTIONS[@]}" --entitlements Resources/AllSet.entitlements --sign "$IDENTITY" "$APP_DIR"
+# Sparkle's helpers are signed inside out, as Sparkle's documentation asks for
+# apps built outside Xcode.
+SPARKLE="$APP_DIR/Contents/Frameworks/Sparkle.framework"
+if [ -d "$SPARKLE" ]; then
+  for item in "$SPARKLE"/Versions/B/XPCServices/*.xpc "$SPARKLE/Versions/B/Autoupdate" "$SPARKLE/Versions/B/Updater.app"; do
+    [ -e "$item" ] && codesign --force "${SIGN_OPTIONS[@]}" --sign "$IDENTITY" "$item"
+  done
+  codesign --force "${SIGN_OPTIONS[@]}" --sign "$IDENTITY" "$SPARKLE"
+fi
+codesign --force "${SIGN_OPTIONS[@]}" --entitlements "$ENTITLEMENTS" --sign "$IDENTITY" "$APP_DIR"
 codesign --verify --deep --strict "$APP_DIR"
 
 VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST")"

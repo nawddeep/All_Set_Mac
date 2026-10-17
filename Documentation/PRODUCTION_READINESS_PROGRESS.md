@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 4
+**Current phase:** 5
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -40,12 +40,12 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T3.7 Stored action validation
 
 ### Phase 4: distribution
-- [ ] T4.1 Entitlements, hardened runtime for every identity
-- [ ] T4.2 Notarization script + workflow
-- [ ] T4.3 Gatekeeper instructions
-- [ ] T4.4 Sparkle (disabled while key is a placeholder)
-- [ ] T4.5 MetricKit + export diagnostics; print -> Logger
-- [ ] T4.6 Version in About; CHANGELOG
+- [x] T4.1 Entitlements, hardened runtime for every identity
+- [x] T4.2 Notarization script + workflow
+- [x] T4.3 Gatekeeper instructions
+- [x] T4.4 Sparkle (disabled while key is a placeholder)
+- [x] T4.5 MetricKit + export diagnostics; print -> Logger
+- [x] T4.6 Version in About; CHANGELOG
 
 ### Phase 5: server
 - [ ] T5.1 No SQL interpolation

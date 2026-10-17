@@ -10,10 +10,14 @@ let package = Package(
         // Now Playing info. See Sources/MediaHelper/MediaHelper.m.
         .library(name: "AllSetMediaHelper", type: .dynamic, targets: ["MediaHelper"]),
     ],
+    dependencies: [
+        // Updates, signed with EdDSA. Pinned exactly; bump on purpose.
+        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.9.6"),
+    ],
     targets: [
         .executableTarget(
             name: "AllSet",
-            dependencies: ["AllSetCore"],
+            dependencies: ["AllSetCore", .product(name: "Sparkle", package: "Sparkle")],
             path: "Sources/AllSet"
         ),
         .target(
