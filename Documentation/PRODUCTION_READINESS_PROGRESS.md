@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 1
+**Current phase:** 3 (T3.6 next)
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -20,22 +20,22 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 
 ## Checklist
 ### Phase 1: legal and licensing
-- [ ] T1.1 Remove Lid Plane (GPL)
-- [ ] T1.2 LICENSE + third-party notices
-- [ ] T1.3 Real people and trade dress out of themes; denylist test
-- [ ] T1.4 Wallhaven out; Openverse licence filter + credit; hotlinks out; Picsum credit
-- [ ] T1.5 Wallpaper Engine tooling moved to ../AllSet-personal
+- [x] T1.1 Remove Lid Plane (GPL)
+- [x] T1.2 LICENSE + third-party notices
+- [x] T1.3 Real people and trade dress out of themes; denylist test
+- [x] T1.4 Wallhaven out; Openverse licence filter + credit; hotlinks out; Picsum credit
+- [x] T1.5 Wallpaper Engine tooling moved to ../AllSet-personal
 
 ### Phase 2: product works for a stranger
-- [ ] T2.1 Built-in wallpapers section, never empty
-- [ ] T2.2 Extras section, off by default for new installs
+- [x] T2.1 Built-in wallpapers section, never empty
+- [x] T2.2 Extras section, off by default for new installs
 
 ### Phase 3: security and trust
-- [ ] T3.1 Knock shell command removed; knocks off by default
-- [ ] T3.2 purge button removed
-- [ ] T3.3 Honest privacy, network-use registry + test, AI send notice
-- [ ] T3.4 Screenshot shortcut opt-in; restore settings; uninstall
-- [ ] T3.5 Deep link confirmation and rate limit
+- [x] T3.1 Knock shell command removed; knocks off by default
+- [x] T3.2 purge button removed
+- [x] T3.3 Honest privacy, network-use registry + test, AI send notice
+- [x] T3.4 Screenshot shortcut opt-in; restore settings; uninstall
+- [x] T3.5 Deep link confirmation and rate limit
 - [ ] T3.6 Onboarding and permission rows
 - [ ] T3.7 Stored action validation
 
