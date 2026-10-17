@@ -143,6 +143,11 @@ final class AppServices {
         power.start()
         calendar.start()
         themes.start(services: self)
+        // New installs get ⌃⌥⌘5, which takes nothing from macOS; an install from
+        // before keeps what it had when it never chose (no shortcut).
+        if extras.isLegacyInstall, UserDefaults.standard.object(forKey: "screenshot.shortcut") == nil {
+            settings.screenshotShortcut = .off
+        }
         screenshotShortcut.start()
         startLibrary()
     }

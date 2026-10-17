@@ -100,3 +100,8 @@ Documentation/         HANDOFF (how things work, debug tools), spec/architecture
 Because of these, All Set can't be sandboxed and won't pass Mac App Store review. It's meant to be distributed directly, signed with Developer ID and notarized. Local builds are signed with the self-signed "All Set Development" certificate from `scripts/setup-signing.sh` (ad hoc if it's missing).
 
 Weather data by [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0). Photos by Unsplash photographers, served by [Picsum](https://picsum.photos); search by [Openverse](https://openverse.org).
+
+## Restoring macOS and uninstalling
+- **Settings › General › Restore macOS settings All Set changed** gives macOS back its ⌘⇧5 screenshot shortcut (if you let All Set take it) and turns the live wallpaper off, which puts your own system wallpaper back. Safe to run anytime.
+- **Settings › General › Uninstall All Set…** does that, removes the login item, optionally moves your data to the Trash, then moves the app to the Trash.
+- Already deleted the app while it was running? Run `scripts/uninstall.sh` (add `--data` to move `~/Library/Application Support/AllSet` to the Trash too). It only moves things to the Trash, never deletes.

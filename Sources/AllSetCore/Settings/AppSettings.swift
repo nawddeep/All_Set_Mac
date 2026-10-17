@@ -148,7 +148,7 @@ public final class AppSettings {
         showVolume = defaults.object(forKey: Key.showVolume) as? Bool ?? true
         showBattery = defaults.object(forKey: Key.showBattery) as? Bool ?? true
         showAudioDevice = defaults.object(forKey: Key.showAudioDevice) as? Bool ?? true
-        screenshotShortcut = defaults.string(forKey: Key.screenshotShortcut).flatMap(ScreenshotShortcut.init) ?? .off
+        screenshotShortcut = defaults.string(forKey: Key.screenshotShortcut).flatMap(ScreenshotShortcut.init) ?? .controlOptionCommand5
         showMenuBarIcon = defaults.object(forKey: Key.showMenuBarIcon) as? Bool ?? true
         showCPUInMenuBar = defaults.object(forKey: Key.showCPUInMenuBar) as? Bool ?? false
         showWidgets = defaults.object(forKey: Key.showWidgets) as? Bool ?? true

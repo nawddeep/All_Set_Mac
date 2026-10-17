@@ -363,6 +363,7 @@ struct MainView: View {
             FormPage(eyebrow: "System", title: "General", subtitle: "Startup, the Dock, the menu bar, and your data.") {
                 GeneralSettings(settings: services.settings)
                 DataPrivacySettings(services: services)
+                SystemRestoreSettings(services: services)
             }
         case .about:
             FormPage(eyebrow: "System", title: "About") { AboutSettings() }

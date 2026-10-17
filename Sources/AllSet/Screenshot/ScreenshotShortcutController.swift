@@ -28,6 +28,15 @@ final class ScreenshotShortcutController {
         observe({ [services] in services.extras.isOn(.screenshot) }) { [weak self] _ in self?.apply() }
     }
 
+    /// macOS's ⌘⇧5 back for good: the choice moves to ⌃⌥⌘5, which needs no takeover.
+    /// Safe to run anytime; does nothing if All Set never switched it off.
+    func giveBackSystemShortcut() {
+        if services.settings.screenshotShortcut == .commandShift5 {
+            services.settings.screenshotShortcut = .controlOptionCommand5
+        }
+        restoreSystemShortcut()
+    }
+
     /// Hands macOS's shortcut back; the setting stays, so the next launch takes it over again.
     func stop() {
         HotKeyCenter.shared.unregisterAll(group: Self.group)
@@ -82,7 +91,7 @@ final class ScreenshotShortcutController {
                                       defaultEntry: SymbolicHotKeys.screenshotOptionsEntry))
     }
 
-    private func restoreSystemShortcut() {
+    func restoreSystemShortcut() {
         guard UserDefaults.standard.bool(forKey: Self.marker) else { return }
         UserDefaults.standard.removeObject(forKey: Self.marker)
         let current = hotKeys()

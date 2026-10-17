@@ -364,6 +364,16 @@ private struct AIPanel: View {
 private struct ShortcutPicker: View {
     let services: AppServices
 
+    /// Taking ⌘⇧5 changes a macOS setting: only after saying so.
+    static func confirmTakeover() -> Bool {
+        let alert = NSAlert()
+        alert.messageText = "Use ⌘⇧5 for AI Screenshot?"
+        alert.informativeText = "macOS uses ⌘⇧5 for its screenshot and screen-recording toolbar. To take it, All Set switches that macOS shortcut off while All Set runs, and switches it back on when you quit, pick another shortcut, or choose General › Restore macOS settings. If All Set is deleted while running, run scripts/uninstall.sh to get it back."
+        alert.addButton(withTitle: "Use ⌘⇧5")
+        alert.addButton(withTitle: "Cancel")
+        return alert.runModal() == .alertFirstButtonReturn
+    }
+
     var body: some View {
         let settings = services.settings
         VStack(alignment: .leading, spacing: DS.Space.s) {
@@ -371,12 +381,15 @@ private struct ShortcutPicker: View {
             HStack(spacing: DS.Space.xs) {
                 ForEach(ScreenshotShortcut.allCases) { choice in
                     FilterPill(title: choice.title, isSelected: settings.screenshotShortcut == choice) {
+                        guard choice != .commandShift5 || Self.confirmTakeover() else { return }
                         withMotion(Motion.responsive) { settings.screenshotShortcut = choice }
                     }
                 }
             }
             if let problem = services.screenshotShortcut.problem {
                 Text(problem).dsText(.meta).foregroundStyle(.red)
+            } else if settings.screenshotShortcut == .controlOptionCommand5 {
+                Text("Leaves macOS\u{2019}s own ⌘⇧5 screenshot toolbar alone.").dsText(.meta)
             } else if settings.screenshotShortcut == .commandShift5 {
                 Text("macOS\u{2019}s own screenshot toolbar is switched off while All Set runs, and comes back when you quit All Set or pick another choice. Screen recording from that toolbar isn\u{2019}t available meanwhile.")
                     .dsText(.meta)

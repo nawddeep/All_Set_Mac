@@ -33,13 +33,15 @@ import Testing
 }
 
 @Suite @MainActor struct ScreenshotShortcutSettingTests {
-    @Test func startsOffAndSurvivesARelaunch() {
+    /// A new install starts on a chord that takes nothing from macOS.
+    @Test func startsWithoutTakeoverAndSurvivesARelaunch() {
         let name = "AllSetTests-shot-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: name)!
         defer { defaults.removePersistentDomain(forName: name) }
         let first = AppSettings(defaults: defaults)
-        #expect(first.screenshotShortcut == .off)
-        first.screenshotShortcut = .controlOptionCommand5
-        #expect(AppSettings(defaults: defaults).screenshotShortcut == .controlOptionCommand5)
+        #expect(first.screenshotShortcut == .controlOptionCommand5)
+        #expect(!first.screenshotShortcut.needsSystemShortcutOff)
+        first.screenshotShortcut = .off
+        #expect(AppSettings(defaults: defaults).screenshotShortcut == .off)
     }
 }
