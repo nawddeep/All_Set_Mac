@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 6
+**Current phase:** 7
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -55,8 +55,8 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T5.5 Portable server tests
 
 ### Phase 6: platform fragility
-- [ ] T6.1 Capabilities layer
-- [ ] T6.2 Minimum OS; Apple Silicon only
+- [x] T6.1 Capabilities layer
+- [x] T6.2 Minimum OS; Apple Silicon only
 
 ### Phase 7: performance
 - [ ] T7.1 Theme previews off the main thread

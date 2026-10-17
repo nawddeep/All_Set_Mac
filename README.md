@@ -39,7 +39,10 @@ A release signed with a Developer ID and notarized by Apple opens normally. Unti
 Ad-hoc builds also lose Accessibility and other permissions on every update, because macOS ties them to the signature; a Developer ID build keeps them.
 
 ## Requirements
-- macOS 14.2 or later (developed on macOS 26, Apple Silicon)
+- **A Mac with Apple Silicon** (M1 or later). Intel Macs aren't supported: the app is built for arm64 only, and its sensor features (temperatures, the motion sensor) exist only on Apple Silicon.
+- **macOS 14.2 or later.** Developed on macOS 26; CI builds for exactly macOS 14.2 so nothing newer slips in unguarded. It has not yet been run on a real macOS 14 or 15 Mac (see `Documentation/RELEASE_CHECKLIST.md`).
+
+To build it:
 - Xcode, for the Swift 6 toolchain and SDK
 - VS Code with the **Swift** extension (`swiftlang.swift-vscode`)
 

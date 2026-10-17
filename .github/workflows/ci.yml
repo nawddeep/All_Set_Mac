@@ -7,6 +7,7 @@ name: CI
 #
 #   hygiene         nothing tracked that shouldn't be (build output, *.env, big files)
 #   build-and-test  zero-warning debug build and the Swift tests
+#   minimum-os      a release build targeting exactly arm64-apple-macos14.2
 #   package         the release app built and packaged exactly as a release is
 #   screenshots     every page rendered, for review
 #   probe           idle CPU and scroll smoothness against budgets
@@ -62,6 +63,17 @@ jobs:
 
       - name: Test
         run: swift test
+
+  minimum-os:
+    # The app says it runs on macOS 14.2 (Package.swift, LSMinimumSystemVersion):
+    # building for exactly that target makes the compiler reject any API newer
+    # than 14.2 that isn't behind `if #available`. Apple Silicon only.
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build for arm64-apple-macos14.2
+        run: swift build -c release -Xswiftc -target -Xswiftc arm64-apple-macos14.2
 
   package:
     # The release build, packaged the way release.yml packages it, so a change
