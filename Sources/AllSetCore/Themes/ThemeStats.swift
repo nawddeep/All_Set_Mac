@@ -28,7 +28,7 @@ public final class ThemeStats {
     public init(fileURL: URL? = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
                     .appendingPathComponent("AllSet", isDirectory: true).appendingPathComponent("theme-stats.json")) {
         self.fileURL = fileURL
-        if let fileURL { records = StoreFile.load([String: Record].self, from: fileURL) ?? [:] }
+        if let fileURL { records = LegacyIdentifiers.themeKeys(StoreFile.load([String: Record].self, from: fileURL) ?? [:]) }
     }
 
     public func record(_ event: Event, for id: String, now: Date = .now) {

@@ -241,17 +241,17 @@ extension WidgetCatalog {
     }
 
     static let football: [CatalogEntry] = [
-        CatalogEntry("shirt", .jersey, .football, configure: kit("LEGEND", 7, "Red & Green", tagline: "Dream big")),
-        CatalogEntry("stripedShirt", .jersey, .football, title: "Striped Shirt", summary: "Sky-blue stripes and a number ten",
-                     keywords: "stripes sky blue ten", configure: kit("MAESTRO", 10, "Sky Stripes", tagline: "Pure magic")),
+        CatalogEntry("shirt", .jersey, .football, configure: kit("CAPTAIN", 14, "Red & Green", tagline: "Dream big")),
+        CatalogEntry("stripedShirt", .jersey, .football, title: "Striped Shirt", summary: "Sky-blue stripes and a number eight",
+                     keywords: "stripes sky blue eight", configure: kit("MAESTRO", 8, "Sky Stripes", tagline: "Pure magic")),
         CatalogEntry("canaryShirt", .jersey, .football, title: "Canary Shirt", summary: "Yellow and green, made for flair",
-                     keywords: "yellow green samba flair ten", configure: kit("REI", 10, "Canary", tagline: "Joga bonito")),
+                     keywords: "yellow green street flair nine", configure: kit("SOLANO", 9, "Canary", tagline: "Play it pretty")),
         CatalogEntry("playerCard", .playerCard, .football),
         CatalogEntry("legendCard", .playerCard, .football, title: "Legend Card", summary: "Pearl foil for the all-time greats",
-                     symbol: "crown.fill", keywords: "legend icon goat pearl", configure: { widget in
+                     symbol: "crown.fill", keywords: "legend icon pearl", configure: { widget in
                          widget.options.player.finish = .legend
                          widget.options.player.rating = 98
-                         widget.options.player.name = "THE GOAT"
+                         widget.options.player.name = "THE ICON"
                          widget.options.player.stats = [92, 96, 94, 97, 40, 80]
                      }),
         CatalogEntry("neonCard", .playerCard, .football, title: "Neon Card", summary: "Dark glass lit in your team's color",

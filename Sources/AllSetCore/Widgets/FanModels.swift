@@ -73,7 +73,7 @@ public struct PlayerDetails: Codable, Equatable, Sendable {
     public var number = 7
     public var position = "ST"
     public var rating = 91
-    /// A short line under the name on the card: "PORTUGAL", "SINCE 2003".
+    /// A short line under the name on the card: "HOME GROWN", "SINCE 2003".
     public var tagline = ""
     /// Pace, shooting, passing, dribbling, defending, physical.
     public var stats = [89, 93, 81, 87, 35, 77]

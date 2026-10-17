@@ -209,7 +209,10 @@ extension WidgetTheme {
         }
     }
 
-    public static func named(_ id: String) -> WidgetTheme? { all.first { $0.id == id } }
+    public static func named(_ id: String) -> WidgetTheme? {
+        let id = LegacyIdentifiers.theme(id)
+        return all.first { $0.id == id }
+    }
 
     /// Baby-blue sky, cream paper cards, soft stars.
     public static let cloudNine = WidgetTheme(

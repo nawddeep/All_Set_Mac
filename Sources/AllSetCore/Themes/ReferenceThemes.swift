@@ -373,7 +373,7 @@ public enum ReferenceThemes {
                 KitItem(.weather, .small, 5, 1), KitItem(.stopwatch, .small, 5, 2), KitItem(.shortcuts, .medium, 4, 3, shortcuts),
              ]),
         make("redlineClub", "Redline Club", "Carbon, crimson details and a compact race-day control room.",
-             wallpaper: .art(.init(style: .film, palette: .rossoneri)), card: 0x2A2025, ink: 0xFFEFF0, accent: 0xEE6B75, palette: .rossoneri,
+             wallpaper: .art(.init(style: .film, palette: .emberCharcoal)), card: 0x2A2025, ink: 0xFFEFF0, accent: 0xEE6B75, palette: .emberCharcoal,
              font: .condensed, style: .poster, clock: .flip, material: .paper, radius: 12, dark: true,
              collections: [.night, .cinematic, .rock], tags: "redline crimson racing motorsport carbon stopwatch race day",
              philosophy: "A track photograph meets a crimson flip clock and race-day timer. Bold condensed words and quiet carbon cards keep the composition energetic and legible.",

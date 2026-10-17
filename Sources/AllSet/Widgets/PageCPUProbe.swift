@@ -94,7 +94,7 @@ enum PageCPUProbe {
     /// widgets: the Seven world moving, then paused, three times over, so the
     /// difference stands out from whatever else the Mac is doing.
     static func runWindowServer(services: AppServices) async {
-        let seven = ThemeLibrary.set("setup.seven")!
+        let seven = ThemeLibrary.set("setup.floodlightGold")!
         let widgets = seven.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))
         let window = NSWindow(contentRect: NSRect(x: 40, y: 40, width: 1136, height: 768),
                               styleMask: [.borderless], backing: .buffered, defer: false)
@@ -131,7 +131,7 @@ enum PageCPUProbe {
     static func runApply(services: AppServices) async {
         final class Gaps: @unchecked Sendable { var last = CACurrentMediaTime(); var worst = 0.0; var total = 0.0 }
         try? await Task.sleep(for: .seconds(3))
-        for id in ["setup.seven", "setup.americana", "setup.wonderkid"] {
+        for id in ["setup.floodlightGold", "setup.americana", "setup.wonderkid"] {
             guard let set = ThemeLibrary.set(id) else { continue }
             let gaps = Gaps()
             let timer = Timer(timeInterval: 0.004, repeats: true) { _ in
@@ -164,7 +164,7 @@ enum PageCPUProbe {
         window.isReleasedWhenClosed = false
         window.orderFrontRegardless()
         try? await Task.sleep(for: .seconds(2))
-        for id in ["setup.seven", "setup.wonderkid", "setup.americana", "setup.seven"] {
+        for id in ["setup.floodlightGold", "setup.wonderkid", "setup.americana", "setup.floodlightGold"] {
             guard let set = ThemeLibrary.set(id) else { continue }
             let widgets = set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))
             let gaps = Gaps()
@@ -282,7 +282,7 @@ enum PageCPUProbe {
             instance.options.art = ArtPiece(style: style, palette: palette)
             return AnyView(WidgetBody(instance: instance, services: services).environment(\.widgetIsVisible, true))
         }
-        let seven = ThemeLibrary.set("setup.seven")!
+        let seven = ThemeLibrary.set("setup.floodlightGold")!
         let world = ZStack(alignment: .topLeading) {
             ForEach(seven.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))) { widget in
                 WidgetBody(instance: widget, services: services).offset(x: widget.offset.x, y: widget.offset.y)

@@ -55,7 +55,7 @@ public enum ThemeCardArt {
         // from the top until its pitch is out of the card: the pitch's
         // centre circle sat behind the name like a stray ring, and the
         // crop leaves the theme its two colors, red and gold.
-        "setup.seven": Picks(hero: 0, title: 1, flankers: [4, 2, 10, 3], zoom: 1.64, focus: CGPoint(x: 0.5, y: 0)),
+        "setup.floodlightGold": Picks(hero: 0, title: 1, flankers: [4, 2, 10, 3], zoom: 1.64, focus: CGPoint(x: 0.5, y: 0)),
         // The VHS palms under the neon line, with roses, a heart and a headlight.
         "setup.americana": Picks(hero: 0, title: 1, flankers: [3, 9, 2, 8]),
         // The portrait under the bare clock, with the script word, the crown and the tiger.

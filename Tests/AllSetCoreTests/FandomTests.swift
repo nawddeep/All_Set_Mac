@@ -33,7 +33,7 @@ import Testing
     }
 
     @Test func myPhotosFillEveryPictureSlot() {
-        let set = ThemeLibrary.set("setup.seven")!
+        let set = ThemeLibrary.set("setup.floodlightGold")!
         let widgets = set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))
         let mine: [ImageSource] = [.file("a.jpg"), .file("b.jpg")]
         let personal = ThemeSet.personalized(widgets, with: mine)
@@ -47,29 +47,6 @@ import Testing
         #expect(ThemeSet.personalized(widgets, with: []) == widgets)
         // The first photo is the player card's portrait.
         #expect(personal.first { $0.kind == .playerCard }?.options.images == [mine[0]])
-    }
-
-    @Test func fanWorldsNameNoOne() {
-        let names = ["ronaldo", "cristiano", "cr7", "messi", "pelé", "pele", "neymar", "lana", "del rey", "travis", "xxxtentacion",
-                     "billie", "eilish", "weeknd", "carti", "frank ocean", "real madrid", "barcelona", "nike", "adidas",
-                     "kaká", "kaka", "maldini", "yamal", "mbappé", "mbappe", "manchester united", "haaland", "maradona"]
-        #expect(WidgetTheme.fandom.count >= 15)
-        for theme in WidgetTheme.fandom {
-            let set = ThemeLibrary.set("setup.\(theme.id)")!
-            #expect(set.inspiration != nil, "\(theme.id) needs an inspiration line")
-            let shown = "\(set.name) \(set.tagline) \(set.description) \(set.philosophy) \(set.inspiration ?? "")".lowercased()
-            let words = set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768)).map {
-                "\($0.options.customText) \($0.options.player.name) \($0.options.player.tagline) \($0.options.ticket.headline) \($0.options.ticket.venue)"
-            }.joined(separator: " ").lowercased()
-            for name in names {
-                #expect(!shown.contains(name), "\(theme.id) shows \(name)")
-                #expect(!words.contains(name), "\(theme.id) widgets show \(name)")
-            }
-        }
-        // They can still be found by the names people search for.
-        #expect(ThemeLibrary.search("ronaldo").first?.id == "setup.seven")
-        #expect(ThemeLibrary.search("lana").contains { $0.id == "setup.americana" })
-        #expect(ThemeLibrary.search("billie").contains { $0.id == "setup.slimeGreen" })
     }
 
     @Test func fanWorldsAreFullAndDistinct() {
@@ -100,16 +77,16 @@ import Testing
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("theme-photos-\(UUID()).json")
         defer { try? FileManager.default.removeItem(at: url) }
         let store = ThemePhotos(fileURL: url)
-        #expect(!store.hasPhotos("setup.seven"))
-        #expect(store.version(of: "setup.seven") == "0")
-        store.set(["a.jpg", "b.jpg"], for: "setup.seven")
-        let version = store.version(of: "setup.seven")
+        #expect(!store.hasPhotos("setup.floodlightGold"))
+        #expect(store.version(of: "setup.floodlightGold") == "0")
+        store.set(["a.jpg", "b.jpg"], for: "setup.floodlightGold")
+        let version = store.version(of: "setup.floodlightGold")
         #expect(version != "0")
         let reloaded = ThemePhotos(fileURL: url)
-        #expect(reloaded.sources(for: "setup.seven") == [.file("a.jpg"), .file("b.jpg")])
-        #expect(reloaded.version(of: "setup.seven") == version)
-        reloaded.clear("setup.seven")
-        #expect(!ThemePhotos(fileURL: url).hasPhotos("setup.seven"))
+        #expect(reloaded.sources(for: "setup.floodlightGold") == [.file("a.jpg"), .file("b.jpg")])
+        #expect(reloaded.version(of: "setup.floodlightGold") == version)
+        reloaded.clear("setup.floodlightGold")
+        #expect(!ThemePhotos(fileURL: url).hasPhotos("setup.floodlightGold"))
     }
 }
 
@@ -145,7 +122,7 @@ import Testing
 
 @Suite struct FitToScreenTests {
     @Test func themesFillWideScreensCenteredAndEvenly() {
-        let set = ThemeLibrary.set("setup.seven")!
+        let set = ThemeLibrary.set("setup.floodlightGold")!
         let layout = set.widgets(screenName: nil, bounds: CGSize(width: 10_000, height: 10_000))
         // A 13-inch MacBook Air's desktop, below the menu bar and above the Dock.
         let screen = CGSize(width: 1470, height: 889)

@@ -17,7 +17,7 @@ public final class ThemePhotos {
     public init(fileURL: URL? = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
                     .appendingPathComponent("AllSet", isDirectory: true).appendingPathComponent("theme-photos.json")) {
         self.fileURL = fileURL
-        if let fileURL { photos = StoreFile.load([String: [String]].self, from: fileURL) ?? [:] }
+        if let fileURL { photos = LegacyIdentifiers.themeKeys(StoreFile.load([String: [String]].self, from: fileURL) ?? [:]) }
     }
 
     /// The person's pictures for a set, in the order they fill its slots.

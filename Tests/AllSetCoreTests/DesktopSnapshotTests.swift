@@ -9,7 +9,7 @@ import Testing
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let settings = AppSettings(defaults: defaults)
-        let set = try #require(ThemeLibrary.set("setup.seven"))
+        let set = try #require(ThemeLibrary.set("setup.floodlightGold"))
         let setup = try #require(set.setup)
         settings.widgetFont = setup.font == .monospaced ? .serif : .monospaced
         settings.widgetCornerRadius = setup.cornerRadius + 7
@@ -31,7 +31,7 @@ import Testing
         let suite = "AllSetTests.\(UUID().uuidString)"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        let set = try #require(ThemeLibrary.set("setup.seven"))
+        let set = try #require(ThemeLibrary.set("setup.floodlightGold"))
         let settings = AppSettings(defaults: defaults)
         settings.adopt(set)
         #expect(AppSettings(defaults: defaults).activeThemeSet == set.id)
@@ -62,7 +62,7 @@ import Testing
         let freshSuite = suite + ".fresh"
         let freshDefaults = try #require(UserDefaults(suiteName: freshSuite))
         defer { freshDefaults.removePersistentDomain(forName: freshSuite) }
-        let set = try #require(ThemeLibrary.set("setup.seven"))
+        let set = try #require(ThemeLibrary.set("setup.floodlightGold"))
         let settings = AppSettings(defaults: defaults)
         settings.adopt(set)
         settings.widgetScale = 1.3
@@ -105,7 +105,7 @@ import Testing
         let before = DesktopSnapshot(settings: settings, widgets: widgets, wallpaper: wallpaper)
 
         // A theme goes on, the way installing one does.
-        let set = try #require(ThemeLibrary.set("setup.seven"))
+        let set = try #require(ThemeLibrary.set("setup.floodlightGold"))
         let themeWallpaper = try #require(set.wallpaper)
         widgets.replaceAll(with: set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768)))
         settings.widgetScale = 0.9

@@ -1,13 +1,15 @@
 import Foundation
 
-/// Football and music worlds: whole desktops inspired by the colors, eras and
-/// moods fans know, packed edge to edge with the new live widgets. They name
-/// no one and copy nothing: no photos of real people, crests, logos, album
-/// art or lyrics. Photos are CC0 places and things; the words are our own.
+/// Football and music worlds: whole desktops built on moods (floodlit nights,
+/// rainy derbies, late-night drives), packed edge to edge with the new live
+/// widgets. Every player, club, fixture and venue is invented; none points at a
+/// real person, club, nation, kit, crest, album or lyric (`RealPeopleDenylistTests`).
+/// Photos are CC0 places and things; the words are our own. The `id`s are old
+/// names kept only so saved desktops still decode; they are never shown.
 extension WidgetTheme {
     public static let fandom: [WidgetTheme] = [
-        seven, redSeven, galactico, albiceleste, oRei, sambaNeon, wonderkid, bleuRoyal, milanoNights, legends, miamiPink, matchday,
-        americana, coastline, violetNoir, rageMode, sadHours, slimeGreen, deepBlue, crimsonNights, opiumPunk, blondSummer,
+        floodlightGold, rainDerby, ivoryCrown, skyPlaymaker, goldenAge, neonFlair, wonderkid, midnightSprint, emberTerrace, legends, palmNightPink, matchday,
+        americana, coastline, violetNoir, emberCrowd, rainHours, acidMoss, deepBlue, crimsonNights, gothicStatic, sunflowerDrive,
     ]
 
     private static func library(_ names: String...) -> [WebPhoto] { names.flatMap(CuratedBackgrounds.collection) }
@@ -19,9 +21,9 @@ extension WidgetTheme {
 
     // MARK: Football
 
-    /// Portugal's number seven: red and green under floodlights, gold on top.
-    public static let seven = WidgetTheme(
-        id: "seven", title: "Seven", tagline: "Red, green and gold under the floodlights. Dream big, work harder.",
+    /// Floodlit gold: deep red and pine green under the lights, gold on top.
+    public static let floodlightGold = WidgetTheme(
+        id: "floodlightGold", title: "Floodlight Gold", tagline: "Red, pine and gold under the floodlights. Dream big, work harder.",
         material: .dark, card: WidgetColor(hex: 0x0E0A0B), ink: WidgetColor(hex: 0xF4EDE4), accent: WidgetColor(hex: 0xE8C15A),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xE8C15A),
         font: .condensed, cornerRadius: 16, textStyle: .poster, clockFace: .flip, palette: .redGreen, photoFilter: .none,
@@ -29,14 +31,14 @@ extension WidgetTheme {
         wallpaper: .art(ArtPiece(style: .stadium, palette: .redGreen)),
         photos: library("Stadium Nights", "On the Pitch", "Golden Goal"),
         kit: [
-            KitItem(.jersey, .large, 0, 0, Kit.player("LEGEND", 7, kit: "Red & Green", tagline: "DREAM BIG")),
-            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("Seven", .gold, style: .script)),
+            KitItem(.jersey, .large, 0, 0, Kit.player("CAPTAIN", 14, kit: "Red & Green", tagline: "DREAM BIG")),
+            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("Floodlight", .gold, style: .script)),
             KitItem(.clock, .small, 4, 0),
             KitItem(.photo, .small, 5, 0, Kit.photo(1)),
-            KitItem(.playerCard, .large, 2, 1, Kit.player("LEGEND", 7, kit: "Red & Green", tagline: "WORK HARDER", rating: 94,
+            KitItem(.playerCard, .large, 2, 1, Kit.player("CAPTAIN", 14, kit: "Red & Green", tagline: "WORK HARDER", rating: 94,
                                                             finish: .gold, stats: [90, 95, 82, 88, 35, 86])),
-            KitItem(.milestone, .medium, 4, 1, Kit.milestone(900, "+", "CAREER GOALS", "and counting")),
-            KitItem(.scoreboard, .medium, 0, 2, Kit.match("POR", "ESP", 0xC8102E, 0xF1BF00, "FRIENDLY", inDays: 4)),
+            KitItem(.milestone, .medium, 4, 1, Kit.milestone(250, "", "MATCHES", "and counting")),
+            KitItem(.scoreboard, .medium, 0, 2, Kit.match("LIO", "FAL", 0xC8102E, 0xF1BF00, "FRIENDLY", inDays: 4)),
             KitItem(.photo, .medium, 4, 2, Kit.photo(2)),
             KitItem(.quote, .medium, 0, 3, Kit.words("Dream big.\nWork harder.", style: .poster)),
             KitItem(.focus, .medium, 2, 3),
@@ -44,9 +46,9 @@ extension WidgetTheme {
             KitItem(.photo, .small, 5, 3, Kit.photo(8)),
         ])
 
-    /// The white-and-gold era: royal nights, trophies on black, fine serif.
-    public static let galactico = WidgetTheme(
-        id: "galactico", title: "Galáctico", tagline: "White and gold, trophies on black, royal European nights.",
+    /// Ivory and gold: grand nights, trophies on black, fine serif.
+    public static let ivoryCrown = WidgetTheme(
+        id: "ivoryCrown", title: "Ivory Crown", tagline: "Ivory and gold, trophies on black, grand cup nights.",
         material: .light, card: WidgetColor(hex: 0xF6F3EC), ink: WidgetColor(hex: 0x1C2440), accent: WidgetColor(hex: 0xB8902F),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xE8C15A),
         font: .serif, cornerRadius: 18, textStyle: .luxe, clockFace: .minimal, palette: .royal, photoFilter: .none,
@@ -54,60 +56,60 @@ extension WidgetTheme {
         wallpaper: backdropPhoto("Golden Goal", 4),
         photos: library("Golden Goal", "Stadium Nights"),
         kit: [
-            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("Galáctico", .gold, style: .luxe)),
-            KitItem(.jersey, .medium, 2, 0, Kit.player("LEGEND", 7, kit: "Royal White", tagline: "WHITE & GOLD")),
+            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("Ivory Crown", .gold, style: .luxe)),
+            KitItem(.jersey, .medium, 2, 0, Kit.player("MAESTRO", 5, kit: "Royal White", tagline: "IVORY & GOLD")),
             KitItem(.clock, .small, 4, 0, Kit.bare),
             KitItem(.sticker, .small, 5, 0),
-            KitItem(.playerCard, .large, 0, 1, Kit.player("LEGEND", 7, kit: "Royal White", tagline: "ROYAL NIGHTS", rating: 97,
+            KitItem(.playerCard, .large, 0, 1, Kit.player("MAESTRO", 5, kit: "Royal White", tagline: "GRAND NIGHTS", rating: 97,
                                                             finish: .legend, stats: [91, 95, 83, 89, 34, 85])),
             KitItem(.photo, .large, 2, 1, Kit.photo(5)),
-            KitItem(.milestone, .small, 4, 1, Kit.both(Kit.milestone(5, "×", "EUROPEAN CROWNS", ""), Kit.dark)),
+            KitItem(.milestone, .small, 4, 1, Kit.both(Kit.milestone(3, "×", "CUP NIGHTS", ""), Kit.dark)),
             KitItem(.calendar, .small, 5, 1),
-            KitItem(.ticket, .medium, 4, 2, Kit.ticket("EUROPEAN NIGHT", "Under the white lights", venue: "The Royal Stadium",
+            KitItem(.ticket, .medium, 4, 2, Kit.ticket("CUP NIGHT", "Under the white lights", venue: "The Ivory Ground",
                                                         seat: "EAST · ROW 7", inDays: 12, stripe: 0xB8902F)),
             KitItem(.nowPlaying, .medium, 0, 3),
             KitItem(.quote, .medium, 2, 3, Kit.words("Class is permanent.", style: .luxe)),
             KitItem(.weather, .medium, 4, 3),
         ])
 
-    /// The young number seven in red: rainy floodlit nights and step-overs.
-    public static let redSeven = WidgetTheme(
-        id: "redSeven", title: "Red Seven", tagline: "The young number seven in red: rainy floodlit nights and step-overs.",
+    /// A winger in red: rainy floodlit nights and step-overs.
+    public static let rainDerby = WidgetTheme(
+        id: "rainDerby", title: "Rain Derby", tagline: "A young winger in red: rainy floodlit nights and step-overs.",
         material: .dark, card: WidgetColor(hex: 0x120204), ink: WidgetColor(hex: 0xFFF3F0), accent: WidgetColor(hex: 0xD0021B),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFF3B3B),
         font: .condensed, cornerRadius: 16, textStyle: .poster, clockFace: .flip, palette: .classicRed, photoFilter: .none,
-        noteColor: .pink, sticker: .star, stickerFinish: .chrome, stickerColor: WidgetColor(hex: 0xFFFFFF), iconSymbol: "7.circle.fill",
+        noteColor: .pink, sticker: .star, stickerFinish: .chrome, stickerColor: WidgetColor(hex: 0xFFFFFF), iconSymbol: "cloud.rain.fill",
         wallpaper: .art(ArtPiece(style: .rain, palette: .classicRed)),
         photos: library("Stadium Nights", "On the Pitch"),
         kit: [
             KitItem(.photo, .large, 0, 0, Kit.photo(0)),
-            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("No. 7", .chrome, style: .poster)),
+            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("No. 17", .chrome, style: .poster)),
             KitItem(.clock, .medium, 4, 0),
-            KitItem(.playerCard, .large, 2, 1, Kit.player("THE SEVEN", 7, kit: "Classic Red", tagline: "MANCHESTER NIGHTS", rating: 91,
+            KitItem(.playerCard, .large, 2, 1, Kit.player("THE WINGER", 17, kit: "Classic Red", tagline: "RAINY NIGHT RUNS", rating: 91,
                                                             finish: .gold, stats: [93, 87, 78, 91, 32, 75])),
-            KitItem(.jersey, .medium, 4, 1, Kit.player("LEGEND", 7, kit: "Classic Red", tagline: "NUMBER SEVEN")),
+            KitItem(.jersey, .medium, 4, 1, Kit.player("WINGER", 17, kit: "Classic Red", tagline: "STEP-OVERS")),
             KitItem(.photo, .medium, 0, 2, Kit.photo(1)),
-            KitItem(.milestone, .medium, 4, 2, Kit.milestone(145, "", "GOALS IN RED", "across two spells")),
+            KitItem(.milestone, .medium, 4, 2, Kit.milestone(60, "", "ASSISTS", "this season")),
             KitItem(.photo, .small, 0, 3, Kit.photo(2)),
             KitItem(.photo, .small, 1, 3, Kit.photo(3)),
-            KitItem(.scoreboard, .medium, 2, 3, Kit.match("MUN", "CHE", 0xD0021B, 0x034694, "FINAL · 2008", score: (1, 1))),
+            KitItem(.scoreboard, .medium, 2, 3, Kit.match("HAR", "CAS", 0xD0021B, 0x034694, "CUP FINAL", score: (1, 1))),
             KitItem(.nowPlaying, .medium, 4, 3),
         ])
 
-    /// The boy wonder: claret and blue, stadium bokeh and the number nineteen.
+    /// The boy wonder: violet and gold, stadium bokeh and the number sixteen.
     public static let wonderkid = WidgetTheme(
-        id: "wonderkid", title: "Wonderkid", tagline: "Claret and blue, stadium bokeh and a teenager changing the game.",
+        id: "wonderkid", title: "Wonderkid", tagline: "Violet and gold, stadium bokeh and a teenager changing the game.",
         material: .frosted, card: WidgetColor(hex: 0x0B0E2A), ink: WidgetColor(hex: 0xFFFFFF), accent: WidgetColor(hex: 0xEDBB00),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFFD54A),
-        font: .rounded, cornerRadius: 22, textStyle: .bold, clockFace: .digital, palette: .blaugrana, photoFilter: .none,
+        font: .rounded, cornerRadius: 22, textStyle: .bold, clockFace: .digital, palette: .violetGold, photoFilter: .none,
         noteColor: .blue, sticker: .star, stickerFinish: .chrome, stickerColor: WidgetColor(hex: 0xEDBB00), iconSymbol: "star.fill",
-        wallpaper: .art(ArtPiece(style: .bokeh, palette: .blaugrana)),
+        wallpaper: .art(ArtPiece(style: .bokeh, palette: .violetGold)),
         photos: library("On the Pitch", "Stadium Nights"),
         kit: [
-            KitItem(.playerCard, .large, 0, 0, Kit.player("WONDERKID", 19, kit: "Claret & Blue", tagline: "BORN FOR THIS", rating: 90,
+            KitItem(.playerCard, .large, 0, 0, Kit.player("WONDERKID", 16, kit: "Midnight", tagline: "BORN FOR THIS", rating: 90,
                                                             finish: .holo, stats: [90, 82, 86, 92, 30, 60])),
             KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("Wonderkid", .holo, style: .bold)),
-            KitItem(.jersey, .small, 4, 0, Kit.player("WONDERKID", 19, kit: "Claret & Blue")),
+            KitItem(.jersey, .small, 4, 0, Kit.player("WONDERKID", 16, kit: "Midnight")),
             KitItem(.clock, .small, 5, 0),
             KitItem(.photo, .large, 2, 1, Kit.photo(0)),
             KitItem(.photo, .medium, 4, 1, Kit.photo(1)),
@@ -119,9 +121,9 @@ extension WidgetTheme {
             KitItem(.calendar, .small, 5, 3),
         ])
 
-    /// Paris at night in navy and gold: speed, the number ten, royal blue.
-    public static let bleuRoyal = WidgetTheme(
-        id: "bleuRoyal", title: "Bleu Royal", tagline: "Paris at night in navy and gold: pure speed and the number ten.",
+    /// A city at night in navy and gold: speed and royal blue.
+    public static let midnightSprint = WidgetTheme(
+        id: "midnightSprint", title: "Midnight Sprint", tagline: "A city at night in navy and gold: pure speed on the counter.",
         material: .glass, card: WidgetColor(hex: 0x0C1A3F), ink: WidgetColor(hex: 0xFFFFFF), accent: WidgetColor(hex: 0xE8C15A),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xF3D36B),
         font: .expanded, cornerRadius: 18, textStyle: .modern, clockFace: .stacked, palette: .bleu, photoFilter: .none,
@@ -129,38 +131,38 @@ extension WidgetTheme {
         wallpaper: .art(ArtPiece(style: .skyline, palette: .bleu)),
         photos: library("Stadium Nights", "On the Pitch"),
         kit: [
-            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("Bleu Royal", .gold, style: .modern)),
+            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("Midnight Sprint", .gold, style: .modern)),
             KitItem(.clock, .medium, 2, 0),
-            KitItem(.jersey, .medium, 4, 0, Kit.player("VITESSE", 10, kit: "Navy Bleu", tagline: "SPEED IS POWER")),
+            KitItem(.jersey, .medium, 4, 0, Kit.player("VITESSE", 21, kit: "Navy Bleu", tagline: "SPEED IS POWER")),
             KitItem(.photo, .large, 0, 1, Kit.photo(0)),
-            KitItem(.playerCard, .large, 2, 1, Kit.player("VITESSE", 10, kit: "Navy Bleu", tagline: "PARIS NIGHTS", rating: 92,
+            KitItem(.playerCard, .large, 2, 1, Kit.player("VITESSE", 21, kit: "Navy Bleu", tagline: "CITY NIGHTS", rating: 92,
                                                             finish: .night, stats: [97, 90, 80, 92, 36, 77])),
-            KitItem(.scoreboard, .medium, 4, 1, Kit.match("FRA", "ARG", 0x1C2A5A, 0x75AADB, "ROUND OF 16 · 2018", score: (4, 3))),
+            KitItem(.scoreboard, .medium, 4, 1, Kit.match("NAV", "SKY", 0x1C2A5A, 0x75AADB, "KNOCKOUT ROUND", score: (4, 3))),
             KitItem(.photo, .medium, 4, 2, Kit.photo(1)),
-            KitItem(.quote, .medium, 0, 3, Kit.words("Fast. Fearless.\nFrench.", style: .modern)),
+            KitItem(.quote, .medium, 0, 3, Kit.words("Fast. Fearless.\nFree.", style: .modern)),
             KitItem(.nowPlaying, .medium, 2, 3),
             KitItem(.calendar, .small, 4, 3),
             KitItem(.weather, .small, 5, 3),
         ])
 
-    /// Red and black stripes, flares in the stands and pure elegance.
-    public static let milanoNights = WidgetTheme(
-        id: "milanoNights", title: "Milano Nights", tagline: "Red and black stripes, flares in the stands and pure elegance.",
+    /// Ember red and charcoal, flares in the stands and pure elegance.
+    public static let emberTerrace = WidgetTheme(
+        id: "emberTerrace", title: "Ember Terrace", tagline: "Ember red and charcoal, flares in the stands and pure elegance.",
         material: .dark, card: WidgetColor(hex: 0x0C0606), ink: WidgetColor(hex: 0xF8EEEE), accent: WidgetColor(hex: 0xC8102E),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFF5A4A),
-        font: .serif, cornerRadius: 12, textStyle: .luxe, clockFace: .minimal, palette: .rossoneri, photoFilter: .none,
+        font: .serif, cornerRadius: 12, textStyle: .luxe, clockFace: .minimal, palette: .emberCharcoal, photoFilter: .none,
         noteColor: .pink, sticker: .star, stickerFinish: .chrome, stickerColor: WidgetColor(hex: 0xFFFFFF), iconSymbol: "star.fill",
-        wallpaper: .art(ArtPiece(style: .smoke, palette: .rossoneri)),
+        wallpaper: .art(ArtPiece(style: .smoke, palette: .emberCharcoal)),
         photos: library("Stadium Nights", "Smoke"),
         kit: [
-            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("Milano", .gold, style: .luxe)),
+            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("Terrace", .gold, style: .luxe)),
             KitItem(.photo, .large, 2, 0, Kit.photo(0)),
-            KitItem(.playerCard, .large, 4, 0, Kit.player("ELEGANZA", 22, kit: "Red & Black Stripes", tagline: "RED & BLACK NIGHTS",
+            KitItem(.playerCard, .large, 4, 0, Kit.player("ELEGANZA", 22, kit: "Orange Hoops", tagline: "EMBER NIGHTS",
                                                             rating: 93, finish: .night, stats: [88, 86, 92, 93, 40, 76])),
-            KitItem(.jersey, .medium, 0, 1, Kit.player("CAPITANO", 3, kit: "Red & Black Stripes", tagline: "ONE CLUB, ONE LIFE")),
+            KitItem(.jersey, .medium, 0, 1, Kit.player("CAPTAIN", 4, kit: "Orange Hoops", tagline: "ONE CLUB, ONE LIFE")),
             KitItem(.photo, .large, 0, 2, Kit.photo(1)),
-            KitItem(.vhs, .medium, 2, 2, Kit.tape(2, caption: "SAN SIRO · 2007")),
-            KitItem(.milestone, .medium, 4, 2, Kit.milestone(7, "", "EUROPEAN CROWNS", "in red and black")),
+            KitItem(.vhs, .medium, 2, 2, Kit.tape(2, caption: "THE OLD TERRACE")),
+            KitItem(.milestone, .medium, 4, 2, Kit.milestone(100, "", "YEARS", "on the same terrace")),
             KitItem(.quote, .medium, 2, 3, Kit.words("Elegance is\na way of playing.", style: .luxe)),
             KitItem(.calendar, .small, 4, 3),
             KitItem(.clock, .small, 5, 3),
@@ -190,9 +192,9 @@ extension WidgetTheme {
             KitItem(.milestone, .medium, 4, 3, Kit.milestone(22, "", "WORLD CUPS", "every one a story")),
         ])
 
-    /// Sky-blue stripes and a left foot like magic: the number ten.
-    public static let albiceleste = WidgetTheme(
-        id: "albiceleste", title: "Albiceleste", tagline: "Sky-blue stripes, the number ten and a little magic.",
+    /// Sky and white, a playmaker and a little magic.
+    public static let skyPlaymaker = WidgetTheme(
+        id: "skyPlaymaker", title: "Sky Playmaker", tagline: "Sky and white, a playmaker's touch and a little magic.",
         material: .frosted, card: WidgetColor(hex: 0x0E1B2E), ink: WidgetColor(hex: 0xF2F7FC), accent: WidgetColor(hex: 0x75AADB),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0x9CCBF0),
         font: .rounded, cornerRadius: 20, textStyle: .bold, clockFace: .digital, palette: .skyWhite, photoFilter: .none,
@@ -200,25 +202,25 @@ extension WidgetTheme {
         wallpaper: backdropPhoto("Stadium Nights", 0),
         photos: library("On the Pitch", "Stadium Nights", "Golden Goal"),
         kit: [
-            KitItem(.jersey, .large, 0, 0, Kit.player("MAESTRO", 10, kit: "Sky Stripes", tagline: "PURE MAGIC")),
-            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("G.O.A.T.", .gold, style: .poster)),
+            KitItem(.jersey, .large, 0, 0, Kit.player("PLAYMAKER", 8, kit: "Black & White", tagline: "PURE MAGIC")),
+            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("Playmaker", .gold, style: .poster)),
             KitItem(.sticker, .small, 4, 0),
             KitItem(.clock, .small, 5, 0),
-            KitItem(.pitch, .medium, 2, 1, Kit.match("ARG", "FRA", 0x75AADB, 0x1F3A93, "FINAL", inDays: nil)),
-            KitItem(.playerCard, .medium, 4, 1, Kit.player("MAESTRO", 10, kit: "Sky Stripes", tagline: "LEFT FOOT MAGIC", rating: 96,
+            KitItem(.pitch, .medium, 2, 1, Kit.match("SKY", "NAV", 0x75AADB, 0x1F3A93, "FINAL", inDays: nil)),
+            KitItem(.playerCard, .medium, 4, 1, Kit.player("PLAYMAKER", 8, kit: "Black & White", tagline: "LEFT FOOT MAGIC", rating: 96,
                                                              finish: .legend, stats: [85, 92, 94, 96, 38, 68])),
             KitItem(.photo, .medium, 0, 2, Kit.photo(0)),
-            KitItem(.scoreboard, .medium, 2, 2, Kit.match("ARG", "FRA", 0x75AADB, 0x1F3A93, "FINAL · 2022", score: (3, 3))),
-            KitItem(.milestone, .medium, 4, 2, Kit.milestone(45, "+", "TROPHIES", "the most ever")),
+            KitItem(.scoreboard, .medium, 2, 2, Kit.match("SKY", "NAV", 0x75AADB, 0x1F3A93, "FINAL", score: (3, 3))),
+            KitItem(.milestone, .medium, 4, 2, Kit.milestone(300, "", "ASSISTS", "and still looking")),
             KitItem(.nowPlaying, .medium, 0, 3),
             KitItem(.calendar, .small, 2, 3),
             KitItem(.weather, .small, 3, 3),
             KitItem(.photo, .medium, 4, 3, Kit.photo(3)),
         ])
 
-    /// 1970 in color: canary yellow, green and blue, retro stripes, film.
-    public static let oRei = WidgetTheme(
-        id: "oRei", title: "O Rei", tagline: "The king's era: canary yellow, retro stripes and film grain.",
+    /// A golden age in color: mustard, forest and cream, retro stripes, film.
+    public static let goldenAge = WidgetTheme(
+        id: "goldenAge", title: "Golden Age", tagline: "An old-school era: sunny yellow, retro stripes and film grain.",
         material: .paper, card: WidgetColor(hex: 0xF3E9D2), ink: WidgetColor(hex: 0x1F3B1F), accent: WidgetColor(hex: 0x009C3B),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFFDF00),
         font: .serif, cornerRadius: 10, textStyle: .chunky, clockFace: .analog, palette: .canary, photoFilter: .vintage,
@@ -227,14 +229,14 @@ extension WidgetTheme {
         photos: library("Golden Goal", "On the Pitch"),
         kit: [
             KitItem(.sticker, .small, 0, 0),
-            KitItem(.wordArt, .medium, 1, 0, Kit.wordArt("O Rei", .gold, style: .chunky)),
-            KitItem(.scoreboard, .medium, 3, 0, Kit.match("BRA", "ITA", 0xFFD400, 0x1F5FBF, "FINAL · 1970", score: (4, 1))),
+            KitItem(.wordArt, .medium, 1, 0, Kit.wordArt("Golden Age", .gold, style: .chunky)),
+            KitItem(.scoreboard, .medium, 3, 0, Kit.match("SOL", "AZU", 0xFFD400, 0x1F5FBF, "FINAL · '71", score: (4, 1))),
             KitItem(.clock, .small, 5, 0),
-            KitItem(.jersey, .large, 0, 1, Kit.player("REI", 10, kit: "Canary", tagline: "1958 · 1962 · 1970")),
-            KitItem(.vhs, .large, 2, 1, Kit.tape(1, caption: "MEXICO 1970")),
-            KitItem(.playerCard, .medium, 4, 1, Kit.player("O REI", 10, kit: "Canary", tagline: "THE KING", rating: 98,
+            KitItem(.jersey, .large, 0, 1, Kit.player("SOLANO", 9, kit: "Forest Sash", tagline: "CLASS OF '71")),
+            KitItem(.vhs, .large, 2, 1, Kit.tape(1, caption: "SUMMER OF '71")),
+            KitItem(.playerCard, .medium, 4, 1, Kit.player("SOLANO", 9, kit: "Forest Sash", tagline: "OLD SCHOOL", rating: 98,
                                                              finish: .legend, stats: [93, 97, 90, 96, 50, 80])),
-            KitItem(.milestone, .medium, 4, 2, Kit.milestone(1000, "+", "GOALS", "the king of them all")),
+            KitItem(.milestone, .medium, 4, 2, Kit.milestone(500, "", "MATCHES", "one club, one era")),
             KitItem(.quote, .medium, 0, 3, Kit.words("The beautiful game.", style: .chunky)),
             KitItem(.calendar, .small, 2, 3),
             KitItem(.photo, .small, 3, 3, Kit.photo(2)),
@@ -242,8 +244,8 @@ extension WidgetTheme {
         ])
 
     /// Flair in neon: canary yellow on a synth grid, skills and samba.
-    public static let sambaNeon = WidgetTheme(
-        id: "sambaNeon", title: "Samba Neon", tagline: "Canary yellow on a neon grid: skill, flair and samba.",
+    public static let neonFlair = WidgetTheme(
+        id: "neonFlair", title: "Neon Flair", tagline: "Sunny yellow on a neon grid: skill, flair and street football.",
         material: .dark, card: WidgetColor(hex: 0x07100A), ink: WidgetColor(hex: 0xF5FFF0), accent: WidgetColor(hex: 0xFFDF00),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFFE14D),
         font: .expanded, cornerRadius: 18, textStyle: .bold, clockFace: .digital, palette: .canary, photoFilter: .none,
@@ -252,15 +254,15 @@ extension WidgetTheme {
         photos: library("On the Pitch", "Neon Green", "Concert Lights"),
         kit: [
             KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("Flair", .neon, style: .script, color: 0xFFE14D)),
-            KitItem(.playerCard, .large, 2, 0, Kit.player("FLAIR", 10, kit: "Canary", tagline: "SKILL IS A LANGUAGE", rating: 91,
+            KitItem(.playerCard, .large, 2, 0, Kit.player("FLAIR", 11, kit: "Canary", tagline: "SKILL IS A LANGUAGE", rating: 91,
                                                             finish: .neon, stats: [91, 85, 86, 94, 32, 62])),
-            KitItem(.jersey, .small, 4, 0, Kit.player("SAMBA", 10, kit: "Canary")),
+            KitItem(.jersey, .small, 4, 0, Kit.player("FLAIR", 11, kit: "Canary")),
             KitItem(.sticker, .small, 5, 0),
             KitItem(.visualizer, .medium, 0, 1, Kit.visualizer(.bars)),
-            KitItem(.pitch, .medium, 4, 1, Kit.match("BRA", "ARG", 0xFFD400, 0x75AADB, "CLÁSSICO", inDays: 6)),
+            KitItem(.pitch, .medium, 4, 1, Kit.match("SOL", "SKY", 0xFFD400, 0x75AADB, "STREET CUP", inDays: 6)),
             KitItem(.photo, .medium, 0, 2, Kit.photo(9)),
             KitItem(.photo, .medium, 2, 2, Kit.photo(4)),
-            KitItem(.scoreboard, .medium, 4, 2, Kit.match("BRA", "ARG", 0xFFD400, 0x75AADB, "CLÁSSICO", inDays: 6)),
+            KitItem(.scoreboard, .medium, 4, 2, Kit.match("SOL", "SKY", 0xFFD400, 0x75AADB, "STREET CUP", inDays: 6)),
             KitItem(.clock, .medium, 0, 3, Kit.bare),
             KitItem(.focus, .medium, 2, 3),
             KitItem(.calendar, .small, 4, 3),
@@ -268,8 +270,8 @@ extension WidgetTheme {
         ])
 
     /// Pink and black by the ocean: palm silhouettes and a new chapter.
-    public static let miamiPink = WidgetTheme(
-        id: "miamiPink", title: "Miami Pink", tagline: "Pink and black, palms at night, a new chapter by the sea.",
+    public static let palmNightPink = WidgetTheme(
+        id: "palmNightPink", title: "Palm Night Pink", tagline: "Pink and black, palms at night, a new chapter by the sea.",
         material: .dark, card: WidgetColor(hex: 0x0D0A0C), ink: WidgetColor(hex: 0xFFF0F6), accent: WidgetColor(hex: 0xF4A6C6),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFF8FC2),
         font: .rounded, cornerRadius: 22, textStyle: .script, clockFace: .flip, palette: .miami, photoFilter: .none,
@@ -277,15 +279,15 @@ extension WidgetTheme {
         wallpaper: .art(ArtPiece(style: .palms, palette: .miami)),
         photos: library("Palm Sunsets", "Neon Motels", "On the Pitch"),
         kit: [
-            KitItem(.jersey, .medium, 0, 0, Kit.player("MIAMI", 10, kit: "Pink & Black", tagline: "NEW CHAPTER")),
-            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("Miami Nights", .neon, style: .script, color: 0xFF8FC2)),
+            KitItem(.jersey, .medium, 0, 0, Kit.player("PALMS", 23, kit: "Pink & Black", tagline: "NEW CHAPTER")),
+            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("Palm Nights", .neon, style: .script, color: 0xFF8FC2)),
             KitItem(.clock, .medium, 4, 0),
-            KitItem(.playerCard, .large, 0, 1, Kit.player("MIAMI", 10, kit: "Pink & Black", tagline: "PINK IS THE NEW GOLD", rating: 93,
+            KitItem(.playerCard, .large, 0, 1, Kit.player("PALMS", 23, kit: "Pink & Black", tagline: "PINK IS THE NEW GOLD", rating: 93,
                                                             finish: .neon, stats: [80, 90, 93, 94, 33, 64])),
             KitItem(.photo, .large, 2, 1, Kit.photo(0)),
-            KitItem(.ticket, .medium, 4, 1, Kit.ticket("MATCH NIGHT", "Pink under the lights", venue: "Fort Lauderdale",
+            KitItem(.ticket, .medium, 4, 1, Kit.ticket("MATCH NIGHT", "Pink under the lights", venue: "The Seaside Ground",
                                                         seat: "SEC 110 · ROW 10", inDays: 9, stripe: 0xF4A6C6)),
-            KitItem(.scoreboard, .medium, 4, 2, Kit.match("MIA", "NYC", 0xF4A6C6, 0x6CACE4, "SEASON", inDays: 5)),
+            KitItem(.scoreboard, .medium, 4, 2, Kit.match("PAL", "HAR", 0xF4A6C6, 0x6CACE4, "SEASON", inDays: 5)),
             KitItem(.nowPlaying, .medium, 0, 3),
             KitItem(.photo, .small, 2, 3, Kit.photo(14)),
             KitItem(.sticker, .small, 3, 3),
@@ -342,7 +344,7 @@ extension WidgetTheme {
             KitItem(.photo, .small, 4, 2, Kit.photo(25)),
             KitItem(.sticker, .small, 5, 2),
             KitItem(.nowPlaying, .medium, 0, 3),
-            KitItem(.quote, .medium, 2, 3, Kit.words("Kiss me in the Pacific light.", style: .typewriter)),
+            KitItem(.quote, .medium, 2, 3, Kit.words("Golden hour on the boulevard.", style: .typewriter)),
             KitItem(.calendar, .small, 4, 3),
             KitItem(.photo, .small, 5, 3, Kit.photo(9)),
         ])
@@ -397,9 +399,9 @@ extension WidgetTheme {
             KitItem(.photo, .medium, 4, 3, Kit.photo(4)),
         ])
 
-    /// Rage-era earth tones: smoke, fire, a crowd in the dark, it's lit.
-    public static let rageMode = WidgetTheme(
-        id: "rageMode", title: "Rage Mode", tagline: "Smoke, fire and a crowd in the dark. Earth tones, turned all the way up.",
+    /// Earth tones turned up: smoke, fire, a crowd in the dark.
+    public static let emberCrowd = WidgetTheme(
+        id: "emberCrowd", title: "Ember Crowd", tagline: "Smoke, fire and a crowd in the dark. Earth tones, turned all the way up.",
         material: .dark, card: WidgetColor(hex: 0x160E09), ink: WidgetColor(hex: 0xF3E6D4), accent: WidgetColor(hex: 0xE3B26B),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFF8A3D),
         font: .condensed, cornerRadius: 12, textStyle: .poster, clockFace: .flip, palette: .rage, photoFilter: .warm,
@@ -407,14 +409,14 @@ extension WidgetTheme {
         wallpaper: .art(ArtPiece(style: .smoke, palette: .rage)),
         photos: library("Desert Fire", "Concert Lights", "Smoke"),
         kit: [
-            KitItem(.wordArt, .large, 0, 0, Kit.wordArt("IT'S LIT", .fire, style: .poster)),
+            KitItem(.wordArt, .large, 0, 0, Kit.wordArt("TURN IT UP", .fire, style: .poster)),
             KitItem(.visualizer, .medium, 2, 0, Kit.visualizer(.bars)),
             KitItem(.photo, .medium, 4, 0, Kit.photo(9)),
-            KitItem(.vhs, .medium, 2, 1, Kit.tape(10, caption: "RAGE · LIVE")),
+            KitItem(.vhs, .medium, 2, 1, Kit.tape(10, caption: "LIVE · LOUD")),
             KitItem(.photo, .small, 4, 1, Kit.photo(0)),
             KitItem(.sticker, .small, 5, 1),
             KitItem(.photo, .medium, 0, 2, Kit.photo(4)),
-            KitItem(.ticket, .medium, 2, 2, Kit.ticket("RAGE NIGHT", "Mosh pit, front row", venue: "The Dome",
+            KitItem(.ticket, .medium, 2, 2, Kit.ticket("LOUD NIGHT", "Mosh pit, front row", venue: "The Dome",
                                                         seat: "GA · PIT", inDays: 11, stripe: 0xC46A2B)),
             KitItem(.nowPlaying, .medium, 4, 2),
             KitItem(.clock, .medium, 0, 3),
@@ -424,8 +426,8 @@ extension WidgetTheme {
         ])
 
     /// Blue hours: rain on the window, a 3 a.m. tape, soft handwriting.
-    public static let sadHours = WidgetTheme(
-        id: "sadHours", title: "Sad Hours", tagline: "Rain on the window, a 3 a.m. tape and soft handwriting in blue.",
+    public static let rainHours = WidgetTheme(
+        id: "rainHours", title: "Rain Hours", tagline: "Rain on the window, a 3 a.m. tape and soft handwriting in blue.",
         material: .glass, card: WidgetColor(hex: 0x0A1633), ink: WidgetColor(hex: 0xE8F0FF), accent: WidgetColor(hex: 0x8FB3FF),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0x8FB3FF),
         font: .standard, cornerRadius: 18, textStyle: .handwritten, clockFace: .digital, palette: .sadBlue, photoFilter: .cool,
@@ -433,7 +435,7 @@ extension WidgetTheme {
         wallpaper: .art(ArtPiece(style: .rain, palette: .sadBlue)),
         photos: library("Rainy Window", "Night Drive"),
         kit: [
-            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("sad hours", .neon, style: .handwritten, color: 0x4D8BFF)),
+            KitItem(.wordArt, .medium, 0, 0, Kit.wordArt("rain hours", .neon, style: .handwritten, color: 0x4D8BFF)),
             KitItem(.clock, .medium, 2, 0),
             KitItem(.moon, .small, 4, 0),
             KitItem(.sticker, .small, 5, 0),
@@ -446,9 +448,9 @@ extension WidgetTheme {
             KitItem(.nowPlaying, .medium, 4, 3),
         ])
 
-    /// Alt-pop in black and slime green: quiet, weird and glowing.
-    public static let slimeGreen = WidgetTheme(
-        id: "slimeGreen", title: "Slime Green", tagline: "Black and slime green: quiet, a little weird, glowing.",
+    /// Black and acid moss green: quiet, weird and glowing.
+    public static let acidMoss = WidgetTheme(
+        id: "acidMoss", title: "Acid Moss", tagline: "Black and acid green: quiet, a little weird, glowing.",
         material: .dark, card: WidgetColor(hex: 0x050805), ink: WidgetColor(hex: 0xE9FFE0), accent: WidgetColor(hex: 0xB6FF3B),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0x9DFF4A),
         font: .rounded, cornerRadius: 20, textStyle: .bold, clockFace: .stacked, palette: .slime, photoFilter: .noir,
@@ -464,7 +466,7 @@ extension WidgetTheme {
             KitItem(.photo, .small, 2, 1, Kit.photo(6)),
             KitItem(.photo, .small, 3, 1, Kit.photo(2)),
             KitItem(.cassette, .medium, 4, 1, Kit.label("whisper tape")),
-            KitItem(.vhs, .medium, 2, 2, Kit.tape(8, caption: "BEDROOM TAPES")),
+            KitItem(.vhs, .medium, 2, 2, Kit.tape(8, caption: "LATE TAPES")),
             KitItem(.nowPlaying, .medium, 4, 2),
             KitItem(.quote, .medium, 0, 3, Kit.words("quiet is a\nkind of loud", style: .bold)),
             KitItem(.calendar, .small, 2, 3),
@@ -497,7 +499,7 @@ extension WidgetTheme {
             KitItem(.photo, .medium, 4, 3, Kit.photo(0)),
         ])
 
-    /// Red neon after midnight: a city in crimson, a night drive, Vegas.
+    /// Red neon after midnight: a city in crimson, a night drive.
     public static let crimsonNights = WidgetTheme(
         id: "crimsonNights", title: "Crimson Nights", tagline: "Red neon after midnight: a crimson city and a long night drive.",
         material: .dark, card: WidgetColor(hex: 0x0C0204), ink: WidgetColor(hex: 0xFFE9EA), accent: WidgetColor(hex: 0xE11D2A),
@@ -508,12 +510,12 @@ extension WidgetTheme {
         photos: library("Night Drive", "Neon Motels", "Concert Lights"),
         kit: [
             KitItem(.photo, .large, 0, 0, Kit.photo(0)),
-            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("city of sin", .neon, style: .modern, color: 0xFF2D3F)),
+            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("red light city", .neon, style: .modern, color: 0xFF2D3F)),
             KitItem(.clock, .medium, 4, 0),
             KitItem(.visualizer, .medium, 2, 1, Kit.visualizer(.bars)),
             KitItem(.photo, .small, 4, 1, Kit.photo(19)),
             KitItem(.photo, .small, 5, 1, Kit.photo(17)),
-            KitItem(.ticket, .medium, 0, 2, Kit.ticket("AFTER MIDNIGHT", "One night only", venue: "Las Vegas",
+            KitItem(.ticket, .medium, 0, 2, Kit.ticket("LATE SHOW", "One night only", venue: "Neon Hall",
                                                         seat: "FLOOR · A1", inDays: 20, stripe: 0xE11D2A)),
             KitItem(.vhs, .medium, 2, 2, Kit.tape(3, caption: "3:00 AM")),
             KitItem(.nowPlaying, .medium, 4, 2),
@@ -523,17 +525,17 @@ extension WidgetTheme {
             KitItem(.weather, .small, 5, 3),
         ])
 
-    /// Gothic punk in black and red: vamp letters, cathedrals, a mosh pit.
-    public static let opiumPunk = WidgetTheme(
-        id: "opiumPunk", title: "Vamp Punk", tagline: "Black and blood red: vamp letters, cathedrals and a mosh pit.",
+    /// Gothic punk in black and red: blackletter, cathedrals, a mosh pit.
+    public static let gothicStatic = WidgetTheme(
+        id: "gothicStatic", title: "Gothic Static", tagline: "Black and blood red: blackletter, cathedrals and a mosh pit.",
         material: .dark, card: WidgetColor(hex: 0x050000), ink: WidgetColor(hex: 0xF2F2F2), accent: WidgetColor(hex: 0xFF1A1A),
         wallpaperInk: WidgetColor(hex: 0xFFFFFF), wallpaperAccent: WidgetColor(hex: 0xFF2A2A),
-        font: .standard, cornerRadius: 4, textStyle: .gothic, clockFace: .words, palette: .opium, photoFilter: .noir,
+        font: .standard, cornerRadius: 4, textStyle: .gothic, clockFace: .words, palette: .bloodRed, photoFilter: .noir,
         noteColor: .pink, sticker: .bolt, stickerFinish: .chrome, stickerColor: WidgetColor(hex: 0xFF1A1A), iconSymbol: "bolt.fill",
-        wallpaper: .art(ArtPiece(style: .embers, palette: .opium)),
+        wallpaper: .art(ArtPiece(style: .embers, palette: .bloodRed)),
         photos: library("Gothic", "Smoke", "Concert Lights"),
         kit: [
-            KitItem(.wordArt, .large, 0, 0, Kit.wordArt("vamp", .fire, style: .gothic)),
+            KitItem(.wordArt, .large, 0, 0, Kit.wordArt("static", .fire, style: .gothic)),
             KitItem(.photo, .medium, 2, 0, Kit.photo(0)),
             KitItem(.sticker, .small, 4, 0),
             KitItem(.clock, .small, 5, 0),
@@ -549,9 +551,9 @@ extension WidgetTheme {
             KitItem(.battery, .small, 5, 3),
         ])
 
-    /// Blond summer: cream and orange, sunflowers, a record and a slow drive.
-    public static let blondSummer = WidgetTheme(
-        id: "blondSummer", title: "Blond Summer", tagline: "Cream and orange: sunflowers, a record and a slow summer drive.",
+    /// Sunflower drive: cream and orange, sunflowers, a record and a slow drive.
+    public static let sunflowerDrive = WidgetTheme(
+        id: "sunflowerDrive", title: "Sunflower Drive", tagline: "Cream and orange: sunflowers, a record and a slow summer drive.",
         material: .paper, card: WidgetColor(hex: 0xFFF8EE), ink: WidgetColor(hex: 0x3A2A1A), accent: WidgetColor(hex: 0xF28C28),
         wallpaperInk: WidgetColor(hex: 0x3A2A1A), wallpaperAccent: WidgetColor(hex: 0xE35D1C),
         font: .standard, cornerRadius: 20, textStyle: .editorial, clockFace: .minimal, palette: .blond, photoFilter: .warm,
@@ -560,7 +562,7 @@ extension WidgetTheme {
         photos: library("Sunflowers", "Night Drive", "Palm Sunsets"),
         kit: [
             KitItem(.polaroids, .large, 0, 0, Kit.prints(from: 0)),
-            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("blond summer", .fire, style: .modern)),
+            KitItem(.wordArt, .medium, 2, 0, Kit.wordArt("sunflower drive", .fire, style: .modern)),
             KitItem(.clock, .medium, 4, 0, Kit.bare),
             KitItem(.vinyl, .medium, 2, 1),
             KitItem(.photo, .medium, 4, 1, Kit.photo(1)),

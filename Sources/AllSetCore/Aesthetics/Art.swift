@@ -136,8 +136,8 @@ public enum ArtPalette: String, Codable, CaseIterable, Identifiable, Sendable {
     case royal
     case miami
     case classicRed
-    case rossoneri
-    case blaugrana
+    case emberCharcoal
+    case violetGold
     case bleu
     case hallOfFame
     // Music
@@ -147,7 +147,7 @@ public enum ArtPalette: String, Codable, CaseIterable, Identifiable, Sendable {
     case rage
     case sadBlue
     case crimson
-    case opium
+    case bloodRed
     case blond
 
     public var id: String { rawValue }
@@ -159,6 +159,16 @@ public enum ArtPalette: String, Codable, CaseIterable, Identifiable, Sendable {
         case .sadBlue: "Sad Blue"
         case .classicRed: "Classic Red"
         case .hallOfFame: "Hall of Fame"
+        case .emberCharcoal: "Red & Charcoal"
+        case .violetGold: "Violet & Gold"
+        case .bleu: "Navy & Gold"
+        case .canary: "Sunny Yellow"
+        case .royal: "Ivory & Gold"
+        case .miami: "Palm Pink"
+        case .bloodRed: "Blood Red"
+        case .blond: "Sunflower"
+        case .rage: "Ember Earth"
+        case .slime: "Acid Moss"
         default: rawValue.capitalized
         }
     }
@@ -195,8 +205,8 @@ public enum ArtPalette: String, Codable, CaseIterable, Identifiable, Sendable {
         case .royal: [0x0A0C14, 0x1A1E2E, 0x2C3350, 0xE8C15A, 0xFFFFFF]
         case .miami: [0x0B0B0F, 0x1E0E18, 0xF4A6C6, 0xFF5FA2, 0xFFD1E3]
         case .classicRed: [0x0C0204, 0x2A0508, 0xD0021B, 0xFF4D4D, 0xFFFFFF]
-        case .rossoneri: [0x0A0303, 0x2A0A0A, 0xC8102E, 0xFF6B4A, 0x3A3A3A]
-        case .blaugrana: [0x070A1F, 0x1A0B2E, 0x004D98, 0xA50044, 0xEDBB00]
+        case .emberCharcoal: [0x0A0303, 0x2A0A0A, 0xC8102E, 0xFF6B4A, 0x3A3A3A]
+        case .violetGold: [0x070A1F, 0x1A0B2E, 0x004D98, 0xA50044, 0xEDBB00]
         case .bleu: [0x040A1F, 0x0C1A3F, 0x1C2A5A, 0xE8C15A, 0xFFFFFF]
         case .hallOfFame: [0x050403, 0x14100A, 0xE8C15A, 0xFFF1C1, 0x8A6A1F]
         case .americana: [0x1B2A4A, 0xE7A6A1, 0xB3202A, 0xF3C9A0, 0xFFF1D6]
@@ -205,7 +215,7 @@ public enum ArtPalette: String, Codable, CaseIterable, Identifiable, Sendable {
         case .rage: [0x0E0806, 0x2A1810, 0xC46A2B, 0xE3B26B, 0x8A3B12]
         case .sadBlue: [0x02040C, 0x0A1633, 0x2F6BFF, 0x8FB3FF, 0xFFFFFF]
         case .crimson: [0x080102, 0x220307, 0xE11D2A, 0xFF5A5F, 0xFFD1D1]
-        case .opium: [0x000000, 0x120000, 0x8B0000, 0xFF1A1A, 0xE0E0E0]
+        case .bloodRed: [0x000000, 0x120000, 0x8B0000, 0xFF1A1A, 0xE0E0E0]
         case .blond: [0xF2E6D0, 0xF7C98B, 0xF28C28, 0xE35D1C, 0xFFF3DC]
         }
         return hex.map(WidgetColor.init(hex:))
@@ -233,28 +243,28 @@ public enum ArtPalette: String, Codable, CaseIterable, Identifiable, Sendable {
         case .mocha: "brown coffee sepia vintage latte"
         case .matcha: "green sage clean girl minimal matcha"
         case .cherry: "red cherry black dark y2k gothic goth"
-        case .shadow: "black dark night yellow gotham batman vigilante stealth"
+        case .shadow: "black dark night yellow vigilante stealth"
         case .ember: "orange fire warm dark ember"
         case .emerald: "green gold dark academia forest emerald"
         case .floodlit: "stadium floodlights night football green"
-        case .redGreen: "red green gold football portugal seven"
+        case .redGreen: "red green gold football floodlight"
         case .skyWhite: "sky blue white stripes football ten"
-        case .canary: "yellow green blue samba football flair"
-        case .royal: "white gold navy royal galactic football"
-        case .miami: "pink black miami football"
+        case .canary: "yellow green blue street football flair"
+        case .royal: "white gold navy ivory crown football"
+        case .miami: "pink black palms seaside football"
         case .classicRed: "red white classic football night"
-        case .rossoneri: "red black stripes flares milan football"
-        case .blaugrana: "blue garnet claret gold football young"
-        case .bleu: "navy blue gold france paris football"
+        case .emberCharcoal: "red charcoal flares terrace football"
+        case .violetGold: "blue garnet claret gold football young"
+        case .bleu: "navy blue gold city night football"
         case .hallOfFame: "gold black legends hall of fame football"
-        case .americana: "americana vintage cherry red navy dusty pink hollywood sad"
+        case .americana: "americana vintage cherry red navy dusty pink hollywood"
         case .coastline: "coastal pastel ocean california beach soft blue"
         case .slime: "neon green black slime alt"
-        case .rage: "brown orange rage desert earth cactus"
+        case .rage: "brown orange ember desert earth cactus"
         case .sadBlue: "blue sad night emo rain"
         case .crimson: "red neon crimson night casino"
-        case .opium: "red black punk gothic opium vamp"
-        case .blond: "orange cream summer blond warm"
+        case .bloodRed: "red black punk gothic static blackletter"
+        case .blond: "orange cream summer sunflower warm"
         }
     }
 
@@ -319,5 +329,16 @@ public enum Affirmations {
     /// Changes every hour, the same for everyone looking at that hour.
     public static func line(at date: Date) -> String {
         all[Int(date.timeIntervalSince1970 / 3600) % all.count]
+    }
+}
+
+extension ArtPalette {
+    /// Palettes saved under an id renamed since (`LegacyIdentifiers`) still load.
+    public init(from decoder: Decoder) throws {
+        let raw = try decoder.singleValueContainer().decode(String.self)
+        guard let palette = ArtPalette(rawValue: LegacyIdentifiers.palette(raw)) else {
+            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Unknown palette \(raw)"))
+        }
+        self = palette
     }
 }

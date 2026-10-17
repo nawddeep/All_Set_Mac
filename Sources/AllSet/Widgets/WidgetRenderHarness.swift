@@ -441,7 +441,7 @@ extension WidgetRenderHarness {
             print("RENDERED \(set.id) · \(ThemeWidgetCatalog.widgets(in: set.id).count) widgets")
         }
         for (name, view) in [("page-themes", AnyView(ThemesPage(services: services))),
-                             ("page-detail", AnyView(ThemeDetailPage(setID: sets.first?.id ?? "setup.seven", services: services))),
+                             ("page-detail", AnyView(ThemeDetailPage(setID: sets.first?.id ?? "setup.floodlightGold", services: services))),
                              ("page-widgets", AnyView(CinematicCatalog(services: services, width: 1060, filter: .all, category: nil, query: "", themesOnly: true, favoriteIDs: nil)))] {
             if let image = await capture(view.background(Color(nsColor: .windowBackgroundColor)).preferredColorScheme(.dark), size: CGSize(width: 1100, height: 900)),
                let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) {
@@ -653,7 +653,7 @@ extension WidgetRenderHarness {
 extension WidgetRenderHarness {
     /// Every page of the main window, by the name `-renderPages` files it under.
     static let pages: [(name: String, page: AppPage)] = [
-        ("island", .island), ("activities", .activities), ("favorites", .favorites), ("themes", .themes), ("theme-seven", .themeSet("setup.seven")),
+        ("island", .island), ("activities", .activities), ("favorites", .favorites), ("themes", .themes), ("theme-seven", .themeSet("setup.floodlightGold")),
         ("gallery", .gallery(nil)), ("gallery-themes", .gallery(nil)), ("look", .widgetAppearance), ("desktop", .desktop), ("widget", .desktop), ("wallpaper", .wallpaper),
         ("wallpaper-options", .wallpaperOptions), ("snapping", .snapping), ("workspaces", .workspaces),
         ("clipboard", .clipboard), ("shelf", .shelf), ("mixer", .mixer), ("taptap", .knocks), ("notes", .notes),
@@ -779,14 +779,14 @@ extension WidgetRenderHarness {
 }
 
 extension WidgetRenderHarness {
-    /// `-renderThemeCards folder [-cardThemes americana,seven,leopardNoir]`:
+    /// `-renderThemeCards folder [-cardThemes americana,floodlightGold,leopardNoir]`:
     /// the Themes carousel's card for each theme, selected (top row) and as a
     /// neighbour (bottom row), side by side in `theme-cards.png`. For judging
     /// the card art without paging through the carousel.
     static func renderThemeCards(to folder: URL, services: AppServices) async {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         try? ArtGPU.compileNow()
-        let names = (UserDefaults.standard.string(forKey: "cardThemes") ?? "americana,seven,leopardNoir").split(separator: ",")
+        let names = (UserDefaults.standard.string(forKey: "cardThemes") ?? "americana,floodlightGold,leopardNoir").split(separator: ",")
         let sets = names.compactMap { ThemeLibrary.set("setup.\($0)") }
         let cache = services.themePreviews
         for set in sets {

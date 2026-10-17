@@ -29,10 +29,10 @@ import Testing
         #expect(journal.pendingPreview == nil)
 
         let before = DesktopSnapshot(settings: settings, widgets: widgets, wallpaper: wallpaper)
-        #expect(journal.beginPreview(PendingPreview(setID: "setup.seven", before: before)))
+        #expect(journal.beginPreview(PendingPreview(setID: "setup.floodlightGold", before: before)))
         // Another launch (after a crash) sees it.
         let reopened = DesktopJournal(directory: home)
-        #expect(reopened.pendingPreview?.setID == "setup.seven")
+        #expect(reopened.pendingPreview?.setID == "setup.floodlightGold")
         #expect(reopened.pendingPreview?.before == before)
 
         journal.endPreview()
@@ -48,7 +48,7 @@ import Testing
         settings.widgetCornerRadius = 9
         let journal = DesktopJournal(directory: home)
         let real = DesktopSnapshot(settings: settings, widgets: widgets, wallpaper: wallpaper)
-        #expect(journal.beginPreview(PendingPreview(setID: "setup.seven", before: real)))
+        #expect(journal.beginPreview(PendingPreview(setID: "setup.floodlightGold", before: real)))
 
         // The trial goes on and is saved, then the app dies.
         widgets.replaceAll(with: [WidgetInstance(kind: .weather, size: .medium)])
@@ -110,17 +110,17 @@ import Testing
         widgets.replaceAll(with: [WidgetInstance(kind: .clock, size: .small)])
         let journal = DesktopJournal(directory: home)
         let before = DesktopSnapshot(settings: settings, widgets: widgets, wallpaper: wallpaper)
-        #expect(journal.beginPreview(PendingPreview(setID: "setup.seven", before: before)))
+        #expect(journal.beginPreview(PendingPreview(setID: "setup.floodlightGold", before: before)))
         widgets.replaceAll(with: [WidgetInstance(kind: .weather, size: .medium)])
 
         // Restored on screen, but not saved: the record stays for the next launch.
-        #expect(journal.restorePreview(settings: settings, widgets: widgets, wallpaper: wallpaper) == .notSaved(setID: "setup.seven"))
+        #expect(journal.restorePreview(settings: settings, widgets: widgets, wallpaper: wallpaper) == .notSaved(setID: "setup.floodlightGold"))
         #expect(widgets.widgets.map(\.kind) == [.clock])
         #expect(journal.pendingPreview != nil)
 
         // Saving works again: the retry finishes and retires it.
         try FileManager.default.removeItem(at: layoutURL)
-        #expect(journal.restorePreview(settings: settings, widgets: widgets, wallpaper: wallpaper) == .restored(setID: "setup.seven"))
+        #expect(journal.restorePreview(settings: settings, widgets: widgets, wallpaper: wallpaper) == .restored(setID: "setup.floodlightGold"))
         #expect(journal.pendingPreview == nil)
         #expect(WidgetStore(fileURL: layoutURL).widgets.map(\.kind) == [.clock])
     }
@@ -134,7 +134,7 @@ import Testing
         let journal = DesktopJournal(directory: home)
         let before = DesktopSnapshot(settings: settings, widgets: widgets, wallpaper: wallpaper)
         // A record marked kept whose removal didn't happen (the app died in between).
-        #expect(journal.beginPreview(PendingPreview(setID: "setup.seven", before: before, isKept: true)))
+        #expect(journal.beginPreview(PendingPreview(setID: "setup.floodlightGold", before: before, isKept: true)))
         widgets.replaceAll(with: [WidgetInstance(kind: .weather, size: .medium)])
         #expect(journal.restorePreview(settings: settings, widgets: widgets, wallpaper: wallpaper) == .wasKept)
         #expect(widgets.widgets.map(\.kind) == [.weather])

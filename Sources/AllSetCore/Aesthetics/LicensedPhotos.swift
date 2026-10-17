@@ -8,7 +8,7 @@ extension CuratedBackgrounds {
         BackgroundCollection(title: "Stadium Nights", symbol: "sportscourt.fill", photos: [
             WebPhoto(id: "7481d964-9ca8-4a19-b0aa-f80eb69c516c", author: "Unknown", width: 5760, height: 3840, provider: "openverse",
                      imageURLString: "https://images.rawpixel.com/editor_1024/cHJpdmF0ZS9zdGF0aWMvaW1hZ2Uvd2Vic2l0ZS8yMDIyLTA0L2xyL3Bid2s5Nzkta3oyZHo4bmYuanBn.jpg", thumbnailURLString: "https://api.openverse.org/v1/images/7481d964-9ca8-4a19-b0aa-f80eb69c516c/thumb/",
-                     license: "CC0", title: "Football stadium, Velodrome Marseille, France", origin: "rawpixel"),
+                     license: "CC0", title: "Football stadium at night", origin: "rawpixel"),
             WebPhoto(id: "57a5dfc8-12cb-4ac3-9dee-2efd62bc4a3a", author: "Unknown", width: 4288, height: 2848, provider: "openverse",
                      imageURLString: "https://images.rawpixel.com/editor_1024/czNmcy1wcml2YXRlL3Jhd3BpeGVsX2ltYWdlcy93ZWJzaXRlX2NvbnRlbnQvbHIvdXB3azYyMDczOTAyLXdpa2ltZWRpYS1pbWFnZS1rb3dmOTk0YS5qcGc.jpg", thumbnailURLString: "https://api.openverse.org/v1/images/57a5dfc8-12cb-4ac3-9dee-2efd62bc4a3a/thumb/",
                      license: "CC0", title: "Football field night", origin: "rawpixel"),

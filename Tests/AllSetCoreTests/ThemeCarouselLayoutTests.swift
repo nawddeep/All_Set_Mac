@@ -185,7 +185,7 @@ import Testing
 
     @Test func aLightChosenForTheThemeWins() throws {
         // Seven's look has a gold accent; its light is neon crimson over that gold.
-        let seven = try #require(ThemeLibrary.set("setup.seven"))
+        let seven = try #require(ThemeLibrary.set("setup.floodlightGold"))
         #expect(seven.accent?.primary == WidgetColor(hex: 0xFF2D4A))
         #expect(seven.lighting() == ThemeAccent(primary: WidgetColor(hex: 0xFF2D4A), secondary: WidgetColor(hex: 0xFFB347)))
         #expect(seven.setup?.accent == WidgetColor(hex: 0xE8C15A))
@@ -241,7 +241,7 @@ import Testing
     }
 
     @Test func brightThemesGlowLess() throws {
-        let peach = try #require(ThemeLibrary.set("setup.peachFizz")), seven = try #require(ThemeLibrary.set("setup.seven"))
+        let peach = try #require(ThemeLibrary.set("setup.peachFizz")), seven = try #require(ThemeLibrary.set("setup.floodlightGold"))
         #expect(peach.lighting().glowIntensity < seven.lighting().glowIntensity)
         // Out of range is brought back in.
         #expect(ThemeAccent(primary: .init(hex: 0xFF0000), secondary: .init(hex: 0xFF0000), glowIntensity: 0.1).glowIntensity == 0.6)

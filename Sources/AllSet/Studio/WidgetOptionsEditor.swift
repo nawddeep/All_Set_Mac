@@ -763,7 +763,7 @@ struct WidgetOptionsEditor: View {
         Section("Player") {
             TextField("Name on the back", text: binding(\.options.player.name, instance))
             Stepper("Number: \(instance.options.player.number)", value: binding(\.options.player.number, instance), in: 0...99)
-            TextField("A line below, like PORTUGAL or SINCE 2003", text: binding(\.options.player.tagline, instance))
+            TextField("A line below, like HOME GROWN or SINCE 2003", text: binding(\.options.player.tagline, instance))
         }
         Section("Kit") {
             Menu("Start from Colors…") {

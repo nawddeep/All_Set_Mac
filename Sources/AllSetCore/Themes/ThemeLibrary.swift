@@ -4,7 +4,10 @@ import Foundation
 public enum ThemeLibrary {
     public static let all: [ThemeSet] = setups
 
-    public static func set(_ id: String) -> ThemeSet? { all.first { $0.id == id } }
+    public static func set(_ id: String) -> ThemeSet? {
+        let id = LegacyIdentifiers.theme(id)
+        return all.first { $0.id == id }
+    }
 
     public static func sets(in collection: ThemeCollection) -> [ThemeSet] {
         all.filter { $0.collections.contains(collection) }
@@ -41,28 +44,28 @@ public enum ThemeLibrary {
         case "softMono": ([.artistWorlds, .minimal, .designer], "light gray minimal handwriting mono")
         case "bohoSand": ([.artistWorlds, .minimal, .zen], "boho beige sand cream flowers")
         case "beginning": ([.artistWorlds, .designer, .developer], "ink fluid orange dashboard")
-        case "seven": ([.featured, .football], "football soccer ronaldo cristiano cr7 portugal seven 7 red green gold stadium goat")
-        case "redSeven": ([.featured, .football], "football soccer ronaldo cristiano manchester united red devils seven 7 young")
-        case "wonderkid": ([.football, .pop], "football soccer lamine yamal barcelona barca 19 young wonderkid")
-        case "bleuRoyal": ([.football, .night], "football soccer mbappe kylian france paris bleus ten 10 speed")
-        case "milanoNights": ([.football, .retro], "football soccer kaka maldini ac milan rossoneri red black stripes")
-        case "legends": ([.football, .luxury], "football soccer legends greatest all time pele maradona zidane hall of fame")
-        case "galactico": ([.football, .luxury], "football soccer ronaldo cristiano madrid white gold royal champions")
-        case "albiceleste": ([.featured, .football], "football soccer messi argentina ten 10 sky blue stripes goat")
-        case "oRei": ([.football, .retro], "football soccer pele brazil 1970 king retro yellow green")
-        case "sambaNeon": ([.football, .neon], "football soccer neymar brazil samba flair skill neon yellow")
-        case "miamiPink": ([.football, .night], "football soccer messi miami pink black palms")
+        case "floodlightGold": ([.featured, .football], "football soccer floodlight captain red green gold stadium")
+        case "rainDerby": ([.featured, .football], "football soccer winger rain derby red young step-overs")
+        case "wonderkid": ([.football, .pop], "football soccer young wonderkid prodigy violet gold bokeh")
+        case "midnightSprint": ([.football, .night], "football soccer sprint speed navy gold city night")
+        case "emberTerrace": ([.football, .retro], "football soccer terrace ember flares red charcoal elegance")
+        case "legends": ([.football, .luxury], "football soccer legends greatest all time hall of fame")
+        case "ivoryCrown": ([.football, .luxury], "football soccer ivory crown white gold trophies cup night")
+        case "skyPlaymaker": ([.featured, .football], "football soccer playmaker sky white magic assists")
+        case "goldenAge": ([.football, .retro], "football soccer golden age retro yellow film old school")
+        case "neonFlair": ([.football, .neon], "football soccer street flair skill neon yellow")
+        case "palmNightPink": ([.football, .night], "football soccer pink black palms seaside")
         case "matchday": ([.football, .night], "football soccer match stadium floodlights tactics ticket derby")
-        case "americana": ([.featured, .musicIcons, .cinematic], "lana del rey americana hollywood vintage cherry palms vhs sad girl summer")
-        case "coastline": ([.musicIcons, .dreamy], "lana del rey coastal california ocean pastel polaroid cassette")
-        case "violetNoir": ([.musicIcons, .night, .luxury], "lana del rey noir black white roses jazz ultraviolence velvet")
-        case "rageMode": ([.musicIcons, .hipHop], "travis scott rage mosh smoke fire brown orange concert")
-        case "sadHours": ([.musicIcons, .night], "xxxtentacion sad blue rain emo night 3am")
-        case "slimeGreen": ([.featured, .musicIcons, .night], "billie eilish slime green black alt neon")
-        case "deepBlue": ([.musicIcons, .ambient], "billie eilish ocean deep blue underwater soft")
-        case "crimsonNights": ([.musicIcons, .rnb, .neon], "the weeknd after hours red neon vegas night drive")
-        case "opiumPunk": ([.musicIcons, .rock, .hipHop], "playboi carti vamp punk gothic red black opium")
-        case "blondSummer": ([.musicIcons, .indie], "frank ocean blond summer orange cream sunflowers")
+        case "americana": ([.featured, .musicIcons, .cinematic], "americana hollywood vintage cherry palms vhs summer")
+        case "coastline": ([.musicIcons, .dreamy], "coastal california ocean pastel polaroid cassette")
+        case "violetNoir": ([.musicIcons, .night, .luxury], "noir black white roses jazz velvet torch song")
+        case "emberCrowd": ([.musicIcons, .hipHop], "mosh smoke fire ember crowd brown orange concert loud")
+        case "rainHours": ([.musicIcons, .night], "sad blue rain emo night 3am")
+        case "acidMoss": ([.featured, .musicIcons, .night], "acid moss green black alt neon weird")
+        case "deepBlue": ([.musicIcons, .ambient], "ocean deep blue underwater soft")
+        case "crimsonNights": ([.musicIcons, .rnb, .neon], "red neon city night drive late show")
+        case "gothicStatic": ([.musicIcons, .rock, .hipHop], "gothic static punk blackletter red black")
+        case "sunflowerDrive": ([.musicIcons, .indie], "sunflower drive summer orange cream sunflowers")
         case "matchaMorning": ([.colourAndLight, .dreamy, .zen], "matcha green sage oat light morning calm cozy handwriting")
         case "peachFizz": ([.colourAndLight, .pop], "peach coral orange light summer sunshine happy bright")
         case "lavenderHaze": ([.colourAndLight, .dreamy, .ambient], "lavender lilac purple pastel light clouds soft dreamy")
@@ -100,7 +103,7 @@ public enum ThemeLibrary {
 
 extension ThemeLibrary {
     /// The worlds that lead the library.
-    static let spotlight: [String: Double] = ["seven": 97, "redSeven": 96.5, "americana": 96, "albiceleste": 93, "slimeGreen": 92]
+    static let spotlight: [String: Double] = ["floodlightGold": 97, "rainDerby": 96.5, "americana": 96, "skyPlaymaker": 93, "acidMoss": 92]
 
     /// The light each leading theme casts in the Themes hero: a neon color
     /// for its edge and glow, and a second for haze. Where a theme isn't
@@ -108,13 +111,13 @@ extension ThemeLibrary {
     static let accents: [String: ThemeAccent] = [
         "midnightAurora": ThemeAccent(0x41BFFF, 0xA374FF, glow: 0.9),
         // Neon crimson under warm gold floodlights.
-        "seven": ThemeAccent(0xFF2D4A, 0xFFB347),
-        "redSeven": ThemeAccent(0xFF3B30, 0xFFD166),
+        "floodlightGold": ThemeAccent(0xFF2D4A, 0xFFB347),
+        "rainDerby": ThemeAccent(0xFF3B30, 0xFFD166),
         // Magenta dusk over a sunset orange.
         "americana": ThemeAccent(0xFF5E8A, 0xFF9A3C, glow: 0.85),
         // Electric sky and white.
-        "albiceleste": ThemeAccent(0x4CC3FF, 0xFFFFFF, glow: 0.9),
-        "slimeGreen": ThemeAccent(0x7CFF3A, 0x1FD98A, glow: 0.8),
+        "skyPlaymaker": ThemeAccent(0x4CC3FF, 0xFFFFFF, glow: 0.9),
+        "acidMoss": ThemeAccent(0x7CFF3A, 0x1FD98A, glow: 0.8),
         // Bright themes glow less: their own pictures carry the light.
         "peachFizz": ThemeAccent(0xFF9E7A, 0xFFD0B0, glow: 0.65),
         "matchaMorning": ThemeAccent(0xA8C686, 0xE8E2C8, glow: 0.6),
@@ -128,29 +131,29 @@ extension ThemeLibrary {
         "afterDark": ThemeAccent(0xE3CF9A, 0x8A7A5A, glow: 0.8),
     ]
 
-    /// What each football and music world draws on, described without names.
+    /// What each football and music world draws on: moods, never people, clubs or nations.
     static let inspirations: [String: String] = [
-        "seven": "Inspired by Portugal's legendary number seven",
-        "redSeven": "Inspired by the young number seven's red-shirt years",
-        "wonderkid": "Inspired by a teenage prodigy in claret and blue",
-        "bleuRoyal": "Inspired by France's lightning-fast number ten",
-        "milanoNights": "Inspired by the red-and-black Milan nights of the 2000s",
+        "floodlightGold": "Inspired by floodlit cup nights",
+        "rainDerby": "Inspired by a winger's rainy derby",
+        "wonderkid": "Inspired by a teenage prodigy's first season",
+        "midnightSprint": "Inspired by a counter-attack at midnight",
+        "emberTerrace": "Inspired by flares on an old terrace",
         "legends": "Inspired by the all-time greats of the game",
-        "galactico": "Inspired by the white-and-gold galáctico era",
-        "albiceleste": "Inspired by Argentina's number ten",
-        "oRei": "Inspired by Brazil's king of 1970",
-        "sambaNeon": "Inspired by Brazilian flair and street football",
-        "miamiPink": "Inspired by pink-and-black nights in Miami",
+        "ivoryCrown": "Inspired by grand cup nights in ivory and gold",
+        "skyPlaymaker": "Inspired by a playmaker's touch",
+        "goldenAge": "Inspired by old-school football on film",
+        "neonFlair": "Inspired by street football and flair",
+        "palmNightPink": "Inspired by pink-and-black nights by the sea",
         "matchday": "Inspired by floodlit Saturdays everywhere",
-        "americana": "Inspired by cinematic Americana and sad-girl pop",
-        "coastline": "Inspired by California-coast songwriting",
+        "americana": "Inspired by cinematic Americana",
+        "coastline": "Inspired by coastal road trips",
         "violetNoir": "Inspired by noir torch songs and old Hollywood",
-        "rageMode": "Inspired by rage-era hip-hop shows",
-        "sadHours": "Inspired by emo rap and late-night blues",
-        "slimeGreen": "Inspired by whispery alt-pop in black and green",
-        "deepBlue": "Inspired by oceanic, soft-then-loud alt-pop",
-        "crimsonNights": "Inspired by red-neon synth R&B",
-        "opiumPunk": "Inspired by gothic punk-rap",
-        "blondSummer": "Inspired by sun-bleached, orange-hued R&B",
+        "emberCrowd": "Inspired by loud live shows",
+        "rainHours": "Inspired by late-night blues",
+        "acidMoss": "Inspired by quiet, glowing alt-pop",
+        "deepBlue": "Inspired by the ocean at night",
+        "crimsonNights": "Inspired by red-neon synth nights",
+        "gothicStatic": "Inspired by gothic punk",
+        "sunflowerDrive": "Inspired by sun-bleached summer drives",
     ]
 }

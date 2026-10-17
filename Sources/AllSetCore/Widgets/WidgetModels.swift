@@ -299,7 +299,7 @@ public enum WidgetKind: String, Codable, CaseIterable, Identifiable, Sendable {
         case .enso: "zen enso circle japanese minimal day"
         case .magazine: "magazine cover editorial vogue date headline"
         case .jersey: "football soccer shirt kit jersey number name club team"
-        case .playerCard: "football soccer player card rating stats ultimate team goat legend"
+        case .playerCard: "football soccer player card rating stats legend"
         case .pitch: "football soccer pitch field tactics formation ball live"
         case .scoreboard: "football soccer match score kickoff countdown stadium game"
         case .milestone: "goals record stat number achievement trophy count"

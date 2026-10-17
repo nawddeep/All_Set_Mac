@@ -89,8 +89,8 @@ Applying a theme replaces every widget on the desktop and matches the wallpaper.
 Leopard Noir · City Noir · Angelic · Hypnotic · After Dark · Streetwear · Gallery · Silver Faith · Peace of Mind · Cherry Night · Stardust · Soft Mono · Boho Sand · The Beginning
 
 ### Fandom-inspired themes (22) — football & music worlds
-**Football:** Seven · Galáctico · Red Seven · Wonderkid · Bleu Royal · Milano Nights · Hall of Fame · Albiceleste · O Rei · Samba Neon · Miami Pink · Matchday
-**Music:** Americana · Coastline · Velvet Noir · Rage Mode · Sad Hours · Slime Green · Deep Blue · Crimson Nights · Vamp Punk · Blond Summer
+**Football:** Floodlight Gold · Ivory Crown · Rain Derby · Wonderkid · Midnight Sprint · Ember Terrace · Hall of Fame · Sky Playmaker · Golden Age · Neon Flair · Palm Night Pink · Matchday
+**Music:** Americana · Coastline · Velvet Noir · Ember Crowd · Rain Hours · Acid Moss · Deep Blue · Crimson Nights · Gothic Static · Sunflower Drive
 
 (Player photos are user-supplied only — "Use My Photos…" lets a user drop their own pictures into every photo slot; the app never bundles or scrapes real people's photos.)
 
