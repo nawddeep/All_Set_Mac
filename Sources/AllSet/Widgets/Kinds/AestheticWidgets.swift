@@ -222,6 +222,7 @@ struct PhotoContent: View {
     let library: ImageLibrary
     /// The most pixels it will be shown at, when that's small: it then loads
     /// a small copy instead of holding the whole photo in memory.
+    @Environment(\.widgetSnapshot) private var snapshot
     var maxPixels: Int?
 
     @State private var image: NSImage?
@@ -256,7 +257,8 @@ struct PhotoContent: View {
                 } else {
                     Rectangle()
                         .fill(.primary.opacity(0.06))
-                        .overlay(ProgressView().controlSize(.small))
+                        // A picture of a widget can't draw a spinner (it's an AppKit view).
+                        .overlay { if !snapshot { ProgressView().controlSize(.small) } }
                 }
             }
         }

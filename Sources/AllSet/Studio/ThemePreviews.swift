@@ -271,7 +271,9 @@ final class ThemePreviewCache {
     @ObservationIgnored private let log = Logger(subsystem: "com.pratik.allset", category: "themes")
 
     /// Bump when the way previews are drawn changes, to redraw them all.
-    private static let drawingVersion = 7
+    /// Up from 7: previews drawn while a wallpaper was out of memory saved a
+    /// spinner's "can't draw" mark in its place.
+    private static let drawingVersion = 8
 
     /// The app's version: a release redraws previews; rebuilding the same one doesn't.
     private static let appVersion: String = {
@@ -524,11 +526,23 @@ final class ThemePreviewCache {
         return widgets
     }
 
+    private func loadPictures(_ set: ThemeSet, widgets: [WidgetInstance], services: AppServices) async {
+        for widget in widgets {
+            for image in widget.options.images { _ = await services.images.image(for: image, maxPixels: 768) }
+        }
+        if case .photo(let source) = set.wallpaper { _ = await services.images.image(for: source, maxPixels: 1200) }
+    }
+
     private func render(_ set: ThemeSet, dark: Bool, variant: ThemePreviewVariant, widgets: [WidgetInstance],
                         services: AppServices, name: String, generation asked: Int) async -> CGImage? {
         // Preparation can finish after the person changes pages. Never mount
         // a discarded preview, or draw one while the current page is scrolling.
         guard await waitUntilQuiet(name: name, generation: asked) else { return nil }
+        // Other cards' fetches may have pushed these pictures out of memory
+        // while this one waited; a picture missing now draws as a spinner,
+        // which ImageRenderer can't draw. From memory this is instant, and
+        // nothing runs between it and the drawing below.
+        await loadPictures(set, widgets: widgets, services: services)
         let view: AnyView = switch variant {
         case .desktop:
             AnyView(ThemeComposition(set: set, widgets: widgets, services: services, dark: dark).frame(width: 568, height: 384))
