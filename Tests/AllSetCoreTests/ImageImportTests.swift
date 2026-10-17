@@ -73,7 +73,7 @@ import UniformTypeIdentifiers
         let images = library(root)
 
         let task = Task { await images.importImages(from: [source]) }
-        for _ in 0..<500 where (images.importProgress?.done ?? 0) == 0 { try await Task.sleep(for: .milliseconds(5)) }
+        try await waitWhile { (images.importProgress?.done ?? 0) == 0 }
         images.cancelImports()
         let names = await task.value
 

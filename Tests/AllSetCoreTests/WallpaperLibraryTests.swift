@@ -90,7 +90,7 @@ import Testing
                                  playback: "stills/missing.jpg")])
         try JSONEncoder().encode(catalog).write(to: store.libraryDirectory.appendingPathComponent("catalog.json"))
         store.reloadLibrary()
-        for _ in 0..<100 where store.library.isEmpty { try await Task.sleep(for: .milliseconds(20)) }
+        try await waitWhile { store.library.isEmpty }
         // Unsupported entries never reach the gallery.
         #expect(store.library.map(\.id) == ["a", "b", "c", "e", "f"])
         // A still resolves to its picture, never to the scene package it came from.
@@ -141,7 +141,7 @@ import Testing
         let catalogURL = store.libraryDirectory.appendingPathComponent("catalog.json")
         try JSONSerialization.data(withJSONObject: catalog).write(to: catalogURL)
         store.reloadLibrary()
-        for _ in 0..<100 where store.library.isEmpty { try await Task.sleep(for: .milliseconds(20)) }
+        try await waitWhile { store.library.isEmpty }
         #expect(store.library.map(\.id).sorted() == ["a", "b"])
 
         store.deleteLibraryVideo("a")
@@ -185,7 +185,7 @@ import Testing
         // anything, so nothing has yielded back to the run loop for it to
         // start on. This is exactly the window WallpaperView can render in.
         #expect(!store.hasLoadedLibrary)
-        for _ in 0..<200 where !store.hasLoadedLibrary { try await Task.sleep(for: .milliseconds(10)) }
+        try await waitWhile { !store.hasLoadedLibrary }
         #expect(store.hasLoadedLibrary)
     }
 
@@ -212,7 +212,7 @@ import Testing
                                  playback: "live/b.mp4")])
         try JSONEncoder().encode(catalog).write(to: store.libraryDirectory.appendingPathComponent("catalog.json"))
         store.reloadLibrary()
-        for _ in 0..<100 where store.library.isEmpty { try await Task.sleep(for: .milliseconds(20)) }
+        try await waitWhile { store.library.isEmpty }
 
         // The pendrive is wiped and unplugged.
         try FileManager.default.removeItem(at: drive)
@@ -306,7 +306,7 @@ private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         try FileManager.default.createDirectory(at: store.libraryDirectory, withIntermediateDirectories: true)
         try JSONSerialization.data(withJSONObject: catalog).write(to: store.libraryDirectory.appendingPathComponent("catalog.json"))
         store.reloadLibrary()
-        for _ in 0..<100 where store.library.isEmpty { try await Task.sleep(for: .milliseconds(20)) }
+        try await waitWhile { store.library.isEmpty }
         store.config.libraryServerURL = "http://stub.invalid"
         StubURLProtocol.reset()
         let configuration = URLSessionConfiguration.ephemeral
@@ -414,7 +414,7 @@ private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         try JSONSerialization.data(withJSONObject: ["version": 1, "roots": [], "items": items] as [String: Any])
             .write(to: store.libraryDirectory.appendingPathComponent("catalog.json"))
         store.reloadLibrary()
-        for _ in 0..<100 where !store.hasLoadedLibrary { try await Task.sleep(for: .milliseconds(20)) }
+        try await waitWhile { !store.hasLoadedLibrary }
         store.config.libraryServerURL = "http://stub.invalid"
         StubURLProtocol.reset()
         let configuration = URLSessionConfiguration.ephemeral
@@ -547,10 +547,11 @@ private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         StubURLProtocol.delay = 0.5
         StubURLProtocol.handler = { _ in (200, Data("too late".utf8)) }
         let task = Task { try await store.fetchLibraryVideo(id) }
-        try await Task.sleep(for: .milliseconds(50))
+        try await waitWhile { !store.isFetching(id) }
         #expect(store.isFetching(id))
         task.cancel()
         await #expect(throws: (any Error).self) { try await task.value }
+        // Long enough for the stub's 0.5 s response to have landed, had it not been stopped: a check that nothing appears.
         try await Task.sleep(for: .milliseconds(600))
         #expect(!FileManager.default.fileExists(atPath: store.libraryDirectory.appendingPathComponent("live/f1.mp4").path))
         #expect(!store.isFetching(id))
@@ -564,10 +565,11 @@ private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         StubURLProtocol.delay = 0.5
         StubURLProtocol.handler = { _ in (200, Data("too late".utf8)) }
         let retrying = Task { await store.fetchLibraryVideoRetrying(id, delays: [.milliseconds(10)]) }
-        try await Task.sleep(for: .milliseconds(50))
+        try await waitWhile { !store.isFetching(id) }
         #expect(store.isFetching(id))
         store.cancelFetch(id)
         #expect(await retrying.value == nil)
+        // Long enough for the stub's 0.5 s response to have landed, had it not been stopped: a check that nothing appears.
         try await Task.sleep(for: .milliseconds(600))
         #expect(!FileManager.default.fileExists(atPath: store.libraryDirectory.appendingPathComponent("live/f1.mp4").path))
         #expect(!store.isFetching(id))
@@ -637,7 +639,7 @@ private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
         StubURLProtocol.delay = 0.3
         StubURLProtocol.handler = { _ in (200, Data(repeating: 0, count: 200_000)) }
         let task = Task { try await store.fetchLibraryVideo(id) }
-        try await Task.sleep(for: .milliseconds(50))
+        try await waitWhile { !store.isFetching(id) }
         #expect(store.isFetching(id))
         #expect(store.fetchProgress(for: id) != nil)
         _ = try await task.value

@@ -65,7 +65,8 @@ jobs:
           fi
 
       - name: Test
-        run: swift test
+        # Suites tagged .hardware read this Mac's own sensors; the VM has none. SwiftPM's CLI has no tag filter, so they are skipped by name.
+        run: swift test --skip "LiveSystemTests|MediaHelperTests"
 
   smoke:
     # The app walked through end to end (-smokeTest): onboarding, every page, a

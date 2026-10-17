@@ -82,7 +82,7 @@ import Testing
         ]]
         try JSONSerialization.data(withJSONObject: catalog).write(to: library.appendingPathComponent("catalog.json"))
         store.reloadLibrary()
-        for _ in 0..<100 where !store.hasLoadedLibrary { try await Task.sleep(for: .milliseconds(20)) }
+        try await waitWhile { !store.hasLoadedLibrary }
 
         #expect(store.libraryVideo("evil") == nil)
         #expect(store.libraryVideo("good") != nil)

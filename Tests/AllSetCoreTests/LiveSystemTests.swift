@@ -4,7 +4,7 @@ import Testing
 
 /// These run against the real machine, so they check shape and sanity rather
 /// than exact values.
-@Suite @MainActor struct LiveSystemTests {
+@Suite(.tags(.hardware)) @MainActor struct LiveSystemTests {
     @Test func samplesThisMac() async throws {
         let monitor = SystemMonitor()
         monitor.setViewer("test", visible: true)
@@ -43,7 +43,7 @@ import Testing
 }
 
 /// Runs the real media helper through /usr/bin/perl, exactly as the app does.
-@Suite struct MediaHelperTests {
+@Suite(.tags(.hardware)) struct MediaHelperTests {
     /// `swift build` puts the helper next to the other build products.
     static let helperURL: URL? = {
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()

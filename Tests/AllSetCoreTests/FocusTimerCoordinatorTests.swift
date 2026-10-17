@@ -40,7 +40,7 @@ import Testing
         var chimed = false
         let timers = FocusTimerCoordinator(widgets: store) { _ in chimed = true }
         timers.reschedule()
-        for _ in 0..<50 where store.widgets[0].options.focus == before { try await Task.sleep(for: .milliseconds(20)) }
+        try await waitWhile { store.widgets[0].options.focus == before }
         #expect(store.widgets[0].options.focus != before)
         #expect(chimed)
         timers.stop()

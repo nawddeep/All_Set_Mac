@@ -90,10 +90,10 @@ import Testing
         let probe = Probe(.hang)
         let weather = WeatherService(cacheURL: nil, forecast: { _ in try await probe.call(Self.report) }, airQuality: Self.noAir)
         let widget = Task { await weather.refresh(pune) }
-        for _ in 0..<50 where probe.calls == 0 { try await Task.sleep(for: .milliseconds(10)) }
+        try await waitWhile { probe.calls == 0 }
         widget.cancel()
         await widget.value
-        for _ in 0..<50 where !probe.sawCancel { try await Task.sleep(for: .milliseconds(10)) }
+        try await waitWhile { !probe.sawCancel }
         #expect(probe.sawCancel)
         #expect(weather.forecastFailures[pune] == nil)
         // Not held against the next widget either.
@@ -113,7 +113,7 @@ import Testing
         }
         let first = Task { await requests.run("k", work) }
         let second = Task { await requests.run("k", work) }
-        for _ in 0..<50 where started.calls == 0 { try await Task.sleep(for: .milliseconds(10)) }
+        try await waitWhile { started.calls == 0 }
         first.cancel()
         await second.value
         #expect(started.calls == 1)   // one request for both
@@ -122,12 +122,12 @@ import Testing
         finished = false
         let third = Task { await requests.run("k", work) }
         let fourth = Task { await requests.run("k", work) }
-        for _ in 0..<50 where started.calls == 1 { try await Task.sleep(for: .milliseconds(10)) }
+        try await waitWhile { started.calls == 1 }
         third.cancel()
         fourth.cancel()
         await third.value
         await fourth.value
-        for _ in 0..<50 where !cancelled { try await Task.sleep(for: .milliseconds(10)) }
+        try await waitWhile { !cancelled }
         #expect(cancelled && !finished)
         #expect(!requests.isRunning("k"))
     }
