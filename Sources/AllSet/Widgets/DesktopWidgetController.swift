@@ -70,6 +70,7 @@ final class DesktopWidgetController {
         observe({ [services] in services.settings.screenFits }) { [weak self] _ in self?.sync() }
         observe({ [services] in services.ui.isArrangingWidgets }) { [weak self] arranging in
             self?.setArranging(arranging)
+            self?.updatePointerWatch()
         }
         observe({ [services] in services.ui.themePreview?.setID }) { [weak self] setID in
             self?.showPreviewBar(for: setID)
@@ -86,8 +87,13 @@ final class DesktopWidgetController {
         }
     }
 
+    /// The corner resize handle shows only in Arrange mode, so the pointer is
+    /// polled (20 times a second: macOS sends no mouse-moved events to an app
+    /// that isn't in front) only then. Outside it: no poll, no wakeups.
+    /// Width and height can still be changed any time in Edit Widget.
     private func updatePointerWatch() {
-        let needed = services.settings.showWidgets && windows.values.contains { !$0.state.isOccluded }
+        let needed = services.ui.isArrangingWidgets && services.settings.showWidgets
+            && windows.values.contains { !$0.state.isOccluded }
         guard pointerWatch.setNeeded(needed), !needed else { return }
         // Stopped: nothing can stay hovered.
         lastPointer = nil

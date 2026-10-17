@@ -201,7 +201,16 @@ private struct BuiltInTile: View {
     var body: some View {
         Button(action: onUse) {
             VStack(alignment: .leading, spacing: DS.Space.xs) {
-                ArtView(piece: wallpaper.piece, animated: isHovering, frameRate: 24)
+                // A picture drawn once and kept: scrolling past a tile costs a
+                // bitmap, not a Canvas redraw. The live art runs only under the pointer.
+                Group {
+                    if isHovering {
+                        ArtView(piece: wallpaper.piece, animated: true, frameRate: 24)
+                    } else {
+                        Image(nsImage: BuiltInStills.image(for: wallpaper.piece))
+                            .resizable()
+                    }
+                }
                     .frame(width: 220, height: 138)
                     .clipShape(RoundedRectangle(cornerRadius: DS.Radius.media, style: .continuous))
                     .overlay {
@@ -219,6 +228,21 @@ private struct BuiltInTile: View {
         .accessibilityLabel(wallpaper.name)
         .accessibilityValue(isCurrent ? "Current wallpaper" : "")
         .accessibilityHint("Sets it as your wallpaper")
+    }
+}
+
+/// Still pictures of the built-in wallpapers, drawn once per launch at tile size.
+@MainActor
+private enum BuiltInStills {
+    private static var images: [String: NSImage] = [:]
+
+    static func image(for piece: ArtPiece) -> NSImage {
+        if let image = images[piece.id] { return image }
+        let renderer = ImageRenderer(content: ArtView(piece: piece).frame(width: 220, height: 138))
+        renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
+        let image = renderer.nsImage ?? NSImage(size: CGSize(width: 220, height: 138))
+        images[piece.id] = image
+        return image
     }
 }
 
