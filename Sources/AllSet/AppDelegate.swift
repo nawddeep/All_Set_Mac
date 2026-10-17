@@ -74,6 +74,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             return
         }
+        if let folder = UserDefaults.standard.string(forKey: "renderOnboarding") {
+            NSApp.setActivationPolicy(.accessory)
+            Task {
+                await WidgetRenderHarness.renderOnboarding(to: URL(fileURLWithPath: folder), services: services)
+                exit(0)
+            }
+            return
+        }
         if let folder = UserDefaults.standard.string(forKey: "renderPhotos") {
             NSApp.setActivationPolicy(.accessory)
             Task {
@@ -269,6 +277,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         // If a restore was waiting, say how it went, once everything is up.
         AppData.presentLaunchRestoreOutcome()
+        // A new install is welcomed once; an older one never sees it.
+        if !skipped.contains("window") { OnboardingController.shared.showIfNeeded(services: services) }
     }
 
     /// A Dock icon and app menu, or menu-bar-only.

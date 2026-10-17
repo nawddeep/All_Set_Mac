@@ -313,7 +313,7 @@ struct MainView: View {
     private func detail(_ page: AppPage) -> some View {
         // A link or a search can still land on an extra that's off: it says so, with its switch.
         if let extra = page.extra, !services.extras.isOn(extra) {
-            ExtraOffPage(extra: extra, extras: services.extras)
+            ExtraOffPage(extra: extra, services: services)
         } else {
             pageView(page)
         }
@@ -366,13 +366,14 @@ struct MainView: View {
         case .screenshot:
             ScreenshotPage(services: services)
         case .extras:
-            ExtrasPage(extras: services.extras)
+            ExtrasPage(services: services)
         case .monitor:
             MonitorPage(services: services)
         case .general:
             FormPage(eyebrow: "System", title: "General", subtitle: "Startup, the Dock, the menu bar, and your data.") {
                 GeneralSettings(settings: services.settings)
                 DataPrivacySettings(services: services)
+                PermissionSettings(services: services)
                 SystemRestoreSettings(services: services)
             }
         case .about:

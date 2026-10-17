@@ -836,3 +836,21 @@ private func captureOwnWindow(_ window: NSWindow) -> CGImage? {
                    CGWindowImageOption.boundsIgnoreFraming.rawValue)?.takeRetainedValue()
 }
 #endif
+
+extension WidgetRenderHarness {
+    /// `-renderOnboarding folder`: each step of the first-run welcome, as a PNG.
+    /// Changes nothing: the extras step's switches are only drawn.
+    static func renderOnboarding(to folder: URL, services: AppServices) async {
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for step in OnboardingView.Step.allCases {
+            OnboardingController.shared.show(services: services, step: step)
+            try? await Task.sleep(for: .milliseconds(900))
+            guard let window = OnboardingController.shared.currentWindow, let image = captureOwnWindow(window) else { continue }
+            let file = folder.appendingPathComponent("onboarding-\(step.rawValue)-\(step).png")
+            try? NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])?.write(to: file)
+            window.delegate = nil
+            window.close()
+            OnboardingController.shared.forget()
+        }
+    }
+}
