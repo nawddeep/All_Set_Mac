@@ -5,6 +5,67 @@ extension FunkyThemes {
     /// Each design's live widgets, in pixels of its picture: each fills the
     /// card drawn for it, with the ink that reads on that card.
     static let layouts: [String: [Placement]] = [
+        "chromeHeartPop": [
+            Placement(.clock, .medium, x: 88, y: 96, scale: 1.051, stretch: 1.080, ink: 0x1B1416),
+            Placement(.calendar, .large, x: 506, y: 86, scale: 0.741, stretch: 0.920, ink: 0x3B2F36),
+            Placement(.nowPlaying, .medium, x: 838, y: 123, scale: 1.006, stretch: 1.080, ink: 0x2D2429),
+            Placement(.todo, .large, x: 1259, y: 144, scale: 0.794, stretch: 0.920, ink: 0x2B2327),
+        ],
+        "angelWingChrome": [
+            Placement(.clock, .medium, x: 36, y: 90, scale: 0.926, stretch: 1.080, ink: 0xF2EDE8),
+            Placement(.calendar, .large, x: 414, y: 66, scale: 0.723, stretch: 0.920, ink: 0x2B2428),
+            Placement(.nowPlaying, .medium, x: 287, y: 334, scale: 1.113, stretch: 0.920, ink: 0xEFE9E4),
+            Placement(.todo, .large, x: 733, y: 432, scale: 0.723, stretch: 0.920, ink: 0x3A2C30),
+        ],
+        "glitterDiscoPink": [
+            Placement(.clock, .medium, x: 109, y: 116, scale: 1.082, stretch: 1.080, ink: 0x111111, face: .flip),
+            Placement(.nowPlaying, .medium, x: 104, y: 354, scale: 1.114, stretch: 1.026, ink: 0x2A2024),
+            Placement(.calendar, .large, x: 972, y: 94, scale: 0.753, stretch: 0.920, ink: 0x3A2D30),
+            Placement(.todo, .large, x: 986, y: 354, scale: 0.766, stretch: 0.920, ink: 0x2E2428),
+            Placement(.weather, .small, x: 534, y: 618, scale: 1.238, stretch: 1.067, ink: 0xFFFFFF),
+        ],
+        "neonHeartNoir": [
+            Placement(.clock, .medium, x: 54, y: 102, scale: 1.165, stretch: 0.951, ink: 0xF7A8CF, face: .flip),
+            Placement(.calendar, .large, x: 963, y: 60, scale: 0.723, stretch: 0.920, ink: 0xF2EAF0),
+            Placement(.nowPlaying, .medium, x: 298, y: 324, scale: 1.229, stretch: 0.920, ink: 0xF6EEF3),
+            Placement(.todo, .large, x: 1286, y: 82, scale: 0.625, stretch: 1.018, ink: 0x2A1F24),
+        ],
+        "electricDreamBlue": [
+            Placement(.clock, .medium, x: 571, y: 128, scale: 1.074, stretch: 0.920, ink: 0xC9CDD6, face: .flip),
+            Placement(.nowPlaying, .medium, x: 602, y: 320, scale: 0.932, stretch: 0.920, ink: 0xF0F0F5),
+            Placement(.calendar, .large, x: 1094, y: 108, scale: 0.852, stretch: 0.920, ink: 0xF2F2F6),
+            Placement(.todo, .large, x: 290, y: 492, scale: 0.871, stretch: 0.920, ink: 0xF4F4F8),
+        ],
+        "bubblegumChrome": [
+            Placement(.clock, .medium, x: 103, y: 94, scale: 1.080, stretch: 0.920, ink: 0xFFFFFF, face: .flip),
+            Placement(.calendar, .large, x: 62, y: 310, scale: 0.682, stretch: 0.920, ink: 0x3A2A30),
+            Placement(.todo, .large, x: 348, y: 374, scale: 0.710, stretch: 0.976, ink: 0x3A2830),
+            Placement(.nowPlaying, .medium, x: 40, y: 646, scale: 1.142, stretch: 1.080, ink: 0x2A2026),
+        ],
+        "silverKissesNoir": [
+            Placement(.clock, .medium, x: 112, y: 166, scale: 0.972, stretch: 1.080, ink: 0xF2E4E8),
+            Placement(.calendar, .large, x: 496, y: 116, scale: 0.852, stretch: 0.920, ink: 0x3A2C30),
+            Placement(.nowPlaying, .medium, x: 288, y: 424, scale: 1.339, stretch: 0.920, ink: 0xF0E4E8),
+            Placement(.todo, .medium, x: 842, y: 533, scale: 0.830, stretch: 1.080, ink: 0x3A2C30),
+        ],
+        "holoGlowDreams": [
+            Placement(.clock, .medium, x: 60, y: 72, scale: 1.290, stretch: 1.043, ink: 0xFADCF0),
+            Placement(.nowPlaying, .medium, x: 64, y: 334, scale: 1.255, stretch: 0.920, ink: 0x2A1F2A),
+            Placement(.todo, .large, x: 94, y: 566, scale: 0.716, stretch: 0.920, ink: 0x2A1F2A),
+            Placement(.calendar, .large, x: 1206, y: 92, scale: 0.840, stretch: 0.920, ink: 0x3A2530),
+        ],
+        "candyPlasticOrbit": [
+            Placement(.clock, .medium, x: 86, y: 122, scale: 1.060, stretch: 1.034, ink: 0x111111, face: .flip),
+            Placement(.nowPlaying, .medium, x: 507, y: 132, scale: 1.352, stretch: 0.920, ink: 0x2B2530),
+            Placement(.calendar, .large, x: 1082, y: 124, scale: 0.735, stretch: 0.920, ink: 0x2B2530),
+            Placement(.todo, .large, x: 106, y: 394, scale: 0.739, stretch: 0.969, ink: 0x3A2A34),
+        ],
+        "cherryChaos": [
+            Placement(.clock, .medium, x: 56, y: 113, scale: 1.009, stretch: 1.080, ink: 0x111111, face: .flip),
+            Placement(.calendar, .large, x: 480, y: 56, scale: 0.729, stretch: 0.920, ink: 0x3B2428),
+            Placement(.nowPlaying, .medium, x: 802, y: 126, scale: 0.707, stretch: 1.080, ink: 0x2D1F24),
+            Placement(.todo, .large, x: 1274, y: 79, scale: 0.673, stretch: 1.080, ink: 0x3B242A),
+        ],
         "midnightScrapbook": [
             Placement(.clock, .medium, x: 89, y: 189, scale: 0.886, stretch: 1.054, ink: 0x1B1916),
             Placement(.calendar, .large, x: 78, y: 419, scale: 0.923, stretch: 0.920, ink: 0xEFE6D6),

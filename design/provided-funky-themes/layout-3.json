@@ -1,0 +1,791 @@
+{
+ "about": "Batch 3: Y2K Chrome Pop. See layout.json.",
+ "themes": [
+  {
+   "id": "chromeHeartPop",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/a_wide_desktop_wallpaper_screenshot_style_scene_1_batch_1.png",
+   "dock": [
+    318,
+    893,
+    1268,
+    980
+   ],
+   "meta": {
+    "title": "Chrome Heart Pop",
+    "tagline": "Pink chrome hearts, glitter stars and a make-it-iconic polaroid.",
+    "card": "F8E6EC",
+    "ink": "3B2F36",
+    "accent": "D9628F",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "heart",
+    "collections": [
+     "pop",
+     "dreamy"
+    ],
+    "tags": "y2k chrome pink hearts stars bow glitter"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      94,
+      100,
+      452,
+      282
+     ],
+     "ink": "1B1416"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      498,
+      92,
+      774,
+      320
+     ],
+     "ink": "3B2F36"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      844,
+      92,
+      1186,
+      336
+     ],
+     "ink": "2D2429"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1250,
+      150,
+      1548,
+      395
+     ],
+     "ink": "2B2327",
+     "also": [
+      [
+       1250,
+       98,
+       1400,
+       160
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "angelWingChrome",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/a_wide_high_resolution_desktop_wallpaper_screensh_7_batch_2.png",
+   "dock": [
+    305,
+    882,
+    1325,
+    975
+   ],
+   "meta": {
+    "title": "Angel Wing Chrome",
+    "tagline": "A chrome wing over black lace, a blushing heart and soft monochrome cards.",
+    "card": "EFEAE6",
+    "ink": "2B2428",
+    "accent": "C79AA8",
+    "dark": false,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "pop",
+     "dreamy"
+    ],
+    "tags": "y2k chrome wing angel lace monochrome silver"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      42,
+      60,
+      356,
+      288
+     ],
+     "ink": "F2EDE8"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      406,
+      72,
+      676,
+      294
+     ],
+     "ink": "2B2428"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      276,
+      340,
+      690,
+      500
+     ],
+     "ink": "EFE9E4"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      738,
+      438,
+      982,
+      660
+     ],
+     "ink": "3A2C30"
+    }
+   ]
+  },
+  {
+   "id": "glitterDiscoPink",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/a_wide_high_resolution_stylized_desktop_wallpaper_5_batch_5.png",
+   "dock": [
+    300,
+    880,
+    1285,
+    972
+   ],
+   "meta": {
+    "title": "Glitter Disco Pink",
+    "tagline": "Disco-ball glitter, holographic discs and pink notebook cards.",
+    "card": "F6DDE2",
+    "ink": "3A2C30",
+    "accent": "D96A8F",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "star",
+    "collections": [
+     "pop",
+     "dreamy"
+    ],
+    "tags": "y2k glitter disco pink cd holographic notebook"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      115,
+      108,
+      484,
+      320
+     ],
+     "ink": "111111",
+     "face": "flip"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      110,
+      360,
+      490,
+      540
+     ],
+     "ink": "2A2024"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      960,
+      100,
+      1250,
+      332
+     ],
+     "ink": "3A2D30"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      992,
+      360,
+      1250,
+      596
+     ],
+     "ink": "2E2428"
+    },
+    {
+     "kind": "weather",
+     "size": "S",
+     "clear": [
+      540,
+      624,
+      736,
+      834
+     ],
+     "ink": "FFFFFF"
+    }
+   ]
+  },
+  {
+   "id": "neonHeartNoir",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/a_widescreen_desktop_screenshot_wallpaper_aesthe_10_batch_5.png",
+   "dock": [
+    345,
+    885,
+    1240,
+    975
+   ],
+   "meta": {
+    "title": "Neon Heart Noir",
+    "tagline": "Black glass, hot-pink handwriting and chrome hearts after midnight.",
+    "card": "17101A",
+    "ink": "F7E7F0",
+    "accent": "FF63B4",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "heart",
+    "collections": [
+     "pop",
+     "neon"
+    ],
+    "tags": "y2k neon pink black chrome hearts film strip midnight"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      60,
+      108,
+      458,
+      282
+     ],
+     "ink": "F7A8CF",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      940,
+      66,
+      1240,
+      288
+     ],
+     "ink": "F2EAF0"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      290,
+      330,
+      738,
+      508
+     ],
+     "ink": "F6EEF3"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1292,
+      88,
+      1500,
+      300
+     ],
+     "ink": "2A1F24"
+    }
+   ]
+  },
+  {
+   "id": "electricDreamBlue",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/wide_cinematic_desktop_wallpaper_screen_image_of_6_batch_1.png",
+   "dock": [
+    350,
+    888,
+    1240,
+    978
+   ],
+   "meta": {
+    "title": "Electric Dream Blue",
+    "tagline": "Blue disco light, frosted glass cards and neon hearts on a night street.",
+    "card": "1B1B2A",
+    "ink": "EEEFF8",
+    "accent": "5B7CFF",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "star",
+    "collections": [
+     "pop",
+     "neon"
+    ],
+    "tags": "y2k electric blue disco neon glass hearts night"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      564,
+      134,
+      956,
+      288
+     ],
+     "ink": "C9CDD6",
+     "face": "flip"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      564,
+      326,
+      968,
+      458
+     ],
+     "ink": "F0F0F5"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1046,
+      114,
+      1442,
+      378
+     ],
+     "ink": "F2F2F6"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      280,
+      498,
+      606,
+      768
+     ],
+     "ink": "F4F4F8"
+    }
+   ]
+  },
+  {
+   "id": "bubblegumChrome",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/wide_desktop_screenshot_macos_style_collage_wall_2_batch_2.png",
+   "dock": [
+    348,
+    885,
+    1240,
+    975
+   ],
+   "meta": {
+    "title": "Bubblegum Chrome",
+    "tagline": "Hot-pink spray paint, chrome hearts and a flip clock in a metal frame.",
+    "card": "F2DEE3",
+    "ink": "3A2A30",
+    "accent": "E8458F",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "flower",
+    "collections": [
+     "pop"
+    ],
+    "tags": "y2k bubblegum chrome flip clock spray paint pearls flower"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      66,
+      100,
+      520,
+      255
+     ],
+     "ink": "FFFFFF",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      48,
+      316,
+      316,
+      525
+     ],
+     "ink": "3A2A30",
+     "also": [
+      [
+       48,
+       525,
+       200,
+       572
+      ]
+     ]
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      354,
+      380,
+      592,
+      612
+     ],
+     "ink": "3A2830",
+     "also": [
+      [
+       354,
+       322,
+       535,
+       385
+      ]
+     ]
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      46,
+      650,
+      436,
+      850
+     ],
+     "ink": "2A2026"
+    }
+   ]
+  },
+  {
+   "id": "silverKissesNoir",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/wide_desktop_screenshot_wallpaper_styled_like_a_3_batch_3.png",
+   "dock": [
+    300,
+    880,
+    1290,
+    975
+   ],
+   "meta": {
+    "title": "Silver Kisses Noir",
+    "tagline": "Glossy lips, black lace, silver chains and blush-pink cards.",
+    "card": "241A1E",
+    "ink": "F3E1E6",
+    "accent": "D9A0B0",
+    "dark": true,
+    "font": "serif",
+    "style": "script",
+    "filter": "none",
+    "charm": "star",
+    "collections": [
+     "pop",
+     "luxury"
+    ],
+    "tags": "y2k silver kisses lips lace chains blush noir"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      118,
+      122,
+      448,
+      386
+     ],
+     "ink": "F2E4E8"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      494,
+      122,
+      798,
+      386
+     ],
+     "ink": "3A2C30"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      252,
+      430,
+      796,
+      625
+     ],
+     "ink": "F0E4E8"
+    },
+    {
+     "kind": "todo",
+     "size": "M",
+     "clear": [
+      848,
+      514,
+      1128,
+      702
+     ],
+     "ink": "3A2C30",
+     "also": [
+      [
+       848,
+       438,
+       1074,
+       516
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "holoGlowDreams",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/wide_desktop_wallpaper_macos_style_screen_layout_4_batch_4.png",
+   "dock": [
+    302,
+    893,
+    1285,
+    975
+   ],
+   "meta": {
+    "title": "Holo Glow Dreams",
+    "tagline": "Holographic discs, butterflies and glowing glass in violet and black.",
+    "card": "2A1B30",
+    "ink": "F8E0F0",
+    "accent": "D86CC8",
+    "dark": true,
+    "font": "standard",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "star",
+    "collections": [
+     "pop",
+     "cosmic"
+    ],
+    "tags": "y2k holographic cd butterfly glow violet black glass"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      66,
+      78,
+      508,
+      292
+     ],
+     "ink": "FADCF0"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      62,
+      340,
+      508,
+      522
+     ],
+     "ink": "2A1F2A"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      64,
+      572,
+      376,
+      792
+     ],
+     "ink": "2A1F2A"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1184,
+      98,
+      1524,
+      358
+     ],
+     "ink": "3A2530"
+    }
+   ]
+  },
+  {
+   "id": "candyPlasticOrbit",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/wide_dreamy_highly_stylized_desktop_wallpaper_8_batch_3.png",
+   "dock": [
+    332,
+    885,
+    1255,
+    975
+   ],
+   "meta": {
+    "title": "Candy Plastic Orbit",
+    "tagline": "Pastel sky, liquid chrome and glass cards orbiting a plastic heart.",
+    "card": "F2E8F6",
+    "ink": "2B2530",
+    "accent": "A58CE8",
+    "dark": false,
+    "font": "rounded",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "heart",
+    "collections": [
+     "pop",
+     "dreamy"
+    ],
+    "tags": "y2k candy plastic orbit pastel sky liquid chrome glass"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      92,
+      128,
+      453,
+      300
+     ],
+     "ink": "111111",
+     "face": "flip"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      502,
+      138,
+      988,
+      335
+     ],
+     "ink": "2B2530"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1047,
+      130,
+      1376,
+      356
+     ],
+     "ink": "2B2530"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      112,
+      400,
+      360,
+      640
+     ],
+     "ink": "3A2A34"
+    }
+   ]
+  },
+  {
+   "id": "cherryChaos",
+   "file": "batch/All_Set_Funky_Themes_Batch_3_Y2K_Chrome_Pop/wide_stylized_desktop_wallpaper_ui_mockup_scene_9_batch_4.png",
+   "dock": [
+    248,
+    880,
+    1340,
+    975
+   ],
+   "meta": {
+    "title": "Cherry Chaos",
+    "tagline": "Glossy cherries, red lips and a chrome bow on blush paper.",
+    "card": "F6DCE0",
+    "ink": "3B2428",
+    "accent": "C1263F",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "none",
+    "charm": "heart",
+    "collections": [
+     "pop",
+     "retro"
+    ],
+    "tags": "y2k cherry red lips chrome bow blush chaos"
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      62,
+      118,
+      405,
+      290
+     ],
+     "ink": "111111",
+     "face": "flip",
+     "also": [
+      [
+       62,
+       70,
+       350,
+       120
+      ]
+     ]
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      450,
+      62,
+      766,
+      286
+     ],
+     "ink": "3B2428"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      808,
+      62,
+      1045,
+      318
+     ],
+     "ink": "2D1F24"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1280,
+      78,
+      1505,
+      335
+     ],
+     "ink": "3B242A"
+    }
+   ]
+  }
+ ]
+}

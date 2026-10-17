@@ -84,10 +84,11 @@ public enum FunkyThemes {
         }
     }
 
-    private static func make(
+    static func make(
         _ id: String, _ title: String, _ tagline: String,
         card: Int, ink: Int, accent: Int, dark: Bool, font: WidgetFont,
-        style: TextStyle, filter: PhotoFilter, charm: String
+        style: TextStyle, filter: PhotoFilter, charm: String,
+        collections: [ThemeCollection]? = nil, tags: String? = nil
     ) -> Design {
         let items = kit(id)
         let radius: Double = ["chromeFangEditorial", "acidStarlet", "creamModPoster"].contains(id) ? 7 : 17
@@ -114,8 +115,8 @@ public enum FunkyThemes {
             })
         // The card leads with the largest widget and floats the rest beside it.
         let hero = items.firstIndex { $0.size == .large } ?? 0
-        return Design(theme: theme, collections: [.funkyThemes, dark ? .night : .designer],
-                      tags: "supplied funky scrapbook collage \(title.lowercased()) \(dark ? "dark" : "light")",
+        return Design(theme: theme, collections: collections ?? [.funkyThemes, dark ? .night : .designer],
+                      tags: "supplied funky collage \(title.lowercased()) \(tags ?? "scrapbook") \(dark ? "dark" : "light")",
                       philosophy: "\(tagline) The design's own collage is the wallpaper; its clock, calendar, music and notes are live widgets set into the cards it drew for them.",
                       cardArt: ThemeCardArt.Picks(hero: hero, flankers: items.indices.filter { $0 != hero }),
                       lighting: ThemeAccent(primary: WidgetColor(hex: accent).lit,
@@ -123,7 +124,10 @@ public enum FunkyThemes {
                                             glowIntensity: dark ? 0.75 : 0.55), dark: dark)
     }
 
-    public static let all: [Design] = [
+    public static let all: [Design] = original + additional
+
+    /// The first twenty supplied designs.
+    static let original: [Design] = [
         make("midnightScrapbook", "Midnight Scrapbook", "Charcoal scraps, cream paper and quiet butterfly detail.",
              card: 0x161716, ink: 0xEFE6D6, accent: 0xBC9D74, dark: true, font: .serif,
              style: .handwritten, filter: .mono, charm: "butterfly"),

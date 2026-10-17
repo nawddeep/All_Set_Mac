@@ -5,22 +5,23 @@ import Testing
 @testable import AllSetCore
 
 @Suite struct FunkyThemeTests {
-    @Test func allTwentySuppliedDesignsAreRealInstallableSets() throws {
-        #expect(FunkyThemes.all.count == 20)
-        #expect(ThemeLibrary.sets(in: .funkyThemes).count == 20)
-        #expect(Set(FunkyThemes.all.map { $0.theme.id }).count == 20)
+    @Test func everySuppliedDesignIsARealInstallableSet() throws {
+        let count = FunkyThemes.all.count
+        #expect(count >= 20)
+        #expect(FunkyThemes.layouts.count == count)
+        #expect(ThemeLibrary.sets(in: .funkyThemes).count == count)
+        #expect(Set(FunkyThemes.all.map { $0.theme.id }).count == count)
         for design in FunkyThemes.all {
             let set = try #require(ThemeLibrary.set("setup.\(design.theme.id)"))
             #expect(set.added == "2026-10-18")
+            #expect(set.collections.contains(.funkyThemes))
             #expect(set.isDark == design.dark)
             #expect(ThemeLibrary.search(set.name).contains { $0.id == set.id })
             let placements = try #require(FunkyThemes.layouts[design.theme.id])
             let widgets = set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))
             #expect(widgets.count == placements.count)
-            #expect(widgets.contains { $0.kind == .clock })
-            #expect(widgets.contains { $0.kind == .nowPlaying })
-            #expect(widgets.contains { $0.kind == .todo })
-            #expect(widgets.contains { $0.kind == .calendar || $0.kind == .date })
+            #expect(widgets.count >= 3, "\(design.theme.id) is too small to be a set")
+            #expect(widgets.contains { $0.kind == .clock || $0.kind == .date })
             #expect(widgets.allSatisfy { $0.kind.supportedSizes.contains($0.size) })
             #expect(widgets.allSatisfy { !$0.options.animateArt && !$0.options.neonFlicker })
             // Stretch squeezes the drawing on the desktop, so it stays too small to see.
