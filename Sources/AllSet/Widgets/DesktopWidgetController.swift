@@ -535,6 +535,7 @@ final class DesktopWidgetController {
         let watch = Timer(timeInterval: 0.05, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.watchDrop(instance) }
         }
+        watch.tolerance = 0.01
         // Runs during the drag's own event loop too.
         RunLoop.main.add(watch, forMode: .common)
         dropWatch = watch

@@ -104,3 +104,17 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 | Seconds clock visible / covered | 2.5% / 1.4% CPU | 0.38–0.41% / 0.04–0.13% CPU | ≤ 1% | yes |
 | Dock app idle, widgets on, desktop covered | 0.5–0.8% CPU, ~2.4 wakeups/s (`top idlew`) | — | ≤ 1% / ≤ 5/s | yes (covered case only) |
 Profiling: the Themes switch cost is SwiftUI attribute-graph work for the page as a whole (attributed through ThemeAtmosphere's GeometryReader), not preview drawing; release builds show no 2 s preview stall (that figure was a debug build on CI). Wallpaper scroll cost is mostly the 1,000-card library; a 120 ms thumbnail-decode deferral was tried and showed no measurable gain, so it was reverted.
+
+## Timer audit (T7.5, 2026-10-18)
+| Timer | Interval / tolerance | Runs only when | Off when feature off / covered / locked / asleep |
+|---|---|---|---|
+| Widget corner poll (`DesktopWidgetController.pointerWatch`) | 50 ms / 20 ms | Arrange mode, widgets shown, a widget not occluded | yes (since 3040d75) |
+| Widget drag watch (`dropWatch`) | 50 ms / 10 ms (added) | a gallery card is being dragged | yes |
+| Clipboard check (`ClipboardMonitor`) | policy pace (0.5–2 s) / half | history on **and** Clipboard extra on | yes |
+| Wallpaper coverage (`WallpaperController`) | 2 s / 0.5 s | live wallpaper paused because covered | yes |
+| Knock watchdog (`KnockListener`) | 1 s / 0.5 s | the motion sensor is open (TapTap extra on, knocks on, an action set) | yes; sensor closes on sleep, display sleep and lock |
+| Island pointer backstop (`NotchController`) | 150 ms / 50 ms | the island is expanded | yes |
+| Scroll relief watchdog (`MainWindow`) | quiet/2 / quiet/4 | a scroll view in the main window is live-scrolling | yes |
+| Ticking text (`TickingTextLayer`) | 0.1 s stopwatch, 0.5 s seconds clock / 20% | the widget is visible and ticking | yes |
+| System sampler (`SystemMonitor`) | policy pace; idle pace with no viewer | always (island/menu bar/widgets read it) | slows to the idle interval with nothing showing it; not paused on lock |
+Idle wakeup budget measured: Dock app, widgets on, desktop covered: ~2.4 wakeups/s, 0.5–0.8% CPU (`top -stats idlew`); `powermetrics` needs sudo, which this run doesn't use.
