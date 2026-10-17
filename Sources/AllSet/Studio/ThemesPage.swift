@@ -317,6 +317,7 @@ struct DesktopUndoBanner: View {
         case .theme(let name): "\(name) is on your desktop. Undo puts back your widgets, their look and your wallpaper."
         case .wallpaper: "New wallpaper. Your widgets are unchanged."
         case .turnedOff(let name): "\(name) is off. Undo brings back its widgets and look."
+        case .link(let what): "\(what). Undo puts the desktop back as it was."
         }
     }
 }

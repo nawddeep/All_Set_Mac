@@ -269,4 +269,26 @@ import Testing
         #expect(DeepLink(URL(string: "https://open/monitor")!) == nil)
         #expect(DeepLink(URL(string: "allset://focus/explode")!) == nil)
     }
+
+    @Test func hostileLinksAreIgnored() {
+        let long = "allset://theme/" + String(repeating: "a", count: 600)
+        #expect(DeepLink(URL(string: long)!) == nil)
+        #expect(DeepLink(URL(string: "allset://theme/" + String(repeating: "a", count: 101))!) == nil)
+        #expect(DeepLink(URL(string: "allset://theme/setup.floodlightGold")!) == .theme("setup.floodlightGold"))
+        for bad in ["allset://theme/%3Cscript%3E", "allset://theme/a%20b", "allset://open/..%2F..", "allset://theme/caf%C3%A9"] {
+            #expect(DeepLink(URL(string: bad)!) == nil, "\(bad)")
+        }
+        #expect(DeepLink(URL(string: "allset://theme")!) == nil)
+        #expect(DeepLink(URL(string: "allset://teleport/now")!) == nil)
+    }
+
+    @Test func desktopChangesAreLimitedToOneEveryTwoSeconds() {
+        var throttle = DeepLinkThrottle()
+        let start = Date(timeIntervalSince1970: 1000)
+        #expect(DeepLink.theme("x").changesDesktop && DeepLink.fit.changesDesktop)
+        #expect(!DeepLink.page("themes").changesDesktop && !DeepLink.focus(.start).changesDesktop)
+        let results = [throttle.allows(.theme("a"), at: start), throttle.allows(.fit, at: start.addingTimeInterval(1.9)),
+                       throttle.allows(.page("themes"), at: start.addingTimeInterval(1)), throttle.allows(.fit, at: start.addingTimeInterval(2))]
+        #expect(results == [true, false, true, true])
+    }
 }

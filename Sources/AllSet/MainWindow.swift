@@ -209,6 +209,22 @@ struct MainView: View {
         .ignoresSafeArea(.container, edges: .top)
     }
 
+    /// The one capsule at the bottom of the window: a link waiting for an
+    /// answer, Undo for what a link did, or Undo for a removed widget.
+    @ViewBuilder private var bottomBar: some View {
+        Group {
+            if let link = ui.pendingLink {
+                LinkConfirmationBar(link: link, services: services)
+            } else if let undo = ui.desktopUndo, case .link(let what) = undo.change {
+                LinkUndoBar(undo: undo, what: what, services: services)
+            } else if let removed = ui.removedWidget {
+                RemovedWidgetBar(removed: removed, services: services)
+            }
+        }
+        .padding(.bottom, DS.Space.l)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
+    }
+
     private var content: some View {
         GeometryReader { geometry in
             // A page swaps at once and eases in under a Core Animation veil
@@ -242,13 +258,7 @@ struct MainView: View {
                     .keyboardShortcut("k", modifiers: .command)
                     .opacity(0).accessibilityHidden(true)
             }
-            .overlay(alignment: .bottom) {
-                if let removed = ui.removedWidget {
-                    RemovedWidgetBar(removed: removed, services: services)
-                        .padding(.bottom, DS.Space.l)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-            }
+            .overlay(alignment: .bottom) { bottomBar }
         }
         .background {
             if ui.page == .wallpaper { WallpaperAtmosphere(services: services) }

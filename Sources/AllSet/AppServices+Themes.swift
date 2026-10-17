@@ -18,6 +18,8 @@ struct DesktopUndo: Equatable {
         case wallpaper
         /// The theme, by name, was turned off: widgets cleared, look reset.
         case turnedOff(String)
+        /// An `allset://` link changed the desktop; what it did, in words.
+        case link(String)
     }
 
     let change: Change
@@ -161,12 +163,13 @@ extension AppServices {
     /// Offers Undo for a change and keeps the desktop from before it on disk. False
     /// (and a warning shown) if that copy couldn't be saved.
     @discardableResult
-    private func recordChange(_ change: DesktopUndo.Change, before: DesktopSnapshot) -> Bool {
+    func recordChange(_ change: DesktopUndo.Change, before: DesktopSnapshot) -> Bool {
         ui.desktopUndo = DesktopUndo(change: change, before: before)
         let words = switch change {
         case .theme(let name): "\(name) went on"
         case .wallpaper: "New wallpaper"
         case .turnedOff(let name): "\(name) was turned off"
+        case .link(let what): what
         }
         guard desktopJournal.remember(PreviousDesktop(change: words, before: before)) else {
             ui.toast = Toast(message: "Done, but a copy of the previous desktop couldn't be saved: Undo works only until you quit",
@@ -218,7 +221,7 @@ extension AppServices {
         recordChange(.wallpaper, before: before)
     }
 
-    private var desktopSnapshot: DesktopSnapshot {
+    var desktopSnapshot: DesktopSnapshot {
         DesktopSnapshot(settings: settings, widgets: widgets, wallpaper: wallpaper)
     }
 

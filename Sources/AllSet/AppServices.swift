@@ -1,6 +1,7 @@
 import AllSetCore
 import AppKit
 import Observation
+import OSLog
 
 /// UI state shared between windows: which page of the main window is showing,
 /// and whether the desktop widgets are being arranged.
@@ -30,6 +31,8 @@ final class UIState {
     var desktopUndo: DesktopUndo?
     /// A theme set being tried on the desktop, with what to go back to.
     var themePreview: ThemePreview?
+    /// A desktop-changing link that came while All Set wasn't in front, waiting for Apply or Cancel.
+    var pendingLink: DeepLink?
     /// The widget removed last, and where it was, for Undo.
     var removedWidget: RemovedWidget?
     /// A gallery widget being dragged toward the desktop.
@@ -103,6 +106,7 @@ final class AppServices {
     /// The library server's API key (`AllSet library <key>` saves it). Read from
     /// the Keychain when a library request first needs it, never at launch, and
     /// again after the command says it changed.
+    private var linkThrottle = DeepLinkThrottle()
     private var libraryKey: String?
     private var hasReadLibraryKey = false
     private var libraryChanges: NSObjectProtocol?
@@ -339,8 +343,38 @@ final class AppServices {
         settings.showWidgets = true
     }
 
-    /// Follows an `allset://` link.
+    /// Follows an `allset://` link. One that changes the desktop runs at most
+    /// once every two seconds, offers Undo, and is asked about first when
+    /// All Set isn't the app in front (a web page may have sent it).
     func handle(_ link: DeepLink) {
+        guard linkThrottle.allows(link) else {
+            Logger(subsystem: "com.pratik.allset", category: "links").notice("Ignored \(link.url.absoluteString, privacy: .public): too soon after the last one")
+            return
+        }
+        if link.changesDesktop, NSWorkspace.shared.frontmostApplication?.processIdentifier != ProcessInfo.processInfo.processIdentifier {
+            ui.pendingLink = link
+            openWindow()
+            return
+        }
+        perform(link)
+    }
+
+    /// What a link asking to change the desktop would do, in words, for asking first.
+    func describe(_ link: DeepLink) -> String {
+        switch link {
+        case .fit: "Resize and center your widgets to fill the screen"
+        case .theme(let id):
+            "Apply \(DesignTheme.named(id)?.title ?? WidgetTheme.named(id)?.title ?? ThemeLibrary.set(id)?.name ?? id) to your desktop"
+        default: "Open \(link.url.absoluteString)"
+        }
+    }
+
+    func perform(_ link: DeepLink) {
+        var before = link.changesDesktop ? desktopSnapshot : nil
+        defer {
+            if let before { recordChange(.link(describe(link).replacingOccurrences(of: "Apply ", with: "Applied ")
+                .replacingOccurrences(of: "Resize and center", with: "Resized and centered")), before: before) }
+        }
         switch link {
         case .page(let name):
             let pages: [String: AppPage] = [
@@ -362,6 +396,9 @@ final class AppServices {
                 apply(setup, wallpaper: false)
             } else if let set = ThemeLibrary.set(id) {
                 install(set, mode: .restyle, wallpaper: false)
+            } else {
+                Logger(subsystem: "com.pratik.allset", category: "links").notice("Ignored a link to an unknown theme: \(id, privacy: .public)")
+                before = nil
             }
         case .focus(let action):
             guard let focus = widgets.widgets.first(where: { $0.kind == .focus }) else { return }

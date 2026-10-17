@@ -1,6 +1,7 @@
 import AllSetCore
 import AppKit
 import MetalKit
+import OSLog
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -296,7 +297,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// `allset://` links from Shortcuts, scripts, the browser or other apps.
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls {
-            guard let link = DeepLink(url) else { continue }
+            guard let link = DeepLink(url) else {
+                Logger(subsystem: "com.pratik.allset", category: "links").notice("Ignored an unknown or malformed link")
+                continue
+            }
             services.handle(link)
         }
     }
