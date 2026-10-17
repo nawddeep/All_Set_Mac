@@ -118,3 +118,12 @@ Profiling: the Themes switch cost is SwiftUI attribute-graph work for the page a
 | Ticking text (`TickingTextLayer`) | 0.1 s stopwatch, 0.5 s seconds clock / 20% | the widget is visible and ticking | yes |
 | System sampler (`SystemMonitor`) | policy pace; idle pace with no viewer | always (island/menu bar/widgets read it) | slows to the idle interval with nothing showing it; not paused on lock |
 Idle wakeup budget measured: Dock app, widgets on, desktop covered: ~2.4 wakeups/s, 0.5–0.8% CPU (`top -stats idlew`); `powermetrics` needs sudo, which this run doesn't use.
+
+## try? audit (T8.4, 2026-10-18)
+Before: 504 (`grep -c "try?"` over Sources). After: 506 (moved code, no new silent ones).
+- File operations on the person's data (videos folder, deleting a video or imported picture, the clipboard and shelf folders and their files, the desktop journal's preview record): now `FileAttempt.run`, which logs every failure. 8 sites.
+- File operations on caches and temporary files (GitHub, weather and search caches, theme previews, diagnostics zip work folder, screenshot temp file, wallpaper stills, library downloads in progress): `try?` kept, each with a "Best effort" comment. 20 sites.
+- Already checked (`(try? …) != nil`, with the failure handled): left as is.
+- `try? await Task.sleep`: 152, all cancellation of a sleep, which is the intended way to stop: left uncommented.
+- Decoding with a fallback (`try? decode…` in tolerant decoders): 137, by design (an unreadable field falls back to its default): left uncommented.
+- Other: ~197 (dlsym/regex/optional parses, Process.run with its own error path, etc.): **not individually reviewed or commented**; that part of T8.4 is open.

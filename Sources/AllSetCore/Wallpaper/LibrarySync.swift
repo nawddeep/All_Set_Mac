@@ -135,9 +135,9 @@ public struct LibrarySync: Sendable {
         try save(catalog)
         // After the list: a tag without its list would hide the list for good.
         if let tag = http.value(forHTTPHeaderField: "ETag") {
-            try? tag.write(to: catalogTagFile, atomically: true, encoding: .utf8)
+            try? tag.write(to: catalogTagFile, atomically: true, encoding: .utf8)  // Best effort: a cache or temporary file; failing only means doing it again.
         } else {
-            try? FileManager.default.removeItem(at: catalogTagFile)
+            try? FileManager.default.removeItem(at: catalogTagFile)  // Best effort: a cache or temporary file; failing only means doing it again.
         }
         return catalog
     }
@@ -250,7 +250,7 @@ public struct LibrarySync: Sendable {
                         return
                     }
                     do {
-                        try? FileManager.default.removeItem(at: destination)
+                        try? FileManager.default.removeItem(at: destination)  // Best effort: a cache or temporary file; failing only means doing it again.
                         try FileManager.default.moveItem(at: temporary, to: destination)
                         continuation.resume()
                     } catch {

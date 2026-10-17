@@ -499,8 +499,8 @@ public final class WeatherService {
         guard let cacheURL else { return }
         let cache = Cache(reports: reports.map { Stored(location: $0.key, value: $0.value) },
                           airQuality: airQuality.map { Stored(location: $0.key, value: $0.value) })
-        try? FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? JSONEncoder().encode(cache).write(to: cacheURL, options: .atomic)
+        try? FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(), withIntermediateDirectories: true)  // Best effort: a cache or temporary file; failing only means doing it again.
+        try? JSONEncoder().encode(cache).write(to: cacheURL, options: .atomic)  // Best effort: a cache or temporary file; failing only means doing it again.
     }
 
     public func searchLocations(_ query: String) async throws -> [WeatherLocation] {

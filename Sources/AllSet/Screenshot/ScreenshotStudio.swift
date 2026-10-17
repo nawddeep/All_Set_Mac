@@ -23,7 +23,7 @@ final class ScreenshotStudioController {
         let wasShowing = window?.isVisible == true
         window?.orderOut(nil)
         let file = FileManager.default.temporaryDirectory.appendingPathComponent("AllSet-\(UUID().uuidString).png")
-        defer { try? FileManager.default.removeItem(at: file) }
+        defer { try? FileManager.default.removeItem(at: file) }  // Best effort: a cache or temporary file; failing only means doing it again.
         _ = await CommandRunner.run("/usr/sbin/screencapture", ["-i", "-x", file.path], timeout: nil)
         guard let picture = ScreenshotStudio.picture(at: file) else {
             if wasShowing { show() }

@@ -196,7 +196,7 @@ public final class WallpaperStore {
         let root = directory ?? Self.defaultDirectory
         self.directory = root
         fileURL = root.appendingPathComponent("wallpaper.json")
-        try? FileManager.default.createDirectory(at: root.appendingPathComponent("Videos"), withIntermediateDirectories: true)
+        FileAttempt.run("create the Videos folder") { try FileManager.default.createDirectory(at: root.appendingPathComponent("Videos"), withIntermediateDirectories: true) }
         config = StoreFile.load(WallpaperConfig.self, from: fileURL) ?? WallpaperConfig()
         reloadVideos()
         reloadLibrary()

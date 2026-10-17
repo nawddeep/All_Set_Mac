@@ -86,7 +86,7 @@ public final class DesktopJournal {
     /// Removes the preview record. True once it's gone.
     @discardableResult
     public func endPreview() -> Bool {
-        try? FileManager.default.removeItem(at: previewURL)
+        FileAttempt.run("remove the finished preview record") { try FileManager.default.removeItem(at: previewURL) }
         return !FileManager.default.fileExists(atPath: previewURL.path)
     }
 

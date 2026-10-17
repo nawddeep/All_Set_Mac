@@ -252,7 +252,7 @@ final class ThemePreviewCache {
         let folder = folder, current = "-d\(Self.drawingVersion)-"
         Task.detached(priority: .background) {
             for name in (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [] where !name.contains(current) {
-                try? FileManager.default.removeItem(at: folder.appendingPathComponent(name))
+                try? FileManager.default.removeItem(at: folder.appendingPathComponent(name))  // Best effort: a cache or temporary file; failing only means doing it again.
             }
         }
     }
@@ -462,13 +462,13 @@ final class ThemePreviewCache {
                     // two would delete each other's whole cache.
                     let older = "\(set.id)-\(dark ? "dark" : "light")-", build = "-\(Self.appVersion)-d\(Self.drawingVersion)-"
                     Task.detached(priority: .utility) {
-                        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)  // Best effort: a cache or temporary file; failing only means doing it again.
                         // Earlier pictures of this set, of this kind (its
                         // desktop, card and backdrop are kept side by side), are stale now.
                         for stale in (try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? []
                         where stale.hasPrefix(older) && stale.contains(build) && variant.owns(stale)
                             && stale != file.lastPathComponent {
-                            try? FileManager.default.removeItem(at: folder.appendingPathComponent(stale))
+                            try? FileManager.default.removeItem(at: folder.appendingPathComponent(stale))  // Best effort: a cache or temporary file; failing only means doing it again.
                         }
                         guard let destination = CGImageDestinationCreateWithURL(file as CFURL, "public.png" as CFString, 1, nil) else { return }
                         CGImageDestinationAddImage(destination, picture.image, nil)

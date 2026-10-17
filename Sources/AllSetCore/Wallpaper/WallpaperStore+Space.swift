@@ -158,7 +158,7 @@ extension WallpaperStore {
               let length = http.value(forHTTPHeaderField: "Content-Length").flatMap(Int64.init),
               length == candidate.size else { return false }
         guard let (downloaded, getResponse) = try? await session.download(for: libraryRequest(remote, bearer: bearer)) else { return false }
-        defer { try? FileManager.default.removeItem(at: downloaded) }
+        defer { try? FileManager.default.removeItem(at: downloaded) }  // Best effort: a cache or temporary file; failing only means doing it again.
         guard (getResponse as? HTTPURLResponse)?.statusCode == 200,
               let theirs = FileDigest.sha256(of: downloaded),
               let local = ContainedPath.resolve(candidate.relative, in: directory),
@@ -333,7 +333,7 @@ extension WallpaperStore {
     }
 
     public func deleteVideo(_ name: String) {
-        try? FileManager.default.removeItem(at: videoURL(name))
+        FileAttempt.run("delete the video \(name)") { try FileManager.default.removeItem(at: videoURL(name)) }
         if config.source == .video(name) {
             config.isEnabled = false
             config.source = WallpaperConfig().source

@@ -271,7 +271,7 @@ extension WallpaperStore {
                             return
                         }
                         do {
-                            try? FileManager.default.removeItem(at: destination)
+                            try? FileManager.default.removeItem(at: destination)  // Best effort: a cache or temporary file; failing only means doing it again.
                             try FileManager.default.moveItem(at: temporary, to: destination)
                             continuation.resume()
                         } catch {

@@ -377,7 +377,7 @@ public final class GitHubService {
         errors = [:]
         backoff.reset()
         pausedUntil = nil
-        if let cacheURL { try? FileManager.default.removeItem(at: cacheURL) }
+        if let cacheURL { try? FileManager.default.removeItem(at: cacheURL) }  // Best effort: a cache or temporary file; failing only means doing it again.
     }
 
     private func scopedKey(_ config: GitHubConfig) -> String { scope() + "|" + Self.key(config) }
@@ -438,8 +438,8 @@ public final class GitHubService {
 
     private func save() {
         guard let cacheURL else { return }
-        try? FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? JSONEncoder().encode(snapshots).write(to: cacheURL, options: .atomic)
+        try? FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(), withIntermediateDirectories: true)  // Best effort: a cache or temporary file; failing only means doing it again.
+        try? JSONEncoder().encode(snapshots).write(to: cacheURL, options: .atomic)  // Best effort: a cache or temporary file; failing only means doing it again.
     }
 }
 

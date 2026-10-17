@@ -224,7 +224,8 @@ public final class ClipboardStore {
             .appendingPathComponent("AllSet/Clipboard", isDirectory: true)
         imageDirectory = root.appendingPathComponent("Images", isDirectory: true)
         fileURL = root.appendingPathComponent("history.json")
-        try? FileManager.default.createDirectory(at: imageDirectory, withIntermediateDirectories: true)
+        let images = imageDirectory
+        FileAttempt.run("create the clipboard images folder") { try FileManager.default.createDirectory(at: images, withIntermediateDirectories: true) }
         let saved = StoreFile.load(Saved.self, from: fileURL)
         settings = saved?.settings ?? ClipboardSettings()
         items = saved?.items ?? []
@@ -344,7 +345,7 @@ public final class ClipboardStore {
     }
 
     private func deleteImage(_ name: String) {
-        try? FileManager.default.removeItem(at: imageDirectory.appendingPathComponent(name))
+        FileAttempt.run("delete a clipboard image") { try FileManager.default.removeItem(at: imageDirectory.appendingPathComponent(name)) }
     }
 
     /// Every copy saves the history, which can run to megabytes of text:

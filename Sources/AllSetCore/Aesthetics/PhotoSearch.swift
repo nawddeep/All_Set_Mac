@@ -97,7 +97,7 @@ public final class PhotoSearch {
             .appendingPathComponent("AllSet/Search", isDirectory: true)
         self.defaults = defaults
         recent = defaults.stringArray(forKey: Self.recentKey) ?? []
-        try? FileManager.default.createDirectory(at: self.cacheDirectory, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: self.cacheDirectory, withIntermediateDirectories: true)  // Best effort: a cache or temporary file; failing only means doing it again.
     }
 
     /// Starts a search after a short pause in typing. Clearing the text clears results.
@@ -344,7 +344,7 @@ public final class PhotoSearch {
     private func store(_ entry: CachedPage, key: String) {
         memoryCache.insert(entry, forKey: key, cost: 1)
         if let data = try? JSONEncoder().encode(entry) {
-            try? data.write(to: cacheFile(key), options: .atomic)
+            try? data.write(to: cacheFile(key), options: .atomic)  // Best effort: a cache or temporary file; failing only means doing it again.
         }
     }
 

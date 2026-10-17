@@ -197,7 +197,7 @@ public final class ImageLibrary {
     }
 
     public func deleteUserImage(_ name: String) {
-        try? FileManager.default.removeItem(at: userDirectory.appendingPathComponent(name))
+        FileAttempt.run("delete the imported picture \(name)") { try FileManager.default.removeItem(at: userDirectory.appendingPathComponent(name)) }
         memoryCache.removeValue(forKey: .file(name))
         smallCache.removeAll { $0.source == .file(name) }
         reloadUserImages()

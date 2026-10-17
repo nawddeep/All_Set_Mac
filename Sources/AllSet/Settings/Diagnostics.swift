@@ -19,7 +19,7 @@ final class Diagnostics: NSObject, MXMetricManagerSubscriber {
 
     nonisolated func didReceive(_ payloads: [MXDiagnosticPayload]) {
         let folder = MainActor.assumeIsolated { Self.folder }
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)  // Best effort: a cache or temporary file; failing only means doing it again.
         for payload in payloads {
             let name = "diagnostic-\(ISO8601DateFormatter().string(from: payload.timeStampEnd)).json"
                 .replacingOccurrences(of: ":", with: "-")
@@ -62,7 +62,7 @@ final class Diagnostics: NSObject, MXMetricManagerSubscriber {
 
     nonisolated private static func writeArchive(to destination: URL) -> Bool {
         let work = FileManager.default.temporaryDirectory.appendingPathComponent("AllSet-diagnostics-\(UUID().uuidString)", isDirectory: true)
-        defer { try? FileManager.default.removeItem(at: work) }
+        defer { try? FileManager.default.removeItem(at: work) }  // Best effort: a cache or temporary file; failing only means doing it again.
         do {
             try FileManager.default.createDirectory(at: work, withIntermediateDirectories: true)
             let reports = MainActor.assumeIsolated { folder }
@@ -79,7 +79,7 @@ final class Diagnostics: NSObject, MXMetricManagerSubscriber {
             // All Set's own log only, from the last day.
             run("/usr/bin/log", ["show", "--last", "24h", "--style", "compact", "--predicate", "subsystem == \"com.pratik.allset\""],
                 output: work.appendingPathComponent("log.txt"))
-            try? FileManager.default.removeItem(at: destination)
+            try? FileManager.default.removeItem(at: destination)  // Best effort: a cache or temporary file; failing only means doing it again.
             return run("/usr/bin/ditto", ["-c", "-k", "--keepParent", work.path, destination.path], output: nil)
         } catch {
             return false

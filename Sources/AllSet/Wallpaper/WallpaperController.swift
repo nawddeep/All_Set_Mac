@@ -333,7 +333,7 @@ final class WallpaperController {
         let folder = services.wallpaper.directory
         let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
         for file in files where file.lastPathComponent.hasPrefix("still-") && file.lastPathComponent != kept.lastPathComponent {
-            try? FileManager.default.removeItem(at: file)
+            try? FileManager.default.removeItem(at: file)  // Best effort: a cache or temporary file; failing only means doing it again.
         }
     }
 }

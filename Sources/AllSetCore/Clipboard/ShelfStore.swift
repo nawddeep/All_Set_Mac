@@ -31,7 +31,7 @@ public final class ShelfStore {
             .appendingPathComponent("AllSet/Shelf", isDirectory: true)
         droppedFilesDirectory = root.appendingPathComponent("Dropped", isDirectory: true)
         fileURL = root.appendingPathComponent("shelf.json")
-        try? FileManager.default.createDirectory(at: droppedFilesDirectory, withIntermediateDirectories: true)
+        FileAttempt.run("create the shelf folder") { try FileManager.default.createDirectory(at: droppedFilesDirectory, withIntermediateDirectories: true) }
         let saved = StoreFile.load([ShelfItem].self, from: fileURL) ?? []
         // Files deleted since last time are gone from the shelf too.
         items = saved.filter { FileManager.default.fileExists(atPath: $0.url.path) }
@@ -61,7 +61,7 @@ public final class ShelfStore {
         // Inside the shelf's own folder, compared by path component after resolving
         // symlinks: a sibling such as Dropped-Other, or a link out, isn't the shelf's.
         if ContainedPath.contains(item.url, in: droppedFilesDirectory) {
-            try? FileManager.default.removeItem(at: item.url)
+            FileAttempt.run("remove a file from the shelf") { try FileManager.default.removeItem(at: item.url) }
         }
     }
 
