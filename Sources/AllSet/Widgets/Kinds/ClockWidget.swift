@@ -5,6 +5,7 @@ struct ClockWidget: View {
     let instance: WidgetInstance
     @Environment(\.widgetAccent) private var accent
     @Environment(\.widgetStyle) private var style
+    @Environment(\.widgetIsVisible) private var isVisible
 
     private var options: WidgetOptions { instance.options }
     private var timeZone: TimeZone { options.timeZoneID.flatMap(TimeZone.init(identifier:)) ?? .current }
@@ -14,7 +15,10 @@ struct ClockWidget: View {
     var body: some View {
         // Ticks on the second or on the minute, aligned so the display changes
         // exactly when the time does.
-        let step: TimeInterval = options.showSeconds || options.cinematicClock ? 1 : 60
+        // The digital face's seconds run in a Core Animation text layer
+        // (`liveTime`), so its card redraws once a minute, not every second.
+        let secondsInLayer = options.showSeconds && options.clockFace == .digital && !options.cinematicClock
+        let step: TimeInterval = (options.showSeconds && !secondsInLayer) || options.cinematicClock ? 1 : 60
         WidgetTimeline(.periodic(from: Self.aligned(.now, to: step), by: step)) { context in
             if options.cinematicClock {
                 CinematicClockFace(instance: instance, date: context.date)
@@ -41,7 +45,7 @@ struct ClockWidget: View {
             VStack(alignment: .leading, spacing: 0) {
                 heading(city ?? weekday)
                 Spacer(minLength: 0)
-                TimeLabel(parts: timeParts(date), size: options.showSeconds ? 34 : 46)
+                liveTime(date, size: options.showSeconds ? 34 : 46)
                 Text(city == nil ? day : "\(weekday), \(day)")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
@@ -54,7 +58,7 @@ struct ClockWidget: View {
                 VStack(alignment: .leading, spacing: 0) {
                     heading(city ?? weekday)
                     Spacer(minLength: 0)
-                    TimeLabel(parts: timeParts(date), size: options.showSeconds ? 44 : 58)
+                    liveTime(date, size: options.showSeconds ? 44 : 58)
                     Text(city == nil ? day : "\(weekday), \(day)")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(.secondary)
@@ -68,7 +72,7 @@ struct ClockWidget: View {
         case .large, .extraLarge:
             VStack(alignment: .leading, spacing: 4) {
                 heading(city ?? weekday)
-                TimeLabel(parts: timeParts(date), size: options.showSeconds ? 64 : 84)
+                liveTime(date, size: options.showSeconds ? 64 : 84)
                     .padding(.top, 6)
                 Text("\(weekday), \(day)")
                     .font(.system(size: 16, weight: .medium))
@@ -332,6 +336,27 @@ struct ClockWidget: View {
             .font(.system(size: 11, weight: .bold))
             .foregroundStyle(accent)
             .lineLimit(1)
+    }
+
+    /// The time on the digital face: with seconds, drawn by a text layer that
+    /// changes on its own twice a second; without, a SwiftUI label that rolls on the minute.
+    @ViewBuilder
+    private func liveTime(_ date: Date, size: CGFloat) -> some View {
+        if options.showSeconds {
+            HStack(alignment: .firstTextBaseline, spacing: size * 0.06) {
+                TickingText(fontSize: size, color: style.ink, isTicking: isVisible, interval: 0.5, weight: .semibold, leading: true) { now in
+                    timeParts(now).time
+                }
+                .frame(height: size * 1.2)
+                if let period = timeParts(date).period {
+                    Text(period)
+                        .font(.system(size: size * 0.3, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } else {
+            TimeLabel(parts: timeParts(date), size: size)
+        }
     }
 
     private func timeParts(_ date: Date) -> TimeLabel.Parts {

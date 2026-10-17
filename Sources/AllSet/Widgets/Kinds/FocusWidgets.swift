@@ -417,6 +417,9 @@ struct TickingTextLayer: NSViewRepresentable {
     let color: Color
     let isTicking: Bool
     let interval: TimeInterval
+    var weight: NSFont.Weight = .light
+    /// Against the left edge instead of centered.
+    var leading = false
     let text: @MainActor (Date) -> String
 
     func makeNSView(context: Context) -> TickingTextView {
@@ -428,6 +431,8 @@ struct TickingTextLayer: NSViewRepresentable {
         view.color = NSColor(color)
         view.text = text
         view.interval = interval
+        view.weight = weight
+        view.leading = leading
         view.isTicking = isTicking
         view.refresh()
     }
@@ -438,6 +443,8 @@ struct TickingTextLayer: NSViewRepresentable {
         var fontSize: CGFloat = 34
         var color = NSColor.labelColor
         var interval: TimeInterval = 0.1
+        var weight: NSFont.Weight = .light
+        var leading = false
         var text: @MainActor (Date) -> String = { _ in "" }
         var isTicking = false { didSet { if isTicking != oldValue { schedule() } } }
 
@@ -486,24 +493,24 @@ struct TickingTextLayer: NSViewRepresentable {
         func refresh() {
             let string = text(.now)
             var size = fontSize
-            var attributed = Self.attributed(string, size: size, color: color)
+            var attributed = Self.attributed(string, size: size, color: color, weight: weight)
             let width = attributed.size().width
             if width > bounds.width, bounds.width > 0 {
                 size = max(fontSize * bounds.width / width, fontSize * 0.5)
-                attributed = Self.attributed(string, size: size, color: color)
+                attributed = Self.attributed(string, size: size, color: color, weight: weight)
             }
             let measured = attributed.size()
             CATransaction.begin()
             CATransaction.setDisableActions(true)
             textLayer.string = attributed
-            textLayer.frame = CGRect(x: (bounds.width - measured.width) / 2, y: (bounds.height - measured.height) / 2,
+            textLayer.frame = CGRect(x: leading ? 0 : (bounds.width - measured.width) / 2, y: (bounds.height - measured.height) / 2,
                                      width: measured.width + 1, height: measured.height)
             CATransaction.commit()
         }
 
-        private static func attributed(_ string: String, size: CGFloat, color: NSColor) -> NSAttributedString {
+        private static func attributed(_ string: String, size: CGFloat, color: NSColor, weight: NSFont.Weight) -> NSAttributedString {
             NSAttributedString(string: string, attributes: [
-                .font: NSFont.monospacedDigitSystemFont(ofSize: size, weight: .light),
+                .font: NSFont.monospacedDigitSystemFont(ofSize: size, weight: weight),
                 .foregroundColor: color,
             ])
         }
@@ -516,18 +523,22 @@ struct TickingText: View {
     let color: Color
     let isTicking: Bool
     let interval: TimeInterval
+    var weight: Font.Weight = .light
+    var leading = false
     let text: @MainActor (Date) -> String
     @Environment(\.widgetSnapshot) private var snapshot
 
     var body: some View {
         if snapshot {
             Text(text(.now))
-                .font(.system(size: fontSize, weight: .light).monospacedDigit())
+                .font(.system(size: fontSize, weight: weight).monospacedDigit())
                 .foregroundStyle(color)
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
+                .frame(maxWidth: .infinity, alignment: leading ? .leading : .center)
         } else {
-            TickingTextLayer(fontSize: fontSize, color: color, isTicking: isTicking, interval: interval, text: text)
+            TickingTextLayer(fontSize: fontSize, color: color, isTicking: isTicking, interval: interval,
+                             weight: weight == .semibold ? .semibold : weight == .bold ? .bold : .light, leading: leading, text: text)
         }
     }
 }

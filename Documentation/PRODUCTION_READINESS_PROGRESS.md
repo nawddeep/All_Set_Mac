@@ -101,6 +101,6 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 | Wallpaper warm scroll CPU | 99.7–102.5% | 90.6–96.0% | ≤ 20% | no |
 | Themes page switch, worst main-thread hold | — | 75–140 ms (first 390 ms) | none > 100 ms | no |
 | Gallery card build, release | — | median 11.9 ms, worst 72.5 ms (first) | ≤ 16 ms | median yes |
-| Seconds clock visible / covered | — | 2.5% / 1.4% CPU | ≤ 1% | no |
+| Seconds clock visible / covered | 2.5% / 1.4% CPU | 0.38–0.41% / 0.04–0.13% CPU | ≤ 1% | yes |
 | Dock app idle, widgets on, desktop covered | 0.5–0.8% CPU, ~2.4 wakeups/s (`top idlew`) | — | ≤ 1% / ≤ 5/s | yes (covered case only) |
 Profiling: the Themes switch cost is SwiftUI attribute-graph work for the page as a whole (attributed through ThemeAtmosphere's GeometryReader), not preview drawing; release builds show no 2 s preview stall (that figure was a debug build on CI). Wallpaper scroll cost is mostly the 1,000-card library; a 120 ms thumbnail-decode deferral was tried and showed no measurable gain, so it was reverted.
