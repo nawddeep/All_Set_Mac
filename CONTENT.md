@@ -158,7 +158,7 @@ Photo search and My Photos no longer have their own pages or Live Wallpaper tabs
 - **Photo** (a theme's wallpaper photo, with slow drift or other motion, and optional dimming)
 - **Aerial videos** (Apple's aerial/scenic catalogue via sylvan.apple.com, by category, 4K or HD): downloaded once with progress and **Cancel**, then loop offline
 - **My Videos**: any MP4 or MOV, imported or dropped on the page
-- **Wallpaper Library**: the user's own collection imported from a Wallpaper Engine folder (live loops and stills, self-contained on this Mac, optionally fetched from a personal server); see `Documentation/spec.md`
+- **Wallpaper Library**: a library of your own videos and stills, found in the library folder if one exists (optionally fetched from a personal server); see `Documentation/spec.md`
 - Picking a wallpaper changes only the wallpaper; widgets stay. **Undo**, and Widgets › **Restore Previous Desktop** (survives a relaunch), put the old one back.
 - **Pauses** while windows cover the desktop, in full screen, when locked or asleep, in Low Power Mode, and on battery (on by default).
 - Runs at desktop-window level, paused unless a real amount of desktop is visible (`ScreenCoverage`), matched to system wallpaper, shared player instances across screens for efficiency.

@@ -281,7 +281,7 @@ private struct VideoTile: View {
 }
 
 /// Videos from a wallpaper library outside All Set (a folder or a drive,
-/// imported with `scripts/wallpaper_library.py`). They play from where they
+/// described by a `catalog.json` the app finds in its library folder). They play from where they
 /// live, through the same player and the same pausing rules as any video;
 /// cards show a picture made at import, never the video itself until you
 /// rest the pointer on one.
@@ -298,7 +298,7 @@ private struct LibrarySection: View {
     @State private var sort = LibrarySort.title
     @State private var show = Show.all
 
-    /// Moving videos, or stills taken from Wallpaper Engine scenes.
+    /// Moving videos, or still pictures.
     enum Show: String, CaseIterable, Identifiable {
         case all, live, stills
         var id: String { rawValue }
@@ -368,7 +368,7 @@ private struct LibrarySection: View {
                     }
                     .frame(width: 210)
                 }
-                Label("For your own desktop: these came from Steam Workshop with no author or license. Scene wallpapers are rebuilt here, as a loop made from their own layers or as their artwork held still. Never shared.",
+                Label("Your own library, for your own desktop. Only use wallpapers you have the rights to.",
                       systemImage: "lock.shield")
                     .font(.caption)
                     .foregroundStyle(.secondary)

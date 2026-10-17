@@ -98,7 +98,7 @@ public final class WallpaperStore {
     /// Imported video file names, newest first.
     public private(set) var videos: [String] = []
     /// Videos in libraries outside All Set (`Library/catalog.json`, written by
-    /// `scripts/wallpaper_library.py`), in catalog order.
+    /// the library's `catalog.json`), in catalog order.
     public private(set) var library: [LibraryVideo] = []
     /// Whether `reloadLibrary()` has completed at least once. `library`
     /// starts empty and fills in asynchronously (a big catalog is a big
@@ -690,7 +690,7 @@ public final class WallpaperStore {
     /// removes it from `catalog.json` on disk and in memory.
     ///
     /// Both files are edited as loose JSON, not through the typed models:
-    /// `scripts/wallpaper_library.py` writes fields (`sha256`, `sceneNotes`,
+    /// The library catalog has fields (`sha256`, `sceneNotes`,
     /// `movement`…) that the app's model doesn't carry, and a decode-reencode
     /// through it would silently drop those for every other wallpaper too.
     @discardableResult

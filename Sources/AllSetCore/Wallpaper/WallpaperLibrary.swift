@@ -1,7 +1,7 @@
 import Foundation
 
 /// One video in a wallpaper library that lives outside All Set (a folder or a
-/// drive), described by `scripts/wallpaper_library.py import`. It plays from
+/// drive), described by a `catalog.json` in the library folder. It plays from
 /// where it is; nothing is copied, except a transcoded copy for the few files
 /// the Mac can't play efficiently as they are.
 public struct LibraryVideo: Codable, Identifiable, Hashable, Sendable {
@@ -16,7 +16,7 @@ public struct LibraryVideo: Codable, Identifiable, Hashable, Sendable {
         case unsupported
     }
 
-    /// A moving video, or a still picture (a Wallpaper Engine scene's
+    /// A moving video, or a still picture (a scene's
     /// artwork, which plays with the photo wallpaper's slow motion).
     public enum Kind: String, Codable, Sendable {
         case video, image
