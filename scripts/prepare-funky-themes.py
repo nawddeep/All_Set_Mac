@@ -82,7 +82,11 @@ def prepare(theme, source_folder, preview):
     assert image.shape[:2] == (992, 1586), f"{theme['id']}: expected 1586x992, got {image.shape[1]}x{image.shape[0]}"
     rng = np.random.default_rng(zlib.crc32(theme["id"].encode()))
     # The menu bar: the real one covers this strip, so the artwork below, mirrored, is enough.
-    image[:MENU_BAR] = image[MENU_BAR:2 * MENU_BAR][::-1]
+    if theme.get("menubar", True):
+        # The strip the real menu bar covers: smoothed over from the artwork below it.
+        strip = np.zeros(image.shape[:2], np.uint8)
+        strip[:MENU_BAR] = 255
+        image[:] = cv2.inpaint(image, strip, 6, cv2.INPAINT_TELEA)
     if theme["dock"]:
         replace_dock(image, theme["dock"])
     for widget in theme["widgets"]:

@@ -21,7 +21,7 @@ import Testing
             let widgets = set.widgets(screenName: nil, bounds: CGSize(width: 1136, height: 768))
             #expect(widgets.count == placements.count)
             #expect(widgets.count >= 3, "\(design.theme.id) is too small to be a set")
-            #expect(widgets.contains { $0.kind == .clock || $0.kind == .date })
+            #expect(widgets.contains { [.clock, .date, .calendar].contains($0.kind) })
             #expect(widgets.allSatisfy { $0.kind.supportedSizes.contains($0.size) })
             #expect(widgets.allSatisfy { !$0.options.animateArt && !$0.options.neonFlicker })
             // Stretch squeezes the drawing on the desktop, so it stays too small to see.

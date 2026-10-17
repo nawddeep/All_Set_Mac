@@ -1,0 +1,751 @@
+{
+ "about": "Batch 5: Retro 70s Mod Funk. See layout.json.",
+ "themes": [
+  {
+   "id": "citrusGroove",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/01_Citrus_Groove.png",
+   "dock": [
+    383,
+    893,
+    1240,
+    980
+   ],
+   "meta": {
+    "title": "Citrus Groove",
+    "tagline": "A groovy citrus collage in orange, olive and brown under a warm sun.",
+    "card": "F4E6CF",
+    "ink": "3A2A1E",
+    "accent": "C8571E",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "flower",
+    "collections": [
+     "retro",
+     "pop"
+    ],
+    "tags": "70s retro groovy citrus orange olive brown sun vinyl palm",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "calendar",
+     "size": "M",
+     "clear": [
+      40,
+      72,
+      424,
+      262
+     ],
+     "ink": "2B2017"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      42,
+      292,
+      430,
+      514
+     ],
+     "ink": "F3E7D3"
+    },
+    {
+     "kind": "todo",
+     "size": "M",
+     "clear": [
+      42,
+      542,
+      426,
+      806
+     ],
+     "ink": "2B2017"
+    },
+    {
+     "kind": "weather",
+     "size": "M",
+     "clear": [
+      1244,
+      64,
+      1552,
+      246
+     ],
+     "ink": "F6EAD0"
+    }
+   ]
+  },
+  {
+   "id": "sunsetMod",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/02_Sunset_Mod.png",
+   "dock": [
+    510,
+    905,
+    1075,
+    978
+   ],
+   "meta": {
+    "title": "Sunset Mod",
+    "tagline": "Terracotta waves, a sun-ray print and a quiet sunset sea.",
+    "card": "F6E4D6",
+    "ink": "7A3322",
+    "accent": "D9663A",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "retro",
+     "dreamy"
+    ],
+    "tags": "70s retro mod sunset terracotta waves sea palm vinyl",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      1078,
+      34,
+      1550,
+      168
+     ],
+     "ink": "8A3A24"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1078,
+      190,
+      1350,
+      420
+     ],
+     "ink": "7A3322"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1078,
+      442,
+      1550,
+      596
+     ],
+     "ink": "6B2F20"
+    },
+    {
+     "kind": "todo",
+     "size": "M",
+     "clear": [
+      1078,
+      620,
+      1410,
+      792
+     ],
+     "ink": "6B2F20"
+    }
+   ],
+   "menubar": false
+  },
+  {
+   "id": "discoTypeStudio",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/03_Disco_Type_Studio.png",
+   "dock": [
+    428,
+    905,
+    1160,
+    980
+   ],
+   "meta": {
+    "title": "Disco Type Studio",
+    "tagline": "Disco lettering, record rings and checkerboard stripes in rust and ochre.",
+    "card": "F3E7D4",
+    "ink": "3B2418",
+    "accent": "C4501F",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "retro",
+     "pop"
+    ],
+    "tags": "70s retro disco type studio vinyl rings checkerboard rust ochre",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      962,
+      78,
+      1280,
+      286
+     ],
+     "ink": "F6EEE0",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1302,
+      78,
+      1554,
+      288
+     ],
+     "ink": "3B2418"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      962,
+      312,
+      1336,
+      498
+     ],
+     "ink": "F4E9D8"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1356,
+      312,
+      1554,
+      498
+     ],
+     "ink": "3B2418"
+    }
+   ]
+  },
+  {
+   "id": "warmVinylLounge",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/04_Warm_Vinyl_Lounge.png",
+   "dock": [
+    418,
+    893,
+    1172,
+    980
+   ],
+   "meta": {
+    "title": "Warm Vinyl Lounge",
+    "tagline": "A lamplit listening room with a turntable, plants and warm paper notes.",
+    "card": "F2E3CB",
+    "ink": "3B2A20",
+    "accent": "B5532C",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "retro",
+     "night"
+    ],
+    "tags": "70s retro warm vinyl lounge turntable lamp plants amber evening",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      62,
+      72,
+      398,
+      258
+     ],
+     "ink": "F3E7D5",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      62,
+      288,
+      398,
+      530
+     ],
+     "ink": "3B2A20"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      434,
+      214,
+      720,
+      498
+     ],
+     "ink": "3B2A20"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      992,
+      112,
+      1312,
+      346
+     ],
+     "ink": "2E2018"
+    }
+   ]
+  },
+  {
+   "id": "groovyFlora",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/05_Groovy_Flora.png",
+   "dock": null,
+   "meta": {
+    "title": "Groovy Flora",
+    "tagline": "Big hand-lettered flowers, ochre and olive and a sunny garden of notes.",
+    "card": "F5E8CE",
+    "ink": "4A3A20",
+    "accent": "C9892A",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "flower",
+    "collections": [
+     "retro",
+     "dreamy",
+     "indie"
+    ],
+    "tags": "70s retro groovy flora flowers daisy ochre olive garden collage",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      574,
+      98,
+      928,
+      342
+     ],
+     "ink": "4B4A22"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      958,
+      98,
+      1238,
+      372
+     ],
+     "ink": "4A3A20"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1264,
+      106,
+      1538,
+      378
+     ],
+     "ink": "4A3A20"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      548,
+      446,
+      1074,
+      696
+     ],
+     "ink": "3A2E18"
+    }
+   ]
+  },
+  {
+   "id": "tangerineGrid",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/06_Tangerine_Grid.png",
+   "dock": null,
+   "meta": {
+    "title": "Tangerine Grid",
+    "tagline": "A tangerine tile grid of waves, suns, moons and warm morning light.",
+    "card": "F2DEC0",
+    "ink": "2B1D14",
+    "accent": "D9531E",
+    "dark": false,
+    "font": "serif",
+    "style": "poster",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "retro",
+     "pop"
+    ],
+    "tags": "70s retro tangerine grid tiles waves suns moons orange brown poster",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "calendar",
+     "size": "M",
+     "clear": [
+      28,
+      24,
+      420,
+      266
+     ],
+     "ink": "F6E7D3"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      28,
+      292,
+      420,
+      632
+     ],
+     "ink": "2B1D14"
+    },
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      1070,
+      26,
+      1562,
+      284
+     ],
+     "ink": "F0E2C8"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1068,
+      306,
+      1560,
+      534
+     ],
+     "ink": "2B1D14"
+    }
+   ],
+   "menubar": false
+  },
+  {
+   "id": "oliveSunset",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/07_Olive_Sunset.png",
+   "dock": [
+    515,
+    905,
+    1070,
+    978
+   ],
+   "meta": {
+    "title": "Olive Sunset",
+    "tagline": "Olive hills, a large orange sun and quiet script by the sea.",
+    "card": "EFE2CC",
+    "ink": "3E3A22",
+    "accent": "C0652E",
+    "dark": false,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "retro",
+     "dreamy"
+    ],
+    "tags": "70s retro olive sunset hills sea script polaroid paper warm",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      58,
+      72,
+      382,
+      290
+     ],
+     "ink": "4B4A22",
+     "face": "stacked"
+    },
+    {
+     "kind": "calendar",
+     "size": "M",
+     "clear": [
+      418,
+      72,
+      768,
+      290
+     ],
+     "ink": "EDE4D0"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      58,
+      318,
+      556,
+      528
+     ],
+     "ink": "F3E7D3"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      584,
+      320,
+      826,
+      528
+     ],
+     "ink": "2E2A1C"
+    }
+   ]
+  },
+  {
+   "id": "funkyAnalog",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/08_Funky_Analog.png",
+   "dock": [
+    447,
+    890,
+    1153,
+    978
+   ],
+   "meta": {
+    "title": "Funky Analog",
+    "tagline": "Fat funky type, a flip clock and turntable warmth on charcoal.",
+    "card": "F2E4CC",
+    "ink": "3A2418",
+    "accent": "C0452C",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "retro",
+     "pop"
+    ],
+    "tags": "70s retro funky analog flip clock turntable charcoal rust stripes",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      84,
+      350,
+      468,
+      500
+     ],
+     "ink": "F8F0E0",
+     "face": "flip"
+    },
+    {
+     "kind": "date",
+     "size": "S",
+     "clear": [
+      490,
+      338,
+      574,
+      498
+     ],
+     "ink": "B83A28"
+    },
+    {
+     "kind": "calendar",
+     "size": "M",
+     "clear": [
+      42,
+      516,
+      372,
+      728
+     ],
+     "ink": "E8DCC4"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      884,
+      144,
+      1186,
+      386
+     ],
+     "ink": "2B1F18"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1006,
+      414,
+      1262,
+      728
+     ],
+     "ink": "3A2418"
+    }
+   ]
+  },
+  {
+   "id": "paperPetals",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/09_Paper_Petals.png",
+   "dock": [
+    418,
+    895,
+    1170,
+    980
+   ],
+   "meta": {
+    "title": "Paper Petals",
+    "tagline": "Torn paper, pressed flowers and soft script in dusty rose and ochre.",
+    "card": "F3E3D0",
+    "ink": "4A2A1E",
+    "accent": "C2703F",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "flower",
+    "collections": [
+     "retro",
+     "dreamy",
+     "indie"
+    ],
+    "tags": "70s retro paper petals torn paper pressed flowers dusty rose ochre scrapbook",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "L",
+     "clear": [
+      838,
+      78,
+      1090,
+      338
+     ],
+     "ink": "4A2A1E",
+     "face": "stacked"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1124,
+      74,
+      1450,
+      312
+     ],
+     "ink": "4A2A1E"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1118,
+      346,
+      1550,
+      506
+     ],
+     "ink": "4A2A1E"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1128,
+      542,
+      1450,
+      776
+     ],
+     "ink": "4A2A1E"
+    }
+   ]
+  },
+  {
+   "id": "cocoaMod",
+   "file": "batch/All_Set_Funky_Themes_Batch_5_Retro_70s_Mod_Funk/10_Cocoa_Mod.png",
+   "dock": null,
+   "meta": {
+    "title": "Cocoa Mod",
+    "tagline": "Cocoa browns, record arches and warm paper notes after dark.",
+    "card": "F0DCC0",
+    "ink": "3A2418",
+    "accent": "B5532C",
+    "dark": true,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "warm",
+    "charm": "star",
+    "collections": [
+     "retro",
+     "night"
+    ],
+    "tags": "70s retro cocoa mod brown arches vinyl torn paper warm dark",
+    "radius": 18
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "S",
+     "clear": [
+      44,
+      62,
+      222,
+      276
+     ],
+     "ink": "F3D8B8",
+     "face": "stacked"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      240,
+      72,
+      476,
+      264
+     ],
+     "ink": "3A2418"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      44,
+      306,
+      480,
+      474
+     ],
+     "ink": "F3D8B8"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      42,
+      504,
+      412,
+      756
+     ],
+     "ink": "3A2418"
+    }
+   ]
+  }
+ ]
+}
