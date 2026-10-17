@@ -47,7 +47,8 @@ import sys
 import tempfile
 import urllib.parse
 
-BIN = "/opt/homebrew/bin"
+# ALLSET_PG_BIN: one Postgres version's own tools (scripts/cloud/server.sh passes 17's).
+BIN = os.environ.get("ALLSET_PG_BIN", "/opt/homebrew/bin")
 PSQL = f"{BIN}/psql" if os.path.exists(f"{BIN}/psql") else "psql"
 PG_DUMP = f"{BIN}/pg_dump" if os.path.exists(f"{BIN}/pg_dump") else "pg_dump"
 RSYNC = "/usr/bin/rsync"

@@ -83,7 +83,14 @@ public struct WidgetTheme: Identifiable, Sendable {
     /// The kit's widgets on a screen whose visible area is `bounds`, from the top left.
     public func kitWidgets(screenName: String?, bounds: CGSize) -> [WidgetInstance] {
         let step = WidgetSize.small.dimensions.width + WidgetLayout.spacing
-        return kit.map { item in
+        // These sparse editorial sets lose an outer column or bottom row on
+        // compact displays instead of snapping their cards onto one another.
+        let compactEdit = DatasetTwoThemes.design(id) != nil
+        let visibleKit = kit.filter { item in
+            !compactEdit || ((bounds.width >= 800 || item.column < 4) &&
+                             (bounds.height >= 720 || item.row < 3))
+        }
+        return visibleKit.map { item in
             let offset = CGPoint(x: WidgetLayout.margin + Double(item.column) * step,
                                  y: WidgetLayout.margin + Double(item.row) * step)
             var widget = styled(WidgetInstance(kind: item.kind, size: item.size, screenName: screenName, offset: offset))
@@ -187,10 +194,16 @@ enum Kit {
 extension WidgetTheme {
     public static let all: [WidgetTheme] = moodboards + fandom + colour + [midnightAurora, cloudNine, goodThings, pinkLatte, coquette, grunge, diva, luxeNoir, sepia,
                                             vigilante, neonNights, darkAcademia, midnightLofi, goth]
+                                            + StudioOriginalThemes.all.map(\.theme)
+                                            + ReferenceThemes.all.map(\.theme)
+                                            + DatasetTwoThemes.all.map(\.theme)
 
     /// Whether the wallpaper is dark (a night photo counts as dark).
     public var isDark: Bool {
-        switch wallpaper {
+        if let reference = ReferenceThemes.design(id) { return reference.dark }
+        if let original = StudioOriginalThemes.design(id) { return original.dark }
+        if let newEdit = DatasetTwoThemes.design(id) { return newEdit.dark }
+        return switch wallpaper {
         case .art(let piece): !piece.palette.isLight
         case .photo, .video, .library: true
         }

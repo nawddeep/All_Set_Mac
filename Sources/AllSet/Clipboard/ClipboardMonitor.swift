@@ -33,7 +33,7 @@ final class ClipboardMonitor {
     /// second, less often on battery, in Low Power Mode or when hot (the
     /// policy's pace); it's a single number comparison, but each check wakes the Mac.
     func start() {
-        guard timer == nil else { return }
+        guard activationObserver == nil else { return }
         if let front = NSWorkspace.shared.frontmostApplication?.bundleIdentifier { frontSinceCheck = [front] }
         activationObserver = NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
@@ -45,10 +45,19 @@ final class ClipboardMonitor {
         }
         schedule()
         observe({ [services] in services.ui.performance.clipboardInterval }) { [weak self] _ in self?.schedule() }
+        observe({ [services] in services.clipboard.settings.isEnabled }) { [weak self] _ in self?.schedule() }
     }
 
+    /// The timer exists only while history is on: with it off (as it is until
+    /// the person turns it on) there is nothing to record, and no reason to
+    /// wake the Mac twice a second.
     private func schedule() {
+        let wasRunning = timer != nil
         timer?.invalidate()
+        timer = nil
+        guard services.clipboard.settings.isEnabled else { return }
+        // Whatever was copied while history was off stays out of it.
+        if !wasRunning { changeCount = NSPasteboard.general.changeCount }
         let interval = services.ui.performance.clipboardInterval
         let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.check() }
@@ -156,6 +165,9 @@ final class ClipboardMonitor {
         }
         ownChangeCount = pasteboard.changeCount
         changeCount = pasteboard.changeCount
+        // Dated now: the store keeps newest first, so an old date left it where it was.
+        var item = item
+        item.date = .now
         services.clipboard.add(item)
     }
 
@@ -233,7 +245,9 @@ enum ShelfDrop {
                 let suggestedName = provider.suggestedName
                 provider.loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { temporary, _ in
                     guard let temporary else { return }
-                    let name = suggestedName.map { $0 + "." + temporary.pathExtension } ?? temporary.lastPathComponent
+                    // A browser's name for the picture is its page's to choose: no path separators.
+                    let name = (suggestedName.map { $0 + "." + temporary.pathExtension } ?? temporary.lastPathComponent)
+                        .replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-")
                     let destination = directory.appendingPathComponent(UUID().uuidString.prefix(6) + "-" + name)
                     guard (try? FileManager.default.copyItem(at: temporary, to: destination)) != nil else { return }
                     Task { @MainActor in shelf.add([destination]) }

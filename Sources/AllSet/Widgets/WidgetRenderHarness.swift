@@ -389,21 +389,61 @@ extension WidgetRenderHarness {
         try? ArtGPU.compileNow()
         services.monitor.start()
         let cache = services.themePreviews
-        for set in ThemeLibrary.all {
+        let collection = UserDefaults.standard.string(forKey: "themeCollection").flatMap(ThemeCollection.init(rawValue:))
+        let requestedIDs = Set((UserDefaults.standard.string(forKey: "themeIDs") ?? "")
+            .split(separator: ",").map { "setup.\($0)" })
+        let collectionSets = collection.map { ThemeLibrary.sets(in: $0) } ?? ThemeLibrary.all
+        let sets = requestedIDs.isEmpty ? collectionSets : collectionSets.filter { requestedIDs.contains($0.id) }
+        if collection == .datasetTwo || collection == .desktopEdit || collection == .studioOriginals {
+            let ids = sets.map(\.id)
+            // Warm both stores before comparing lookup work.
+            _ = ThemeWidgetCatalog.all.count
+            _ = ThemeWidgetCatalog.widgets(in: ids[0]).count
+            var scanned = 0, indexed = 0
+            let scanStart = CACurrentMediaTime()
+            for _ in 0..<500 {
+                for id in ids { scanned += ThemeWidgetCatalog.all.filter { $0.setID == id }.count }
+            }
+            let scanTime = CACurrentMediaTime() - scanStart
+            let indexStart = CACurrentMediaTime()
+            for _ in 0..<500 {
+                for id in ids { indexed += ThemeWidgetCatalog.widgets(in: id).count }
+            }
+            print(String(format: "LOOKUP 12500 calls: scan %.2f ms, indexed %.2f ms; matched %d / %d widgets", scanTime * 1000,
+                         (CACurrentMediaTime() - indexStart) * 1000, scanned, indexed))
+        }
+        for set in sets {
             let appearances = set.designTheme?.followsAppearance == true ? [false, true] : [set.isDark]
             for dark in appearances {
-                cache.request(set, dark: dark, services: services)
-                for _ in 0..<300 where cache.image(for: set, dark: dark) == nil { try? await Task.sleep(for: .milliseconds(100)) }
-                if let image = cache.image(for: set, dark: dark), let tiff = image.tiffRepresentation,
-                   let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) {
-                    try? png.write(to: folder.appendingPathComponent("set-\(set.id)-\(dark ? "dark" : "light").png"))
+                for variant in [ThemePreviewVariant.desktop, .card] {
+                    cache.request(set, dark: dark, variant: variant, services: services)
+                    for _ in 0..<300 where cache.image(for: set, dark: dark, variant: variant) == nil { try? await Task.sleep(for: .milliseconds(100)) }
+                    if let image = cache.image(for: set, dark: dark, variant: variant), let tiff = image.tiffRepresentation,
+                       let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:]) {
+                        try? png.write(to: folder.appendingPathComponent("\(variant == .card ? "card" : "set")-\(set.id)-\(dark ? "dark" : "light").png"))
+                    } else { print("MISSING preview \(set.id) \(variant)") }
                 }
             }
+        if collection == .datasetTwo || collection == .desktopEdit || collection == .studioOriginals {
+                let widgets = ThemeWidgetCatalog.widgets(in: set.id)
+                let view = VStack(alignment: .leading, spacing: 12) {
+                    Text("\(set.name) · \(widgets.count) widgets").font(.title2).foregroundStyle(.white)
+                    LazyVGrid(columns: Array(repeating: GridItem(.fixed(270)), count: 4), spacing: 12) {
+                        ForEach(widgets) { ThemeWidgetCard(widget: $0, services: services, showThemeName: true).frame(width: 270, height: 220) }
+                    }
+                    Spacer(minLength: 0)
+                }.padding(20).background(Color(white: 0.06)).preferredColorScheme(.dark)
+                if let image = await capture(view, size: CGSize(width: 1160, height: 780)),
+                   let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) {
+                    try? png.write(to: folder.appendingPathComponent("widgets-\(set.id).png"))
+                }
+            }
+            print("RENDERED \(set.id) · \(ThemeWidgetCatalog.widgets(in: set.id).count) widgets")
         }
         for (name, view) in [("page-themes", AnyView(ThemesPage(services: services))),
-                             ("page-seven", AnyView(ThemeDetailPage(setID: "setup.seven", services: services))),
-                             ("page-americana", AnyView(ThemeDetailPage(setID: "setup.americana", services: services)))] {
-            if let image = await capture(view.background(Color(nsColor: .windowBackgroundColor)), size: CGSize(width: 1100, height: 1500)),
+                             ("page-detail", AnyView(ThemeDetailPage(setID: sets.first?.id ?? "setup.seven", services: services))),
+                             ("page-widgets", AnyView(CinematicCatalog(services: services, width: 1060, filter: .all, category: nil, query: "", themesOnly: true, favoriteIDs: nil)))] {
+            if let image = await capture(view.background(Color(nsColor: .windowBackgroundColor)).preferredColorScheme(.dark), size: CGSize(width: 1100, height: 900)),
                let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) {
                 try? png.write(to: folder.appendingPathComponent("\(name).png"))
             }

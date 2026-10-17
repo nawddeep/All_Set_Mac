@@ -291,6 +291,15 @@ final class DesktopWidgetController {
         }
         guard let window = windows.removeValue(forKey: id) else { return }
         defer { updatePointerWatch() }
+        // Gone mid-drag (a theme went on, Undo, widgets hidden): its "ended" never
+        // gets past the window lookup, and a drag left open stops the grid tidying
+        // for good.
+        if drag?.id == id || resize?.id == id {
+            drag = nil
+            resize = nil
+            resizeResult = nil
+            gridOverlay.hide()
+        }
         window.orderOut(nil)
         if spares.count < Self.spareLimit {
             (window.contentView as? FirstClickHostingView<WidgetRoot>)?.rootView = WidgetRoot.empty(services: services)

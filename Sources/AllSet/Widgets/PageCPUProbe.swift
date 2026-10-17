@@ -701,6 +701,11 @@ enum PageCPUProbe {
         window.contentViewController = controller
         window.setContentSize(NSSize(width: 1280, height: 800))
         window.orderFrontRegardless()
+        // The real window's relief from AppKit's per-frame drag-region bookkeeping
+        // (`ScrollingWindowRelief`); `NORELIEF=1` leaves it out, for comparing.
+        let relief = ScrollingWindowRelief()
+        if ProcessInfo.processInfo.environment["NORELIEF"] == nil { relief.attach(to: window) }
+        defer { relief.stop() }
         // Each page twice: the first pass pays for first sight (previews
         // drawn, tiles made); the second is what scrolling feels like after.
         let onlyScroll = ProcessInfo.processInfo.environment["ONLY"]
@@ -737,6 +742,10 @@ enum PageCPUProbe {
                 if y > range || y < 0 { step = -step; y = min(max(y, 0), range) }
                 clip.scroll(to: NSPoint(x: 0, y: y))
                 scroll.reflectScrolledClipView(clip)
+                // A trackpad scroll says so on every step.
+                if sendsLiveNotifications {
+                    NotificationCenter.default.post(name: NSScrollView.didLiveScrollNotification, object: scroll)
+                }
                 try? await Task.sleep(for: .milliseconds(16))
                 let now = CACurrentMediaTime()
                 gaps.append(now - last)
@@ -754,6 +763,13 @@ enum PageCPUProbe {
                          gaps[gaps.count / 2] * 1000, p95, (gaps.last ?? 0) * 1000,
                          gaps.filter { $0 > 0.033 }.count, range))
             clip.scroll(to: .zero)
+            // The window must be movable again the moment a scroll ends, and, for a
+            // scroll that never says it ended, shortly after it last moved.
+            let afterEnd = window.isMovable
+            NotificationCenter.default.post(name: NSScrollView.willStartLiveScrollNotification, object: scroll)
+            let during = window.isMovable
+            try? await Task.sleep(for: .seconds(1))
+            print("  window movable: after the scroll \(afterEnd), mid-scroll \(during), 1 s after an unfinished scroll \(window.isMovable)")
         }
         window.close()
     }

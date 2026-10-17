@@ -21,8 +21,11 @@ name: Release
 #   APPLE_TEAM_ID                the team id
 #   APPLE_APP_PASSWORD           an app-specific password for that Apple ID
 #
-# The release never embeds a wallpaper-server address: that only comes from a
-# local scripts/local.env, which isn't in the repository.
+# The release never embeds the private wallpaper-server address: that only comes
+# from a local scripts/local.env, which isn't in the repository. A public
+# library is different: set the repository variable ALLSET_PUBLIC_LIBRARY_URL
+# (Settings › Secrets and variables › Actions › Variables) to its https address
+# and the released app reads its wallpapers from there, with no key.
 on:
   push:
     tags: ['v*']
@@ -129,6 +132,7 @@ jobs:
         env:
           ALLSET_VERSION: ${{ steps.version.outputs.bundle_version }}
           ALLSET_SIGN_IDENTITY: ${{ steps.signing.outputs.identity }}
+          ALLSET_PUBLIC_LIBRARY_URL: ${{ vars.ALLSET_PUBLIC_LIBRARY_URL }}
         run: ALLSET_APP_DIR="$PWD/dist/AllSet.app" scripts/build-app.sh
 
       - name: Notarize the app

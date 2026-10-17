@@ -1,0 +1,56 @@
+# The public wallpaper library: the folder publish_catalog.py builds, and
+# nothing else. No Tailscale, no key, no database: whoever has the address can
+# read catalog.json and the files it lists, and that is all this serves.
+#
+# Three settings, from the environment:
+#   ALLSET_PUBLIC_DIR   the public folder (required)
+#   ALLSET_PUBLIC_BIND  the interface to listen on. Default 127.0.0.1: only
+#                       programs on this Mac (a tunnel's connector included)
+#                       can connect. 0.0.0.0 when the router forwards to it.
+#   ALLSET_PUBLIC_SITE  the address. Default http://127.0.0.1:8090, this Mac
+#                       only. On the real server it is the public name, e.g.
+#                       library.example.com, and Caddy gets its HTTPS
+#                       certificate by itself.
+#
+#   scripts/cloud/server.sh serve          # this Mac only
+#   caddy validate --config scripts/cloud/Caddyfile.public --adapter caddyfile
+#
+# The storage folder and the database are never under ALLSET_PUBLIC_DIR
+# (publish_catalog.py refuses to run if they are), so no request reaches them.
+{
+	admin off
+	# A client that opens a connection and says nothing doesn't hold it. There is
+	# no limit on requests per client here (stock Caddy has none): that belongs
+	# to whatever stands in front, a tunnel or a CDN.
+	servers {
+		timeouts {
+			read_header 10s
+			idle 2m
+		}
+	}
+}
+
+{$ALLSET_PUBLIC_SITE:http://127.0.0.1:8090} {
+	bind {$ALLSET_PUBLIC_BIND:127.0.0.1}
+	root * {$ALLSET_PUBLIC_DIR}
+
+	# Read-only.
+	@write not method GET HEAD
+	respond @write 405
+
+	# Dot files, and a file publish_catalog.py is still putting in place.
+	@hidden path_regexp (^|/)\.|\.publishing$
+	respond @hidden 404
+
+	# The list changes when a publish changes it: checked again after a minute.
+	# A wallpaper's file can be re-rendered under the same name: a day.
+	@catalog path /catalog.json
+	header @catalog Cache-Control "public, max-age=60"
+	@files not path /catalog.json
+	header @files Cache-Control "public, max-age=86400"
+	header X-Content-Type-Options nosniff
+
+	encode zstd gzip
+	# No folder listings: a folder's address answers 404.
+	file_server
+}

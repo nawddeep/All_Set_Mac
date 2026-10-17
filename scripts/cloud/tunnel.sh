@@ -16,7 +16,7 @@ DELETE_PORT=8081
 
 # The command holding a local port, or nothing.
 listener() {
-    lsof -nP -iTCP:"$1" -sTCP:LISTEN -Fc 2>/dev/null | sed -n 's/^c//p' | head -1
+    lsof -nP -iTCP:"$1" -sTCP:LISTEN -Fc 2>/dev/null | sed -n 's/^c//p' | head -1 || true
 }
 
 # Up means both forwards are held by ssh (a local Postgres on 5432 isn't the

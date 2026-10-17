@@ -168,7 +168,8 @@ jobs:
     # The wallpaper server scripts against a throwaway Postgres: deletes that
     # can't remove another wallpaper's files or leave files and database
     # disagreeing, the catalog's sharing rule and paging, catalog sync keeping
-    # keys, schema migrations, and a backup restored and verified by the drill.
+    # keys, schema migrations, a backup restored and verified by the drill, and
+    # the public folder: only licensed, published wallpapers ever reach it.
     runs-on: macos-26
     timeout-minutes: 15
     steps:
@@ -178,6 +179,6 @@ jobs:
       - name: Test
         run: |
           set -o pipefail
-          /usr/bin/python3 -m unittest -v scripts/test_wallpaper_library.py scripts/test_check_probe_budgets.py scripts/cloud/test_sync_catalog.py scripts/cloud/test_delete_service.py scripts/cloud/test_catalog_service.py scripts/cloud/test_migrate.py scripts/cloud/test_backup.py scripts/cloud/test_install_services.py 2>&1 | tee server-tests.log
+          /usr/bin/python3 -m unittest -v scripts/test_wallpaper_library.py scripts/test_check_probe_budgets.py scripts/cloud/test_sync_catalog.py scripts/cloud/test_delete_service.py scripts/cloud/test_catalog_service.py scripts/cloud/test_migrate.py scripts/cloud/test_backup.py scripts/cloud/test_install_services.py scripts/cloud/test_publish_catalog.py scripts/cloud/test_load_library.py scripts/cloud/test_install_public_server.py 2>&1 | tee server-tests.log
           # Skipped tests (no Postgres) would pass silently: require that none were.
           ! grep -q "skipped" server-tests.log

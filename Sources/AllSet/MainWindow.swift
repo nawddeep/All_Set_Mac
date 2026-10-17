@@ -47,6 +47,7 @@ final class MainWindowController: NSObject, NSWindowDelegate {
     static let shared = MainWindowController()
 
     private var window: NSWindow?
+    private let scrollRelief = ScrollingWindowRelief()
 
     /// Closing lets the whole window go. Kept, a closed window's pages stay
     /// alive unseen: no `onDisappear` runs, so a page that asked for live
@@ -99,9 +100,85 @@ final class MainWindowController: NSObject, NSWindowDelegate {
             window.setFrameAutosaveName("AllSetMain")
             window.delegate = self
             self.window = window
+            scrollRelief.attach(to: window)
         }
         NSApp.activate()
         window?.makeKeyAndOrderFront(nil)
+    }
+}
+
+/// Keeps the window from being movable for as long as something in it is being
+/// scrolled.
+///
+/// The window's content runs under its title bar, so AppKit keeps a map of where
+/// a press would drag the window and rebuilds it on every frame the content
+/// changes. SwiftUI answers by walking every card on the page: measured, 19% of
+/// the main thread while Themes scrolls and 26% while the gallery does. A window
+/// that can't be moved has no such map. Nobody drags a window in the middle of a
+/// scroll, so it's given up then and rebuilt once, when the scroll ends.
+@MainActor
+final class ScrollingWindowRelief {
+    private weak var window: NSWindow?
+    private var observers: [NSObjectProtocol] = []
+    /// Scroll views mid-scroll: a shelf can end its scroll while the page's goes on.
+    private let active = NSHashTable<NSScrollView>.weakObjects()
+    private var lastScroll = 0.0
+    private var watchdog: Timer?
+    /// A scroll that never says it ended (its view went away mid-scroll) still
+    /// lets go of the window this long after it last moved.
+    private static let quiet = 0.4
+
+    func attach(to window: NSWindow) {
+        release()
+        self.window = window
+        guard observers.isEmpty else { return }
+        let center = NotificationCenter.default
+        for name in [NSScrollView.willStartLiveScrollNotification, NSScrollView.didLiveScrollNotification] {
+            observers.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
+                let scroll = note.object as? NSScrollView
+                MainActor.assumeIsolated { self?.scrolled(scroll) }
+            })
+        }
+        observers.append(center.addObserver(forName: NSScrollView.didEndLiveScrollNotification, object: nil, queue: .main) { [weak self] note in
+            let scroll = note.object as? NSScrollView
+            MainActor.assumeIsolated { self?.ended(scroll) }
+        })
+    }
+
+    func stop() {
+        observers.forEach(NotificationCenter.default.removeObserver)
+        observers = []
+        release()
+    }
+
+    private func scrolled(_ scroll: NSScrollView?) {
+        guard let scroll, let window, scroll.window === window else { return }
+        active.add(scroll)
+        lastScroll = CACurrentMediaTime()
+        if window.isMovable { window.isMovable = false }
+        guard watchdog == nil else { return }
+        let timer = Timer(timeInterval: Self.quiet / 2, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, CACurrentMediaTime() - self.lastScroll > Self.quiet else { return }
+                self.release()
+            }
+        }
+        timer.tolerance = Self.quiet / 4
+        RunLoop.main.add(timer, forMode: .common)
+        watchdog = timer
+    }
+
+    private func ended(_ scroll: NSScrollView?) {
+        guard let scroll, active.contains(scroll) else { return }
+        active.remove(scroll)
+        if active.allObjects.isEmpty { release() }
+    }
+
+    private func release() {
+        watchdog?.invalidate()
+        watchdog = nil
+        active.removeAllObjects()
+        if let window, !window.isMovable { window.isMovable = true }
     }
 }
 

@@ -178,13 +178,22 @@ public final class WallpaperStore {
         return URLSession(configuration: configuration)
     }()
 
+    /// The library server's API key (`LibraryKey`), read when a request starts.
+    /// Nil when this Mac has none; the request then goes without one.
+    @ObservationIgnored public var libraryBearer: (@MainActor () -> String?)?
+
     @ObservationIgnored private let fileURL: URL
     @ObservationIgnored public let directory: URL
     @ObservationIgnored private let log = Logger(subsystem: "com.pratik.allset", category: "wallpaper")
 
-    public init(directory: URL? = nil) {
-        let root = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+    /// Where the app keeps its wallpaper settings, videos and library.
+    public nonisolated static var defaultDirectory: URL {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("AllSet/Wallpaper", isDirectory: true)
+    }
+
+    public init(directory: URL? = nil) {
+        let root = directory ?? Self.defaultDirectory
         self.directory = root
         fileURL = root.appendingPathComponent("wallpaper.json")
         try? FileManager.default.createDirectory(at: root.appendingPathComponent("Videos"), withIntermediateDirectories: true)
@@ -240,20 +249,30 @@ public final class WallpaperStore {
             serverConfirmed = await Task.detached(priority: .utility) {
                 Set((try? Data(contentsOf: offloaded)).flatMap { try? JSONDecoder().decode([String].self, from: $0) } ?? [])
             }.value
-            let directory = libraryDirectory
+            let directory = libraryDirectory, log = log
+            let copiesBefore = libraryCopies
             // An entry whose files would lie outside the library is never used:
-            // every read, download and delete below trusts these paths.
-            let items = (catalog?.items ?? []).filter { video in
-                guard video.status != .unsupported else { return false }
-                let contained = [video.playback, video.still, video.thumbnail].allSatisfy { relative in
-                    relative.map { ContainedPath.resolve($0, in: directory) != nil } ?? true
+            // every read, download and delete below trusts these paths. Checked
+            // off the main thread with the disk checks: resolving three paths
+            // each for a thousand wallpapers held it for 80-95 ms at every launch.
+            let (items, copies) = await Task.detached(priority: .utility) { () -> ([LibraryVideo], Set<String>) in
+                let items = (catalog?.items ?? []).filter { video in
+                    guard video.status != .unsupported else { return false }
+                    let contained = [video.playback, video.still, video.thumbnail].allSatisfy { relative in
+                        relative.map { ContainedPath.resolve($0, in: directory) != nil } ?? true
+                    }
+                    if !contained { log.error("Ignoring library entry \(video.id, privacy: .public): a path leaves the library") }
+                    return contained
                 }
-                if !contained { log.error("Ignoring library entry \(video.id, privacy: .public): a path leaves the library") }
-                return contained
-            }
-            libraryCopies = Set(items.filter { video in
-                video.playback.map { FileManager.default.fileExists(atPath: directory.appendingPathComponent($0).path) } ?? false
-            }.map(\.id))
+                let copies = Set(items.filter { video in
+                    video.playback.map { FileManager.default.fileExists(atPath: directory.appendingPathComponent($0).path) } ?? false
+                }.map(\.id))
+                return (items, copies)
+            }.value
+            // A download landing or a copy freed while the disk was being read wins
+            // over what the scan saw of that file.
+            let landed = libraryCopies.subtracting(copiesBefore), freed = copiesBefore.subtracting(libraryCopies)
+            libraryCopies = copies.union(landed).subtracting(freed)
             #if DEBUG
             if hasDebugLibrary { return }
             #endif
@@ -327,8 +346,7 @@ public final class WallpaperStore {
         serverCheckInFlight = true
         Task {
             defer { serverCheckInFlight = false }
-            var request = URLRequest(url: url)
-            request.httpMethod = "HEAD"
+            let request = libraryRequest(url, method: "HEAD", bearer: libraryBearer?())
             let reachable: Bool
             if let (_, response) = try? await fetchSession.data(for: request),
                let code = (response as? HTTPURLResponse)?.statusCode {
@@ -341,7 +359,7 @@ public final class WallpaperStore {
         }
     }
 
-    public enum LibraryFetchError: Error { case noServer, incomplete }
+    public enum LibraryFetchError: Error { case noServer, incomplete, corrupt }
 
     /// Fetches a library video's file from `config.libraryServerURL` into the
     /// same relative path it lives at locally, so every other resolution
@@ -425,11 +443,13 @@ public final class WallpaperStore {
             guard let base = config.libraryServerURL, let root = URL(string: base) else { throw LibraryFetchError.noServer }
             guard let destination = ContainedPath.resolve(relative, in: libraryDirectory) else { throw LibraryFetchError.noServer }
             let remote = root.appendingPathComponent(relative)
+            // What the catalog says the file hashes to, when it says (a public library does).
+            let checksum = library.lazy.compactMap { $0.checksum(of: relative) }.first
             let newToken = UUID()
             token = newToken
             task = Task {
                 defer { self.finish(relative, token: newToken) }
-                return try await self.download(remote, to: destination, relative: relative)
+                return try await self.download(remote, to: destination, relative: relative, checksum: checksum)
             }
             inflight[relative] = (newToken, task, 1)
         }
@@ -454,7 +474,7 @@ public final class WallpaperStore {
         }
     }
 
-    private func download(_ remote: URL, to destination: URL, relative: String) async throws -> URL {
+    private func download(_ remote: URL, to destination: URL, relative: String, checksum: String? = nil) async throws -> URL {
         try FileManager.default.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
         fetches[relative] = 0
         fetching.insert(relative)
@@ -462,7 +482,7 @@ public final class WallpaperStore {
         let handle = DownloadHandle()
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                let task = fetchSession.downloadTask(with: remote) { temporary, response, error in
+                let task = fetchSession.downloadTask(with: libraryRequest(remote, bearer: libraryBearer?())) { temporary, response, error in
                     // The temporary file is gone once this returns, so move it now.
                     if let error {
                         continuation.resume(throwing: error)
@@ -471,6 +491,11 @@ public final class WallpaperStore {
                         let size = (try? FileManager.default.attributesOfItem(atPath: temporary.path))?[.size] as? Int64
                         if http.expectedContentLength > 0, size != http.expectedContentLength {
                             continuation.resume(throwing: LibraryFetchError.incomplete)
+                            return
+                        }
+                        // Nor one that isn't the file the catalog lists.
+                        if let checksum, FileDigest.sha256(of: temporary) != checksum.lowercased() {
+                            continuation.resume(throwing: LibraryFetchError.corrupt)
                             return
                         }
                         do {
@@ -565,6 +590,7 @@ public final class WallpaperStore {
         }
         let session = fetchSession
         let directory = libraryDirectory
+        let bearer = libraryBearer?()
         offloadProgress = (0, candidates.count)
         defer { offloadProgress = nil }
         var confirmed: [OffloadCandidate] = []
@@ -574,13 +600,13 @@ public final class WallpaperStore {
             var pending = candidates.makeIterator()
             for _ in 0..<8 {
                 guard let next = pending.next() else { break }
-                group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory)) }
+                group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory, bearer: bearer)) }
             }
             while let (candidate, held) = await group.next() {
                 if held { confirmed.append(candidate) } else { result.kept.append(candidate.relative) }
                 offloadProgress = ((offloadProgress?.done ?? 0) + 1, candidates.count)
                 if let next = pending.next() {
-                    group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory)) }
+                    group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory, bearer: bearer)) }
                 }
             }
         }
@@ -642,15 +668,14 @@ public final class WallpaperStore {
     /// Whether the server's copy of a file is the same as this Mac's: same size
     /// (a cheap HEAD first), then the same SHA-256 over its downloaded bytes.
     private nonisolated static func serverHolds(_ candidate: OffloadCandidate, root: URL, session: URLSession,
-                                                directory: URL) async -> Bool {
+                                                directory: URL, bearer: String?) async -> Bool {
         let remote = root.appendingPathComponent(candidate.relative)
-        var head = URLRequest(url: remote)
-        head.httpMethod = "HEAD"
+        let head = libraryRequest(remote, method: "HEAD", bearer: bearer)
         guard let (_, response) = try? await session.data(for: head),
               let http = response as? HTTPURLResponse, http.statusCode == 200,
               let length = http.value(forHTTPHeaderField: "Content-Length").flatMap(Int64.init),
               length == candidate.size else { return false }
-        guard let (downloaded, getResponse) = try? await session.download(for: URLRequest(url: remote)) else { return false }
+        guard let (downloaded, getResponse) = try? await session.download(for: libraryRequest(remote, bearer: bearer)) else { return false }
         defer { try? FileManager.default.removeItem(at: downloaded) }
         guard (getResponse as? HTTPURLResponse)?.statusCode == 200,
               let theirs = FileDigest.sha256(of: downloaded),
@@ -818,18 +843,23 @@ public final class WallpaperStore {
     }
 
     /// Copies videos in, so the wallpaper keeps working if the originals move.
+    /// The copying happens off the main thread: a film on an external drive or
+    /// another volume is a real copy, and the window froze for as long as it took.
     @discardableResult
-    public func importVideos(from urls: [URL]) -> [String] {
-        let imported = urls.filter(Self.isVideo).compactMap { url -> String? in
-            let name = UUID().uuidString + "." + url.pathExtension.lowercased()
-            do {
-                try FileManager.default.copyItem(at: url, to: videoURL(name))
-                return name
-            } catch {
-                log.error("Couldn't import \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
-                return nil
+    public func importVideos(from urls: [URL]) async -> [String] {
+        let folder = videosFolder, log = log
+        let imported = await Task.detached(priority: .userInitiated) {
+            urls.filter(Self.isVideo).compactMap { url -> String? in
+                let name = UUID().uuidString + "." + url.pathExtension.lowercased()
+                do {
+                    try FileManager.default.copyItem(at: url, to: folder.appendingPathComponent(name))
+                    return name
+                } catch {
+                    log.error("Couldn't import \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                    return nil
+                }
             }
-        }
+        }.value
         reloadVideos()
         return imported
     }
@@ -906,4 +936,14 @@ private final class DownloadHandle: @unchecked Sendable {
         lock.unlock()
         task?.cancel()
     }
+}
+
+/// A request to the library server, carrying its API key when this Mac has one.
+private func libraryRequest(_ url: URL, method: String? = nil, bearer: String?) -> URLRequest {
+    var request = URLRequest(url: url)
+    if let method { request.httpMethod = method }
+    if let bearer {
+        request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization")
+    }
+    return request
 }

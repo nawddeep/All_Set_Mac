@@ -23,6 +23,7 @@ struct ThemeComposition: View {
             let scale = max(geometry.size.width / Self.canvas.width, geometry.size.height / Self.canvas.height)
             ZStack(alignment: .topLeading) {
                 ThemeWallpaper(set: set, services: services, dark: dark, isLive: isLive)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
                 ZStack(alignment: .topLeading) {
                     ForEach(widgets) { widget in
                         WidgetBody(instance: widget, services: services)
@@ -35,6 +36,9 @@ struct ThemeComposition: View {
                 .environment(\.widgetIsPreview, true)
                 .environment(\.colorScheme, dark ? .dark : .light)
                 .scaleEffect(scale, anchor: .topLeading)
+                // Scaling changes drawing, not layout. Keep the full-sized
+                // widget canvas from enlarging and cropping the wallpaper.
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
                 .allowsHitTesting(false)
             }
             .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
@@ -259,7 +263,7 @@ final class ThemePreviewCache {
     @ObservationIgnored private let log = Logger(subsystem: "com.pratik.allset", category: "themes")
 
     /// Bump when the way previews are drawn changes, to redraw them all.
-    private static let drawingVersion = 5
+    private static let drawingVersion = 7
 
     /// The app's version: a release redraws previews; rebuilding the same one doesn't.
     private static let appVersion: String = {

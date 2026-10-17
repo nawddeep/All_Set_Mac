@@ -251,6 +251,10 @@ final class WallpaperController {
                     log.error("Couldn't set the system wallpaper: \(error.localizedDescription, privacy: .public)")
                 }
             }
+            // Only now that the replacement is in place: a still deleted before the
+            // new one existed left the system wallpaper pointing at nothing whenever
+            // the new one couldn't be made.
+            cleanUpOldStills(keeping: still)
         }
     }
 
@@ -281,7 +285,6 @@ final class WallpaperController {
         let size = NSScreen.screens.first?.frame.size ?? CGSize(width: 1470, height: 956)
         // A new name each time, since macOS ignores a changed file with the same name.
         let file = services.wallpaper.directory.appendingPathComponent("still-\(UUID().uuidString.prefix(8)).png")
-        cleanUpOldStills()
         switch source {
         case .art(let piece):
             // Drawing has to happen here; encoding and writing don't.
@@ -326,10 +329,10 @@ final class WallpaperController {
         return written
     }
 
-    private func cleanUpOldStills() {
+    private func cleanUpOldStills(keeping kept: URL) {
         let folder = services.wallpaper.directory
         let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
-        for file in files where file.lastPathComponent.hasPrefix("still-") {
+        for file in files where file.lastPathComponent.hasPrefix("still-") && file.lastPathComponent != kept.lastPathComponent {
             try? FileManager.default.removeItem(at: file)
         }
     }

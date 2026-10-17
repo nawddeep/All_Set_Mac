@@ -293,14 +293,15 @@ private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     /// reachable source root, plus a server configured to answer over a
     /// stubbed session — everything the fetch path actually needs, nothing
     /// it doesn't.
-    @MainActor private func missingLibraryVideo(relative: String = "live/f1.mp4") async throws -> (store: WallpaperStore, id: String) {
+    @MainActor private func missingLibraryVideo(relative: String = "live/f1.mp4",
+                                                checksums: [String: String] = [:]) async throws -> (store: WallpaperStore, id: String) {
         let home = FileManager.default.temporaryDirectory.appendingPathComponent("wallpaper-\(UUID())")
         let store = WallpaperStore(directory: home)
         let id = "f1"
         let catalog: [String: Any] = [
             "version": 1, "roots": [],
             "items": [["id": id, "title": "Fetchable", "category": "games", "root": "gone", "file": "1/f1.mp4",
-                      "playback": relative, "thumbnail": "thumbnails/f1.jpg"]],
+                      "playback": relative, "thumbnail": "thumbnails/f1.jpg", "checksums": checksums]],
         ]
         try FileManager.default.createDirectory(at: store.libraryDirectory, withIntermediateDirectories: true)
         try JSONSerialization.data(withJSONObject: catalog).write(to: store.libraryDirectory.appendingPathComponent("catalog.json"))
@@ -586,6 +587,23 @@ private final class StubURLProtocol: URLProtocol, @unchecked Sendable {
     }
 
     /// The wallpaper on the desktop isn't freed: it would only download straight back.
+    /// A public library's catalog says what each file hashes to.
+    @MainActor @Test func aDownloadThatIsNotTheFileTheCatalogListsIsRejected() async throws {
+        // SHA-256 of "the real file".
+        let listed = "0ab79b5f1d824d60ef1c3860705dca75d2438e7d3c4a4b123a02e0835364f400"
+        let (store, id) = try await missingLibraryVideo(checksums: ["playback": listed])
+        let local = store.libraryDirectory.appendingPathComponent("live/f1.mp4")
+        StubURLProtocol.handler = { _ in (200, Data("something else".utf8)) }
+        await #expect(throws: WallpaperStore.LibraryFetchError.corrupt) { try await store.fetchLibraryVideo(id) }
+        #expect(!FileManager.default.fileExists(atPath: local.path))
+
+        StubURLProtocol.handler = { _ in (200, Data("the real file".utf8)) }
+        try await store.fetchLibraryVideo(id)
+        #expect(try String(contentsOf: local, encoding: .utf8) == "the real file")
+        // The thumbnail has no checksum listed: it is taken as it comes.
+        try await store.fetchThumbnail(id)
+    }
+
     @MainActor @Test func freeingSpaceKeepsTheActiveWallpaper() async throws {
         let store = try await offloadableLibrary()
         store.set(.library("a"))

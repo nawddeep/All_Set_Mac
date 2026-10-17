@@ -4,13 +4,16 @@ import SwiftUI
 
 /// Ways to browse the library.
 enum ThemeDiscovery: String, CaseIterable, Identifiable {
-    case all, featured, trending, new, artist, football, music, popular, minimal, dark, colorful, developer, favorites
+    case all, datasetTwo, studioOriginals, desktopEdit, featured, trending, new, artist, football, music, popular, minimal, dark, colorful, developer, favorites
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .all: "All"
+        case .datasetTwo: "Monochrome Edit"
+        case .studioOriginals: "Studio Originals"
+        case .desktopEdit: "Desktop Edit"
         case .featured: "Featured"
         case .trending: "Recommended"
         case .new: "New"
@@ -29,6 +32,9 @@ enum ThemeDiscovery: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .all: "square.grid.2x2"
+        case .datasetTwo: "square.grid.3x3.topleft.filled"
+        case .studioOriginals: "circle.hexagongrid"
+        case .desktopEdit: "sparkles.rectangle.stack"
         case .featured: "star"
         case .trending: "chart.line.uptrend.xyaxis"
         case .new: "sparkle"
@@ -50,6 +56,9 @@ enum ThemeDiscovery: String, CaseIterable, Identifiable {
         let all = ThemeLibrary.all
         switch self {
         case .all: return all
+        case .datasetTwo: return ThemeLibrary.sets(in: .datasetTwo)
+        case .studioOriginals: return ThemeLibrary.sets(in: .studioOriginals)
+        case .desktopEdit: return ThemeLibrary.sets(in: .desktopEdit)
         case .featured: return all.filter { $0.collections.contains(.featured) }.sorted { stats.popularity($0) > stats.popularity($1) }
         case .trending: return all.sorted { stats.trending($0, now: now) > stats.trending($1, now: now) }.prefix(12).map { $0 }
         case .new:
@@ -71,6 +80,7 @@ enum ThemeDiscovery: String, CaseIterable, Identifiable {
 
     /// A vivid accent, or a colorful wallpaper.
     private static func isColorful(_ set: ThemeSet) -> Bool {
+        if set.collections.contains(.colourAndLight) { return true }
         if let theme = set.designTheme {
             let palette = theme.palette(dark: set.isDark)
             return palette.accent.hsvSaturation > 0.55 && !(theme.surface == .solid || theme.surface == .terminal)
@@ -228,6 +238,9 @@ struct ThemesPage: View {
             return fresh
         }
         var shelves: [Rail] = [
+            ("Monochrome Edit", claim(ThemeDiscovery.datasetTwo.sets(stats: stats)), .datasetTwo),
+            ("Studio Originals", claim(ThemeDiscovery.studioOriginals.sets(stats: stats)), .studioOriginals),
+            ("Desktop Edit", claim(ThemeDiscovery.desktopEdit.sets(stats: stats)), .desktopEdit),
             ("Football", claim(ThemeDiscovery.football.sets(stats: stats)), .football),
             ("Music Icons", claim(ThemeDiscovery.music.sets(stats: stats)), .music),
             ("Colour & Light", claim(ThemeLibrary.sets(in: .colourAndLight)), nil),
@@ -238,7 +251,7 @@ struct ThemesPage: View {
             ("Developer", claim(ThemeDiscovery.developer.sets(stats: stats)), .developer),
         ]
         shelves.append(("More Setups", claim(ThemeLibrary.all), nil))
-        let spotlight = ["midnightAurora", "albiceleste", "matchaMorning", "seven", "oceanGlass", "violetNoir", "americana"]
+        let spotlight = ["haloAtlas", "tideglass", "verdantAfterdark", "duneStudy", "prismWorkshop", "ribbonRoom", "cobaltPaddock"]
             .compactMap { ThemeLibrary.set("setup.\($0)") }
         return (spotlight, shelves)
     }

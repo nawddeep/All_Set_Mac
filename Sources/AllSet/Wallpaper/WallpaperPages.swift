@@ -49,7 +49,9 @@ struct ClassicWallpaperPage: View {
             }
             // Videos dropped anywhere on the page join this library.
             .dropDestination(for: URL.self) { urls, _ in
-                !store.importVideos(from: urls).isEmpty
+                let videos = urls.filter(WallpaperStore.isVideo)
+                Task { await store.importVideos(from: videos) }
+                return !videos.isEmpty
             } isTargeted: { isDropTarget = $0 }
 
             if let video = detailVideo {
@@ -218,7 +220,8 @@ private struct VideosSection: View {
         panel.allowedContentTypes = [.movie]
         panel.prompt = "Import"
         if panel.runModal() == .OK {
-            services.wallpaper.importVideos(from: panel.urls)
+            let urls = panel.urls
+            Task { await services.wallpaper.importVideos(from: urls) }
         }
     }
 }
@@ -638,10 +641,13 @@ private struct LibraryTile: View {
                                 .help("A still from the scene: its animation isn't included")
                         }
                         Spacer(minLength: 4)
-                        Text(video.resolutionLabel).foregroundStyle(.white.opacity(0.75))
+                        // One line of text, not three: every separate Text is its own
+                        // layer to draw and hand to the window server as the card arrives.
                         if let size = video.size {
-                            Text("·").foregroundStyle(.white.opacity(0.5))
-                            Text(Self.size(size)).foregroundStyle(.white.opacity(0.75))
+                            Text("\(Text(video.resolutionLabel).foregroundStyle(.white.opacity(0.75)))\(Text("  ·  ").foregroundStyle(.white.opacity(0.5)))\(Text(Self.size(size)).foregroundStyle(.white.opacity(0.75)))")
+                                .lineLimit(1).layoutPriority(1)
+                        } else {
+                            Text(video.resolutionLabel).foregroundStyle(.white.opacity(0.75))
                         }
                     }
                     .font(.caption.weight(.semibold))

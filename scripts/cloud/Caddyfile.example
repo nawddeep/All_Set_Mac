@@ -1,0 +1,29 @@
+# The part of the server's Caddy configuration that makes the wallpaper library
+# sign-in work. Add it to the existing site block for the Tailscale address
+# (port 8080); the lines for serving files stay as they are.
+#
+# The file server answers only for a signed-in person. Caddy asks catalog_service.py
+# (port 8082) whether the request's bearer token is a good session, and only then
+# serves the file. The account API lives under /api/ on the same address.
+#
+# Replace 100.x.y.z with this server's Tailscale address. Check the config
+# before reloading:  caddy validate --config /path/to/Caddyfile
+
+http://100.x.y.z:8080 {
+	# Sign-in, sign-out, password and "who am I": passed to the catalog service.
+	handle /api/* {
+		uri strip_prefix /api
+		reverse_proxy 100.x.y.z:8082
+	}
+
+	# Everything else is a wallpaper file. Each request must carry a session
+	# that /me accepts (200); 401 and 403 (temporary password) are refused.
+	handle {
+		forward_auth 100.x.y.z:8082 {
+			uri /me
+			header_up Authorization {http.request.header.Authorization}
+		}
+		root * /Users/YOU/AllSetStorage/wallpapers
+		file_server
+	}
+}

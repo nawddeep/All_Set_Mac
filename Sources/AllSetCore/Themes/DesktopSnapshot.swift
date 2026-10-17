@@ -42,8 +42,14 @@ public struct DesktopSnapshot: Codable, Equatable, Sendable {
         settings.widgetDesignTheme = designTheme
         settings.activeThemeSet = activeThemeSet
         settings.showWidgets = showWidgets
+        // Not part of the look, and newer than the snapshot: the system wallpapers
+        // noted since (which turning the live wallpaper off puts back; without
+        // them the person's own picture never returns) and the library server.
+        var restored = self.wallpaper
+        restored.originalWallpapers = wallpaper.config.originalWallpapers
+        restored.libraryServerURL = wallpaper.config.libraryServerURL
         // Only when it differs: setting it restarts the wallpaper.
-        if wallpaper.config != self.wallpaper { wallpaper.config = self.wallpaper }
+        if wallpaper.config != restored { wallpaper.config = restored }
     }
 }
 

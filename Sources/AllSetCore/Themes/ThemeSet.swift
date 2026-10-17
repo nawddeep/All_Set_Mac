@@ -164,7 +164,7 @@ public struct SetItem: Sendable {
 public enum ThemeCollection: String, CaseIterable, Identifiable, Sendable {
     case featured, artistWorlds, night, dreamy, retro, pop, indie, rock, hipHop, rnb, cinematic, cosmic, minimal
     case luxury, neon, ambient, zen, designer, developer, colourAndLight
-    case football, musicIcons
+    case football, musicIcons, desktopEdit, studioOriginals, datasetTwo
 
     public var id: String { rawValue }
 
@@ -192,6 +192,9 @@ public enum ThemeCollection: String, CaseIterable, Identifiable, Sendable {
         case .colourAndLight: "Colour & Light"
         case .football: "Football"
         case .musicIcons: "Music Icons"
+        case .desktopEdit: "Desktop Edit"
+        case .studioOriginals: "Studio Originals"
+        case .datasetTwo: "Monochrome Edit"
         }
     }
 }

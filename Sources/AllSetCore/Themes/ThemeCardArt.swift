@@ -60,7 +60,9 @@ public enum ThemeCardArt {
         "setup.americana": Picks(hero: 0, title: 1, flankers: [3, 9, 2, 8]),
         // The portrait under the bare clock, with the script word, the crown and the tiger.
         "setup.leopardNoir": Picks(hero: 2, title: 0, flankers: [5, 11, 10, 1]),
-    ]
+    ].merging(Dictionary(uniqueKeysWithValues: ReferenceThemes.all.map { ("setup.\($0.theme.id)", $0.cardArt) })) { _, new in new }
+     .merging(Dictionary(uniqueKeysWithValues: StudioOriginalThemes.all.map { ("setup.\($0.theme.id)", $0.cardArt) })) { _, new in new }
+     .merging(Dictionary(uniqueKeysWithValues: DatasetTwoThemes.all.map { ("setup.\($0.theme.id)", $0.cardArt) })) { _, new in new }
 
     /// The widgets a card shows when nobody has chosen them: the theme's
     /// word art across the top, its first large widget in the middle, and

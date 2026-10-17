@@ -116,9 +116,13 @@ def main():
     if not url:
         sys.exit("No database password in the keychain, and no DATABASE_URL set.\n"
                  "    security add-generic-password -s allset-postgres -a allset -w '<password>'")
-    if not tunnel_is_open():
-        sys.exit("Nothing is listening on localhost:5432 — open the tunnel first:\n"
-                 "    scripts/cloud/tunnel.sh")
+    # The port DATABASE_URL names: 5432 is the tunnel's, another is a database
+    # of this Mac's own (scripts/cloud/server.sh).
+    port = urllib.parse.urlsplit(url).port or 5432
+    if not tunnel_is_open(port):
+        sys.exit(f"Nothing is listening on localhost:{port} — open the tunnel first:\n"
+                 "    scripts/cloud/tunnel.sh" if port == 5432 else
+                 f"Nothing is listening on localhost:{port} — start that database first.")
 
     library = env.get("ALLSET_LIBRARY") or os.path.expanduser(
         "~/Library/Application Support/AllSet/Wallpaper/Library")

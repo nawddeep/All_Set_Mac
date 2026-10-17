@@ -40,11 +40,37 @@ if [ -z "$(ls -A "$NOTICES")" ]; then
   exit 1
 fi
 
-# Plain HTTP for exactly one host: the personal, Tailscale-only library server.
-# Its address isn't in the source; set ALLSET_LIBRARY_SERVER_HOST, or put
-# ALLSET_LIBRARY_SERVER_HOST=100.x.y.z in scripts/local.env (git-ignored).
-if [ -z "${ALLSET_LIBRARY_SERVER_HOST:-}" ] && [ -f scripts/local.env ]; then
-  ALLSET_LIBRARY_SERVER_HOST="$(sed -n 's/^ALLSET_LIBRARY_SERVER_HOST=//p' scripts/local.env | tr -d '"' | head -1)"
+# A public library (scripts/cloud/publish_catalog.py behind Caddyfile.public):
+# no key and no Tailscale, the app reads its list by itself.
+#   ALLSET_PUBLIC_LIBRARY_URL=https://library.example.com
+# A copy built with one carries nothing of the private library server below:
+# not its address, not the plain-HTTP exception for it.
+if [ -z "${ALLSET_PUBLIC_LIBRARY_URL:-}" ] && [ -f scripts/local.env ]; then
+  ALLSET_PUBLIC_LIBRARY_URL="$(sed -n 's/^ALLSET_PUBLIC_LIBRARY_URL=//p' scripts/local.env | tr -d '"' | head -1)"
+fi
+if [ -n "${ALLSET_PUBLIC_LIBRARY_URL:-}" ]; then
+  /usr/libexec/PlistBuddy -c "Add :AllSetPublicLibraryURL string $ALLSET_PUBLIC_LIBRARY_URL" "$APP_DIR/Contents/Info.plist"
+  echo "Public wallpaper library: $ALLSET_PUBLIC_LIBRARY_URL built into the app (no key needed)"
+  ALLSET_LIBRARY_SERVER_URL=""
+  ALLSET_LIBRARY_SERVER_HOST=""
+  # HTTPS needs nothing more. A plain-HTTP address (a rehearsal against this
+  # Mac) needs macOS told that this one host may be reached without it.
+  case "$ALLSET_PUBLIC_LIBRARY_URL" in
+    http://*) ALLSET_LIBRARY_SERVER_HOST="$(printf '%s' "$ALLSET_PUBLIC_LIBRARY_URL" | sed -E 's#^http://([^/:]+).*#\1#')" ;;
+  esac
+else
+  # Plain HTTP for exactly one host: the personal, Tailscale-only library server.
+  # Its address isn't in the source; set ALLSET_LIBRARY_SERVER_HOST, or put
+  # ALLSET_LIBRARY_SERVER_HOST=100.x.y.z in scripts/local.env (git-ignored).
+  if [ -z "${ALLSET_LIBRARY_SERVER_HOST:-}" ] && [ -f scripts/local.env ]; then
+    ALLSET_LIBRARY_SERVER_HOST="$(sed -n 's/^ALLSET_LIBRARY_SERVER_HOST=//p' scripts/local.env | tr -d '"' | head -1)"
+  fi
+  # The library's address, baked in so a copy sent to someone else has nothing to
+  # set up but its key (`AllSet library <key>`). Same local.env pattern as the host above:
+  #   ALLSET_LIBRARY_SERVER_URL=http://100.x.y.z:8080
+  if [ -z "${ALLSET_LIBRARY_SERVER_URL:-}" ] && [ -f scripts/local.env ]; then
+    ALLSET_LIBRARY_SERVER_URL="$(sed -n 's/^ALLSET_LIBRARY_SERVER_URL=//p' scripts/local.env | tr -d '"' | head -1)"
+  fi
 fi
 if [ -n "${ALLSET_LIBRARY_SERVER_HOST:-}" ]; then
   PLIST="$APP_DIR/Contents/Info.plist"
@@ -55,7 +81,12 @@ if [ -n "${ALLSET_LIBRARY_SERVER_HOST:-}" ]; then
   /usr/libexec/PlistBuddy -c "Add :NSAppTransportSecurity:NSExceptionDomains:$ALLSET_LIBRARY_SERVER_HOST:NSIncludesSubdomains bool false" "$PLIST"
   echo "Library server: plain HTTP allowed for $ALLSET_LIBRARY_SERVER_HOST only"
 else
-  echo "No ALLSET_LIBRARY_SERVER_HOST: the app can't fetch wallpapers over plain HTTP from a library server"
+  echo "No plain-HTTP library server: the app reaches a library over HTTPS only"
+fi
+if [ -n "${ALLSET_LIBRARY_SERVER_URL:-}" ]; then
+  /usr/libexec/PlistBuddy -c "Delete :AllSetLibraryServerURL" "$APP_DIR/Contents/Info.plist" 2>/dev/null || true
+  /usr/libexec/PlistBuddy -c "Add :AllSetLibraryServerURL string $ALLSET_LIBRARY_SERVER_URL" "$APP_DIR/Contents/Info.plist"
+  echo "Wallpaper library: $ALLSET_LIBRARY_SERVER_URL built into the app"
 fi
 if [ -f Resources/AppIcon.icns ]; then
   cp Resources/AppIcon.icns "$APP_DIR/Contents/Resources/"

@@ -58,6 +58,19 @@ public struct LibraryVideo: Codable, Identifiable, Hashable, Sendable {
     public var provenance: Provenance?
     public var contentRating: String?
     public var addedAt: String?
+    /// The SHA-256 of each of its files, by which one it is ("playback",
+    /// "still", "thumbnail"), when the library that lists it says: a download
+    /// that doesn't match never lands.
+    public var checksums: [String: String]?
+
+    /// What `relative` (one of this video's files) must hash to; nil when the
+    /// catalog doesn't say.
+    public func checksum(of relative: String) -> String? {
+        for (role, path) in [("playback", playback), ("still", still), ("thumbnail", thumbnail)] where path == relative {
+            if let checksum = checksums?[role] { return checksum }
+        }
+        return nil
+    }
 
     /// Everything search looks through, lowercased once.
     public var searchText: String {
@@ -71,13 +84,14 @@ public struct LibraryVideo: Codable, Identifiable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case id, title, kind, category, tags, root, file, thumbnail, playback, still, duration, width, height, fps, size
-        case status, statusReason, provenance, contentRating, addedAt
+        case status, statusReason, provenance, contentRating, addedAt, checksums
     }
 
     public init(id: String, title: String, kind: Kind = .video, category: WallpaperCategory, tags: [String] = [], root: String, file: String,
                 thumbnail: String? = nil, playback: String? = nil, still: String? = nil, duration: Double? = nil, width: Int? = nil,
                 height: Int? = nil, fps: Double? = nil, size: Int64? = nil, status: Status = .quarantined,
-                statusReason: String? = nil, provenance: Provenance? = nil, contentRating: String? = nil, addedAt: String? = nil) {
+                statusReason: String? = nil, provenance: Provenance? = nil, contentRating: String? = nil, addedAt: String? = nil,
+                checksums: [String: String]? = nil) {
         self.id = id
         self.title = title
         self.kind = kind
@@ -98,6 +112,7 @@ public struct LibraryVideo: Codable, Identifiable, Hashable, Sendable {
         self.provenance = provenance
         self.contentRating = contentRating
         self.addedAt = addedAt
+        self.checksums = checksums
     }
 
     /// Tolerant: a catalog from a newer or older importer still loads, with
@@ -125,6 +140,7 @@ public struct LibraryVideo: Codable, Identifiable, Hashable, Sendable {
         provenance = try? c.decodeIfPresent(Provenance.self, forKey: .provenance)
         contentRating = try? c.decodeIfPresent(String.self, forKey: .contentRating)
         addedAt = try? c.decodeIfPresent(String.self, forKey: .addedAt)
+        checksums = try? c.decodeIfPresent([String: String].self, forKey: .checksums)
     }
 }
 

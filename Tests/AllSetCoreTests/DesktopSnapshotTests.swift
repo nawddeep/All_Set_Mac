@@ -123,6 +123,37 @@ import Testing
         #expect(!settings.showWidgets)
         #expect(wallpaper.config.source == .art(ArtPiece(style: .waves, palette: .ocean)))
     }
+
+    /// A theme's live wallpaper replaces the system wallpaper and notes the
+    /// original so it can be put back. That note is made after the snapshot was
+    /// taken: going back must keep it, or the original is never restored.
+    @Test func restoringKeepsWhatWasLearnedSinceAboutTheSystemWallpaper() throws {
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("snapshot-\(UUID())")
+        let suite = "AllSetTests.\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer {
+            defaults.removePersistentDomain(forName: suite)
+            try? FileManager.default.removeItem(at: home)
+        }
+        let settings = AppSettings(defaults: defaults)
+        let widgets = WidgetStore(fileURL: home.appendingPathComponent("widgets.json"))
+        let wallpaper = WallpaperStore(directory: home.appendingPathComponent("Wallpaper"))
+        // No live wallpaper yet, so nothing is noted.
+        let before = DesktopSnapshot(settings: settings, widgets: widgets, wallpaper: wallpaper)
+        #expect(!before.wallpaper.isEnabled && before.wallpaper.originalWallpapers.isEmpty)
+
+        // A theme's wallpaper goes on; the person's own picture is noted, and a server set.
+        let original = URL(fileURLWithPath: "/Users/someone/Pictures/mine.heic")
+        wallpaper.set(.art(ArtPiece(style: .waves, palette: .ocean)))
+        wallpaper.config.originalWallpapers["display-1"] = original
+        wallpaper.config.libraryServerURL = "http://server.example:8080"
+
+        before.restore(settings: settings, widgets: widgets, wallpaper: wallpaper)
+
+        #expect(!wallpaper.config.isEnabled)
+        #expect(wallpaper.config.originalWallpapers == ["display-1": original])
+        #expect(wallpaper.config.libraryServerURL == "http://server.example:8080")
+    }
 }
 
 @Suite @MainActor struct WidgetStoreInsertTests {

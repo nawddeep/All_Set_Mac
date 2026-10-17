@@ -10,7 +10,11 @@ struct ThemeWidgetRails: View {
     var limit: Int?
 
     private var groups: [(set: ThemeSet, widgets: [ThemeWidget])] {
-        let sets = limit.map { Array(ThemeLibrary.all.prefix($0)) } ?? ThemeLibrary.all
+        let ordered = ThemeLibrary.sets(in: .datasetTwo)
+            + ThemeLibrary.sets(in: .studioOriginals)
+            + ThemeLibrary.sets(in: .desktopEdit)
+            + ThemeLibrary.all.filter { !$0.collections.contains(.datasetTwo) && !$0.collections.contains(.studioOriginals) && !$0.collections.contains(.desktopEdit) }
+        let sets = limit.map { Array(ordered.prefix($0)) } ?? ordered
         return sets.compactMap { set in
             let widgets = ThemeWidgetCatalog.widgets(in: set.id).filter {
                 SearchMatch.normalize(query).isEmpty || SearchMatch.containsAll(query, in: $0.searchText)
@@ -50,10 +54,12 @@ struct ThemeWidgetCard: View {
     @State private var added = false
     @State private var isHovering = false
 
+    private var dark: Bool { ThemeLibrary.set(widget.setID)?.isDark ?? true }
+
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Space.xs) {
             ZStack {
-                LinearGradient(colors: [Color(white: 0.16), Color(white: 0.07)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                LinearGradient(colors: dark ? [Color(white: 0.16), Color(white: 0.07)] : [Color(white: 0.97), Color(white: 0.87)], startPoint: .topLeading, endPoint: .bottomTrailing)
                 LibraryWidgetPreview(instance: widget.instance, services: services, fit: CGSize(width: 214, height: 150), live: isHovering)
                     // Still until pointed at: a rail of moving widgets would keep the Mac busy.
                     .environment(\.widgetIsVisible, isHovering)

@@ -9,9 +9,9 @@ A complete inventory of what All Set contains: every feature, page, widget, them
 All Set is a macOS menu-bar/Dock utility built from these pieces:
 
 - **Dynamic Island / notch hub** — a fake island under the camera notch (screens without a notch get a virtual one in the middle of the menu bar), with five tabs.
-- **Desktop widgets** — draggable live cards and freeform pieces on your desktop, from a gallery of 91 catalog entries across 9 categories, arranged individually or applied as a whole-desktop **theme** (57 of them).
+- **Desktop widgets** — draggable live cards and freeform pieces on your desktop, from a gallery of 91 catalog entries across 9 categories, arranged individually or applied as a whole-desktop **theme** (110 of them).
   - **Snap grid:** widgets live in slots a quarter the size of a small widget (small 2×2, medium 4×2, large 4×4, extra large 8×4; Extra Small takes one), each display with its own widget size, never overlap, and tidy themselves when widgets come, go or change size, or the screen changes. Drag a widget straight off the desktop (or in Arrange mode) and it settles into the nearest free slot, previewed while dragging (dropped on a widget of the same size, the two trade places); a theme is spread across the whole screen, and change the resolution or switch monitors and the widgets scale and move with the screen; drag a card out of the Widget Gallery onto the desktop to drop it into a slot. Right-click a widget for Edit Widget…, Size, Clean Up Widgets, Arrange Widgets and Remove Widget.
-  - **From Themes:** all 623 widgets of the 57 themes in the gallery (a rail per theme), each dressed as its theme has it, to add or drag out alone.
+  - **From Themes:** more than 1,100 styled widgets from the 110 themes in the gallery, each dressed as its theme has it, to add or drag out alone. **Monochrome Edit**, **Studio Originals** and **Desktop Edit** have separate groups.
   - **Text, per widget:** its own font, UPPERCASE/lowercase, corner roundness, every built-in word renamed (the editor lists the words the widget is showing, like CPU or Up Next), and a caption below with size, alignment, bold, font and color.
 - **Live wallpaper** — generative art, a photo, Apple's aerial videos, your own videos, or your imported wallpaper library, matched to the system wallpaper.
 - **Workspace manager** — hotkey window snapping and saved workspaces.
@@ -81,7 +81,7 @@ Analog clock hands, flip clock, stat rings/bars, cassette reels, VHS tracking ba
 
 ---
 
-## 4. Whole-Desktop Themes — 57 total
+## 4. Whole-Desktop Themes — 110 total
 
 Applying a theme replaces every widget on the desktop and matches the wallpaper. All are **original designs** — inspired by an era/genre/mood, never reproducing a real logo, celebrity photo, or trademark. Real names (when referenced) only ever appear in hidden search tags, never in visible UI text.
 
@@ -99,6 +99,21 @@ Cloud Nine · Good Things · Pink Latte · Coquette · Grunge · Diva · Luxe No
 
 ### Colour & Light themes (8) — bright, pastel and daylight desktops
 Matcha Morning · Peach Fizz · Lavender Haze · Candy Pop · Ocean Glass · Sunset Drive · Forest Cabin · Desert Bloom
+
+### Desktop Edit themes (25) — reference-led complete desktops
+Ribbon Room · Rosewater · Pearl Lace · Butterfly Hour · Petal Diary · Cloud Post · Ivory Agenda · Linen Week · Study Margins · Sage Atelier · Sunday Paper · Paper Muse · Silver Stereo · Nocturne FM · Cherry Archive · Rose Leopard · Copper Console · Quiet Circuit · Blueprint Night · Good Energy · Cobalt Paddock · Apex Journal · Pitlane White · Redline Club · Golden Interlude
+
+These original compositions cover coquette, paper planning, editorial music, technical dashboards and motorsport. They ship with offline artwork, coordinated typography and hand-arranged widget kits, and appear together in the Themes page's **Desktop Edit** shelf and filter.
+
+### Studio Originals themes (25) — self-directed art and desktop compositions
+Halo Atlas · Arc Theory · Static Star · Ember Eclipse · Midnight Mathematics · Tideglass · Pearl Current · Salt Air · Azure Daylight · Deep Lagoon · Dune Study · Claybound · Solstice Road · Heat Haze · Cinder Field · Verdant Afterdark · Orchid Signal · Moss & Mercury · Rainroom · Night Herbarium · Prism Workshop · Chromatic Pause · Ink & Ivory · Blue Margins · Afterimage
+
+This collection has its own Themes shelf and filter and its own Widgets gallery group. Six original, bundled abstract artworks anchor it; native generative art makes the other nineteen wallpapers. The five desktop arrangements mix useful clocks, planners, system readings, photos, music, shortcuts and reflective pieces. All 260 included widgets can be picked individually.
+
+### Monochrome Edit themes (3) — from the second reference folder
+Nocturne Index · Herbarium Margin · Grand Tour
+
+These three distinct, seven-widget layouts translate the dark music collage, white botanical desk and black-and-white motoring references into sharp offline artwork and live widgets. They leave the center of the desktop open. On a compact display, the outer cluster or bottom row drops away to prevent overlap; every widget remains available individually in the Widgets gallery. The supplied laptop screenshots are used only as visual references.
 
 Each theme carries a name, tagline, description, philosophy, an inspiration line (shown on its card and page; football and music worlds describe their inspiration without naming anyone), its own wallpaper and a starter layout. Motion languages belong to the 15 design skins below, not to these themes.
 

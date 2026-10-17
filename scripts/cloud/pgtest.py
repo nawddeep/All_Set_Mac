@@ -6,7 +6,7 @@ import socket
 import subprocess
 import tempfile
 
-BIN = "/opt/homebrew/opt/postgresql@17/bin"
+BIN = os.environ.get("ALLSET_PG_BIN", "/opt/homebrew/opt/postgresql@17/bin")
 # The same version as the server binaries (postgresql@17 is keg-only, so not on PATH in CI).
 PSQL = f"{BIN}/psql" if os.path.exists(f"{BIN}/psql") else "psql"
 HERE = os.path.dirname(os.path.abspath(__file__))

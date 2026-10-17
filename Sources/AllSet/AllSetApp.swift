@@ -1,7 +1,19 @@
 import AllSetCore
 import SwiftUI
 
+/// Where the process starts: a command typed in Terminal (`AllSet library <key>`)
+/// runs and ends without the app ever appearing; anything else is the app.
 @main
+enum Launcher {
+    @MainActor static func main() {
+        if let command = LibraryCommand(arguments: CommandLine.arguments) {
+            Task.detached { exit(await command.run()) }
+            dispatchMain()
+        }
+        AllSetApp.main()
+    }
+}
+
 struct AllSetApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 

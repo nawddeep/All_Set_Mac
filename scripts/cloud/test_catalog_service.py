@@ -14,10 +14,10 @@ from http.server import ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import accounts  # noqa: E402
 import catalog_service  # noqa: E402
 import pgtest  # noqa: E402
 
-TOKEN = "catalog-test-key"
 
 
 class RangeTests(unittest.TestCase):
@@ -41,7 +41,11 @@ class CatalogServiceTests(unittest.TestCase):
         cls.pg = pgtest.Postgres()
         catalog_service.DATABASE_URL = cls.pg.url
         catalog_service.PSQL = pgtest.PSQL
-        catalog_service.Handler.token = TOKEN
+        cls.accounts = accounts.Accounts(catalog_service.query)
+        catalog_service.Handler.accounts = cls.accounts
+        password = cls.accounts.invite("tester@example.com")
+        session, _ = cls.accounts.sign_in("tester@example.com", password)
+        cls.token = cls.accounts.change_password(session, "a-long-enough-password")
         cls.storage = tempfile.mkdtemp(prefix="allset-catalog-test-")
         catalog_service.STORAGE = cls.storage
         cls.server = ThreadingHTTPServer(("127.0.0.1", 0), catalog_service.Handler)
@@ -64,9 +68,9 @@ class CatalogServiceTests(unittest.TestCase):
     def setUp(self):
         catalog_service.Handler.include_quarantined = False
 
-    def get(self, path, headers=None, token=TOKEN):
+    def get(self, path, headers=None, token=None):
         connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
-        connection.request("GET", path, headers={"Authorization": f"Bearer {token}", **(headers or {})})
+        connection.request("GET", path, headers={"Authorization": f"Bearer {self.token if token is None else token}", **(headers or {})})
         response = connection.getresponse()
         body = response.read()
         result = (response.status, dict(response.getheaders()), body)
@@ -101,6 +105,48 @@ class CatalogServiceTests(unittest.TestCase):
         self.assertEqual(self.get("/file/../../etc")[0], 400)
         self.assertEqual(self.get("/file/nope")[0], 404)
         self.assertEqual(self.get("/elsewhere")[0], 404)
+
+    def test_the_api_key_is_accepted_wherever_a_session_is(self):
+        catalog_service.Handler.key = "the-permanent-key"
+        try:
+            self.assertEqual(self.get("/me", token="the-permanent-key")[0], 200)
+            self.assertEqual(self.get("/catalog", token="the-permanent-key")[0], 200)
+            self.assertEqual(self.get("/file/pub1", token="the-permanent-key")[0], 200)
+            self.assertEqual(self.get("/library", token="the-permanent-key")[0], 200)
+            self.assertEqual(self.get("/me", token="the-permanent-ke")[0], 401)
+            self.assertEqual(self.get("/library", token="")[0], 401)
+        finally:
+            catalog_service.Handler.key = ""
+        # With no key on the server, nothing but a session gets in: not even an empty token.
+        self.assertEqual(self.get("/me", token="the-permanent-key")[0], 401)
+        self.assertEqual(self.get("/me", token="")[0], 401)
+
+    def test_the_library_is_the_apps_catalog_with_each_files_place_on_the_server(self):
+        self.pg.sql("insert into wallpapers (id, title, kind, category, tags, status, playback_key, still_key, "
+                    "thumbnail_key, origin_root, origin_file, size_bytes) values ('lib1', 'Lib', 'video', 'zz-library', "
+                    "'{rain,night}', 'published', 'live/lib1.mp4', 'stills/lib1.jpg', 'thumbnails/gone.jpg', "
+                    "'drive', '/Volumes/Drive/lib1.mp4', 100), "
+                    "('lib2', 'Not uploaded', 'video', 'zz-library', '{}', 'published', 'live/lib2.mp4', null, null, null, null, 1)")
+        os.makedirs(os.path.join(self.storage, "stills"), exist_ok=True)
+        for name in ("live/lib1.mp4", "stills/lib1.jpg"):
+            with open(os.path.join(self.storage, name), "wb") as handle:
+                handle.write(b"x")
+        try:
+            status, _, body = self.get("/library")
+            library = json.loads(body)
+            self.assertEqual((status, library["version"], library["roots"]), (200, 1, []))
+            items = {item["id"]: item for item in library["items"]}
+            # Published only, and only what's on this server (quar1 and lib2 are not).
+            self.assertEqual(sorted(items), ["lib1", "pub1"])
+            self.assertEqual(items["lib1"], {
+                "id": "lib1", "title": "Lib", "kind": "video", "category": "zz-library", "tags": ["rain", "night"],
+                "root": "server", "file": "live/lib1.mp4", "playback": "live/lib1.mp4", "still": "stills/lib1.jpg",
+                "size": 100, "status": "published"})
+            self.assertNotIn("/Volumes", body.decode())
+            catalog_service.Handler.include_quarantined = True
+            self.assertIn("quar1", [item["id"] for item in json.loads(self.get("/library")[2])["items"]])
+        finally:
+            self.pg.sql("delete from wallpapers where category = 'zz-library'")
 
     def test_the_catalog_can_be_read_a_page_at_a_time(self):
         """Paging is opt-in: the body is the same list, the headers say how to go on."""
@@ -150,6 +196,62 @@ class CatalogServiceTests(unittest.TestCase):
             catalog_service.DATABASE_URL = good
         self.assertEqual(self.get("/catalog")[0], 200)
 
+
+    def post(self, path, body, token=None):
+        connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        headers = {"Content-Type": "application/json"}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+        connection.request("POST", path, body=json.dumps(body), headers=headers)
+        response = connection.getresponse()
+        result = (response.status, json.loads(response.read() or b"{}"))
+        connection.close()
+        return result
+
+    def test_signing_in_is_required_and_a_password_change_comes_first(self):
+        self.assertEqual(self.get("/catalog", token="not-a-session")[0], 401)
+        self.assertEqual(self.get("/catalog", token="")[0], 401)
+
+        password = self.accounts.invite("signin@example.com")
+        status, body = self.post("/login", {"email": "signin@example.com", "password": password})
+        self.assertEqual((status, body["must_change"]), (200, True))
+        new_session = body["token"]
+        self.assertEqual(self.get("/catalog", token=new_session)[0], 403)
+        self.assertEqual(self.get("/file/pub1", token=new_session)[0], 403)
+        self.assertEqual(self.get("/me", token=new_session)[0], 403)
+
+        status, body = self.post("/password", {"password": "short"}, token=new_session)
+        self.assertEqual(status, 400)
+        status, body = self.post("/password", {"password": "a-brand-new-password"}, token=new_session)
+        self.assertEqual(status, 200)
+        fresh = body["token"]
+        self.assertEqual(self.get("/catalog", token=new_session)[0], 401)  # the old session ended
+        self.assertEqual(self.get("/catalog", token=fresh)[0], 200)
+        self.assertEqual(self.get("/me", token=fresh)[0], 200)
+        self.assertEqual(self.post("/logout", {}, token=fresh)[0], 200)
+        self.assertEqual(self.get("/catalog", token=fresh)[0], 401)
+
+        self.assertEqual(self.post("/login", {"email": "signin@example.com", "password": "a-brand-new-password"})[0], 200)
+        self.assertEqual(self.post("/login", {"email": "signin@example.com", "password": "wrong-password-here"})[0], 401)
+        self.assertEqual(self.post("/login", {"email": "nobody@example.com", "password": "x"})[0], 401)
+        self.assertEqual(self.post("/login", "not an object")[0], 400)
+
+    def test_too_many_wrong_passwords_are_refused_for_a_while(self):
+        catalog_service.Handler.failures.clear()
+        for _ in range(catalog_service.LOGIN_LIMIT):
+            self.assertEqual(self.post("/login", {"email": "slow@example.com", "password": "nope"})[0], 401)
+        self.assertEqual(self.post("/login", {"email": "slow@example.com", "password": "nope"})[0], 429)
+        catalog_service.Handler.failures.clear()
+
+    def test_a_disabled_account_loses_access_at_once(self):
+        self.accounts.invite("gone@example.com")
+        password = self.accounts.reset("gone@example.com")
+        session, _ = self.accounts.sign_in("gone@example.com", password)
+        session = self.accounts.change_password(session, "a-long-enough-password")
+        self.assertEqual(self.get("/catalog", token=session)[0], 200)
+        self.accounts.set_disabled("gone@example.com", True)
+        self.assertEqual(self.get("/catalog", token=session)[0], 401)
+        self.assertIsNone(self.accounts.sign_in("gone@example.com", "a-long-enough-password"))
 
 if __name__ == "__main__":
     unittest.main()

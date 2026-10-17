@@ -99,6 +99,15 @@ final class AppServices {
     /// Set by the app delegate so pages can drive the island (for "Try it").
     weak var notch: NotchController?
 
+    /// The library server's API key (`AllSet library <key>` saves it). Read from
+    /// the Keychain when a library request first needs it, never at launch, and
+    /// again after the command says it changed.
+    private var libraryKey: String?
+    private var hasReadLibraryKey = false
+    private var libraryChanges: NSObjectProtocol?
+    private var libraryReload: Task<Void, Never>?
+    private var publicLibraryUpdates: Task<Void, Never>?
+
     func start() {
         // A preview the app quit or crashed in the middle of: the real desktop comes back.
         recoverInterruptedPreview()
@@ -130,6 +139,69 @@ final class AppServices {
         themes.start(services: self)
         lidPlane.start()
         screenshotShortcut.start()
+        startLibrary()
+    }
+
+    /// The wallpaper library someone else serves: where it is, the key that
+    /// opens it, and showing what the `library` command downloads as it lands.
+    private func startLibrary() {
+        // A public library is built in (scripts/build-app.sh): its list and
+        // files are open to anyone, so there is no key and nothing to set up.
+        if let address = Bundle.main.object(forInfoDictionaryKey: "AllSetPublicLibraryURL") as? String,
+           let server = URL(string: address), server.host != nil {
+            startPublicLibrary(server)
+            return
+        }
+        // A copy made for someone else has the library's address built in
+        // (scripts/build-app.sh), so there is nothing for them to set up.
+        if wallpaper.config.libraryServerURL == nil,
+           let builtIn = Bundle.main.object(forInfoDictionaryKey: "AllSetLibraryServerURL") as? String {
+            wallpaper.config.libraryServerURL = builtIn
+        }
+        wallpaper.libraryBearer = { [weak self] in
+            guard let self else { return nil }
+            if !hasReadLibraryKey {
+                libraryKey = LibraryKey.read()
+                hasReadLibraryKey = true
+            }
+            return libraryKey
+        }
+        libraryChanges = DistributedNotificationCenter.default().addObserver(
+            forName: LibraryKey.changed, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.libraryChanged() }
+        }
+    }
+
+    /// Keeps this Mac's list the public library's: now, then a few times a day.
+    /// Pictures and wallpapers download when the pages ask for them
+    /// (`WallpaperStore`). A Mac with a library of its own keeps it, and its
+    /// wallpapers keep coming from wherever they did.
+    private func startPublicLibrary(_ server: URL) {
+        let sync = LibrarySync(server: server, key: nil, directory: wallpaper.libraryDirectory)
+        guard !sync.hasOwnLibrary else { return }
+        // The library's key, if this Mac has one, belongs to another server:
+        // nothing sent to this one carries it.
+        wallpaper.libraryBearer = nil
+        wallpaper.config.libraryServerURL = server.absoluteString
+        publicLibraryUpdates = Task { [weak self] in
+            while !Task.isCancelled {
+                if (try? await sync.update()) != nil { self?.wallpaper.reloadLibrary() }
+                try? await Task.sleep(for: .seconds(6 * 60 * 60))
+            }
+        }
+    }
+
+    /// The command reports every wallpaper it downloads; the list is read again
+    /// at most once a second however fast they come.
+    private func libraryChanged() {
+        hasReadLibraryKey = false
+        guard libraryReload == nil else { return }
+        libraryReload = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(1))
+            self?.libraryReload = nil
+            self?.wallpaper.reloadLibrary()
+        }
     }
 
     func stop() {
@@ -496,7 +568,8 @@ extension AppServices {
         guard let screen = NSScreen.screens.first else { return }
         let onScreen = widgets.widgets.filter { shows($0, on: screen) }
         guard !onScreen.isEmpty else { return }
-        let moved = Dictionary(uniqueKeysWithValues: fittedToScreen(onScreen).map { ($0.id, $0.offset) })
+        // Never trapping on a layout file that repeats an id (hand-edited, or damaged).
+        let moved = Dictionary(fittedToScreen(onScreen).map { ($0.id, $0.offset) }, uniquingKeysWith: { first, _ in first })
         for (id, offset) in moved { widgets.update(id) { $0.offset = offset } }
     }
 }
