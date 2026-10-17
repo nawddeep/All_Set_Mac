@@ -88,10 +88,10 @@ public enum FunkyThemes {
         _ id: String, _ title: String, _ tagline: String,
         card: Int, ink: Int, accent: Int, dark: Bool, font: WidgetFont,
         style: TextStyle, filter: PhotoFilter, charm: String,
-        collections: [ThemeCollection]? = nil, tags: String? = nil
+        collections: [ThemeCollection]? = nil, tags: String? = nil, radius corner: Double? = nil
     ) -> Design {
         let items = kit(id)
-        let radius: Double = ["chromeFangEditorial", "acidStarlet", "creamModPoster"].contains(id) ? 7 : 17
+        let radius = corner ?? (["chromeFangEditorial", "acidStarlet", "creamModPoster"].contains(id) ? 7 : 17)
         let theme = WidgetTheme(
             id: id, title: title, tagline: tagline, material: .paper,
             card: WidgetColor(hex: card), ink: WidgetColor(hex: ink), accent: WidgetColor(hex: accent),

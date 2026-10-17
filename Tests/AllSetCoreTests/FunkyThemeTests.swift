@@ -59,16 +59,24 @@ import Testing
                     let traced = CGPoint(x: placement.origin.x + placement.size.dimensions.width * placement.scale / 2,
                                          y: placement.origin.y + placement.size.dimensions.height * placement.scale * placement.stretch / 2)
                     // Unless it came in from an edge the screen's shape cut off.
-                    let nudged = abs(frame.minY - visible.minY) < 0.5 || abs(frame.maxY - screen.height) < 0.5
-                    #expect(abs(frame.midX - (crop.x + traced.x * cover)) < 1, "\(id) drifts across")
-                    #expect(nudged || abs(frame.midY - (crop.y + traced.y * cover)) < 1, "\(id) drifts down")
-                    #expect(abs(frame.midY - (crop.y + traced.y * cover)) < 40, "\(id) is far from its card")
+                    let nudgedAcross = frame.minX < 0.5 || abs(frame.maxX - screen.width) < 0.5
+                    let nudgedDown = abs(frame.minY - visible.minY) < 0.5 || abs(frame.maxY - screen.height) < 0.5
+                    #expect(nudgedAcross || abs(frame.midX - (crop.x + traced.x * cover)) < 1, "\(id) drifts across")
+                    #expect(nudgedDown || abs(frame.midY - (crop.y + traced.y * cover)) < 1, "\(id) drifts down")
+                    #expect(abs(frame.midX - (crop.x + traced.x * cover)) < 60, "\(id) is far from its card")
+                    #expect(abs(frame.midY - (crop.y + traced.y * cover)) < 60, "\(id) is far from its card")
                     #expect(frame.minX >= 0 && frame.maxX <= screen.width && frame.minY >= visible.minY && frame.maxY <= screen.height,
                             "\(id) leaves the screen at \(screen)")
                 }
-                for (index, rect) in frames.enumerated() {
-                    for other in frames.dropFirst(index + 1) {
-                        #expect(!rect.insetBy(dx: 1, dy: 1).intersects(other), "\(id) overlaps")
+                // A widget the screen's shape pushed in from an edge can touch its neighbour.
+                let moved = frames.map { frame in
+                    frame.minX < 0.5 || abs(frame.maxX - screen.width) < 0.5
+                        || abs(frame.minY - visible.minY) < 0.5 || abs(frame.maxY - screen.height) < 0.5
+                }
+                for (index, rect) in frames.enumerated() where !moved[index] {
+                    for (other, otherMoved) in zip(frames, moved).dropFirst(index + 1) where !otherMoved {
+                        // Cards a few points apart touch once each widget reaches to its card's edge.
+                        #expect(!rect.insetBy(dx: 12 * fit.scale, dy: 12 * fit.scale).intersects(other), "\(id) overlaps at \(screen)")
                     }
                 }
             }

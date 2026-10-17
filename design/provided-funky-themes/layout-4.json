@@ -1,0 +1,757 @@
+{
+ "about": "Batch 4: Brutalist Editorial. See layout.json.",
+ "themes": [
+  {
+   "id": "makeNoiseQuietly",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/brutalist_collage_desktop_dashboard.png",
+   "dock": [
+    410,
+    893,
+    1178,
+    975
+   ],
+   "meta": {
+    "title": "Make Noise Quietly",
+    "tagline": "Torn newsprint, red block letters and a black flip clock.",
+    "card": "EAE3D8",
+    "ink": "2B2623",
+    "accent": "D63A2E",
+    "dark": false,
+    "font": "condensed",
+    "style": "poster",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "retro",
+     "minimal"
+    ],
+    "tags": "brutalist newsprint red torn paper poster flip clock noise",
+    "radius": 4
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      575,
+      62,
+      1044,
+      356
+     ],
+     "ink": "E5483B",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1094,
+      66,
+      1332,
+      322
+     ],
+     "ink": "2B2623"
+    },
+    {
+     "kind": "weather",
+     "size": "M",
+     "clear": [
+      576,
+      394,
+      1046,
+      568
+     ],
+     "ink": "2B2623"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1088,
+      354,
+      1560,
+      570
+     ],
+     "ink": "F2EDE6"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      577,
+      600,
+      893,
+      870
+     ],
+     "ink": "2B2623"
+    }
+   ]
+  },
+  {
+   "id": "slowIdeasLoudResults",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/brutalist_editorial_desktop_collage.png",
+   "dock": [
+    385,
+    885,
+    1202,
+    972
+   ],
+   "meta": {
+    "title": "Slow Ideas Loud Results",
+    "tagline": "Black concrete, orange sun and huge condensed headlines.",
+    "card": "1A1816",
+    "ink": "F1E9DC",
+    "accent": "E8591C",
+    "dark": true,
+    "font": "condensed",
+    "style": "poster",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "cinematic",
+     "minimal"
+    ],
+    "tags": "brutalist concrete orange black poster headline architecture",
+    "radius": 4
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      842,
+      60,
+      1554,
+      250
+     ],
+     "ink": "141414"
+    },
+    {
+     "kind": "weather",
+     "size": "L",
+     "clear": [
+      840,
+      282,
+      1148,
+      528
+     ],
+     "ink": "F1E9DC"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1178,
+      282,
+      1558,
+      530
+     ],
+     "ink": "F1E9DC"
+    }
+   ]
+  },
+  {
+   "id": "orangeIndex",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/brutalist_editorial_desktop_dashboard.png",
+   "dock": [
+    372,
+    880,
+    1215,
+    968
+   ],
+   "meta": {
+    "title": "Orange Index",
+    "tagline": "A numbered editorial grid in cream, black and one orange sun.",
+    "card": "EFEAE0",
+    "ink": "1A1A1A",
+    "accent": "F26A1B",
+    "dark": false,
+    "font": "condensed",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "minimal"
+    ],
+    "tags": "brutalist editorial index numbered grid orange cream",
+    "radius": 2
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      44,
+      98,
+      510,
+      368
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      532,
+      84,
+      1008,
+      372
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1044,
+      82,
+      1550,
+      374
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      44,
+      412,
+      332,
+      850
+     ],
+     "ink": "1A1A1A"
+    }
+   ]
+  },
+  {
+   "id": "workLouder",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/brutalist_editorial_desktop_moodboard.png",
+   "dock": [
+    515,
+    912,
+    1072,
+    985
+   ],
+   "meta": {
+    "title": "Work Louder",
+    "tagline": "Poured concrete, one red block and bold black type.",
+    "card": "ECE6DC",
+    "ink": "141414",
+    "accent": "D8281E",
+    "dark": false,
+    "font": "condensed",
+    "style": "poster",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "minimal"
+    ],
+    "tags": "brutalist concrete red work louder poster moodboard",
+    "radius": 3
+   },
+   "widgets": [
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1016,
+      66,
+      1370,
+      414
+     ],
+     "ink": "F2EDE6"
+    },
+    {
+     "kind": "clock",
+     "size": "L",
+     "clear": [
+      664,
+      238,
+      988,
+      484
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      670,
+      510,
+      1184,
+      722
+     ],
+     "ink": "F2EDE6"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1212,
+      442,
+      1554,
+      722
+     ],
+     "ink": "1A1A1A"
+    }
+   ]
+  },
+  {
+   "id": "cityStatic",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/city_static_brutalist_collage_dashboard.png",
+   "dock": [
+    322,
+    905,
+    1262,
+    978
+   ],
+   "meta": {
+    "title": "City Static",
+    "tagline": "Gritty city photocopy, lime marker and black-and-white cards.",
+    "card": "E6E2DA",
+    "ink": "1A1A1A",
+    "accent": "B7E030",
+    "dark": false,
+    "font": "condensed",
+    "style": "poster",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "retro"
+    ],
+    "tags": "brutalist city static photocopy lime marker newsprint",
+    "radius": 4
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      548,
+      62,
+      1060,
+      300
+     ],
+     "ink": "EDEDE6"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1100,
+      68,
+      1360,
+      310
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      548,
+      328,
+      882,
+      652
+     ],
+     "ink": "EDEDE6"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      928,
+      334,
+      1200,
+      618
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "weather",
+     "size": "L",
+     "clear": [
+      1222,
+      328,
+      1556,
+      594
+     ],
+     "ink": "F2EDE6"
+    }
+   ]
+  },
+  {
+   "id": "printMatters",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/editorial_desktop_print_matters.png",
+   "dock": [
+    488,
+    895,
+    1100,
+    978
+   ],
+   "meta": {
+    "title": "Print Matters",
+    "tagline": "Tall serif headlines, cobalt blue and black-and-white architecture.",
+    "card": "F3F0E8",
+    "ink": "111111",
+    "accent": "1F4FD8",
+    "dark": false,
+    "font": "serif",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "minimal"
+    ],
+    "tags": "editorial print matters serif cobalt blue black white architecture",
+    "radius": 3
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      28,
+      64,
+      392,
+      232
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      166,
+      238,
+      392,
+      438
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      32,
+      464,
+      390,
+      642
+     ],
+     "ink": "F2EDE6"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      34,
+      662,
+      388,
+      890
+     ],
+     "ink": "111111"
+    }
+   ]
+  },
+  {
+   "id": "orderMakesSpace",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/minimalist_editorial_desktop_dashboard.png",
+   "dock": null,
+   "meta": {
+    "title": "Order Makes Space",
+    "tagline": "Sage shadows, a numbered grid and a calm monospaced archive.",
+    "card": "EFEDE3",
+    "ink": "1B1B17",
+    "accent": "5A5F43",
+    "dark": false,
+    "font": "monospaced",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "minimal",
+     "zen"
+    ],
+    "tags": "editorial minimal order space sage shadow archive grid",
+    "radius": 3
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      1070,
+      64,
+      1560,
+      270
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1070,
+      294,
+      1560,
+      538
+     ],
+     "ink": "1B1B17"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1070,
+      560,
+      1296,
+      788
+     ],
+     "ink": "1B1B17"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1314,
+      560,
+      1560,
+      788
+     ],
+     "ink": "1B1B17"
+    }
+   ]
+  },
+  {
+   "id": "betterStructure",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/monochrome_editorial_desktop_dashboard.png",
+   "dock": [
+    506,
+    905,
+    1080,
+    978
+   ],
+   "meta": {
+    "title": "Better Structure",
+    "tagline": "A stacked black clock, bordered grid and a monochrome archive.",
+    "card": "E8E3D8",
+    "ink": "141414",
+    "accent": "C9A89A",
+    "dark": false,
+    "font": "monospaced",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "minimal"
+    ],
+    "tags": "editorial monochrome structure stacked clock archive grid black",
+    "radius": 2
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      20,
+      50,
+      428,
+      566
+     ],
+     "ink": "111111",
+     "face": "stacked"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      442,
+      50,
+      928,
+      344
+     ],
+     "ink": "F0EBE2"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      442,
+      354,
+      1004,
+      566
+     ],
+     "ink": "F0EBE2"
+    },
+    {
+     "kind": "todo",
+     "size": "M",
+     "clear": [
+      1018,
+      354,
+      1568,
+      566
+     ],
+     "ink": "111111"
+    }
+   ]
+  },
+  {
+   "id": "quietSystems",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/quiet_systems_editorial_desktop.png",
+   "dock": [
+    428,
+    900,
+    1160,
+    980
+   ],
+   "meta": {
+    "title": "Quiet Systems",
+    "tagline": "Cobalt serif headlines, concrete shadows and quiet bordered cards.",
+    "card": "F1ECE2",
+    "ink": "151515",
+    "accent": "1A3CC8",
+    "dark": false,
+    "font": "serif",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "minimal"
+    ],
+    "tags": "editorial quiet systems cobalt blue serif concrete",
+    "radius": 3
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      710,
+      68,
+      982,
+      316
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1000,
+      66,
+      1234,
+      316
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1252,
+      66,
+      1560,
+      362
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "todo",
+     "size": "M",
+     "clear": [
+      832,
+      338,
+      1234,
+      514
+     ],
+     "ink": "1A1A1A"
+    }
+   ]
+  },
+  {
+   "id": "thinkClearer",
+   "file": "batch/All_Set_Funky_Themes_Batch_4_Brutalist_Editorial/think_clearer_editorial_dashboard.png",
+   "dock": [
+    440,
+    905,
+    1120,
+    985
+   ],
+   "meta": {
+    "title": "Think Clearer",
+    "tagline": "Torn rust paper, red tape and bold black headlines on warm stock.",
+    "card": "EAE3D7",
+    "ink": "1A1816",
+    "accent": "9E2B1C",
+    "dark": false,
+    "font": "serif",
+    "style": "typewriter",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "designer",
+     "retro",
+     "minimal"
+    ],
+    "tags": "editorial think clearer rust red tape torn paper typewriter",
+    "radius": 2
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      744,
+      66,
+      1234,
+      302
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1264,
+      64,
+      1548,
+      304
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      48,
+      346,
+      436,
+      558
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      48,
+      584,
+      436,
+      898
+     ],
+     "ink": "111111"
+    }
+   ]
+  }
+ ]
+}
