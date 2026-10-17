@@ -67,9 +67,9 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T7.6 CI probes on optimised build
 
 ### Phase 8: architecture
-- [ ] T8.1 Split AppServices
-- [ ] T8.2 Self-registering widget kinds
-- [ ] T8.3 No file over 600 lines
+- [x] T8.1 Split AppServices
+- [x] T8.2 (core only; app side open, see DECISIONS) Self-registering widget kinds
+- [x] T8.3 No file over 600 lines
 - [ ] T8.4 try? audit
 - [ ] T8.5 Concurrency
 - [ ] T8.6 Localization scaffolding
