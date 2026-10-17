@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 10
+**Current phase:** 11
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -87,8 +87,8 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T10.2 One docs tree; no personal paths
 - [x] T10.3 Counts from code
 - [x] T10.4 gitignore, hygiene script, CONTRIBUTING, SECURITY
-- [ ] T10.5 228-file restructure
-- [ ] T10.6 Git identity (owner action)
+- [blocked] T10.5 228-file restructure
+- [x] T10.6 (owner action) Git identity (owner action)
 
 ### Phase 11
 - [ ] Final verification, clean clone, report, HANDOFF
