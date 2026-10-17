@@ -1,0 +1,35 @@
+All Set
+Copyright (c) 2026 Pratik Kansara. All rights reserved.
+
+This software and its source code are proprietary. No permission is granted to
+use, copy, modify, merge, publish, distribute, sublicense or sell copies of the
+software, in source or binary form, except with the prior written permission of
+the copyright holder.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+-------------------------------------------------------------------------------
+Third-party code, services and content
+-------------------------------------------------------------------------------
+
+All Set contains no third-party source code. It uses the following services
+and content at run time; each keeps its own licence and terms.
+
+- Open-Meteo (open-meteo.com): weather forecast, geocoding and air quality data.
+  Data licensed CC BY 4.0. Attribution: "Weather data by Open-Meteo.com".
+- Openverse (openverse.org): image search. Each image carries its own licence,
+  shown next to the image with its creator. All Set only offers images whose
+  licence allows commercial use (CC0, Public Domain Mark, CC BY, CC BY-SA).
+- Picsum Photos (picsum.photos): photos from Unsplash, under the Unsplash
+  License (unsplash.com/license). Credited where shown.
+- GitHub (api.github.com, github.com): a user's public contribution data, only
+  when they enter a GitHub user name in a widget.
+- Anthropic and OpenAI APIs: only when the user adds their own API key to the
+  AI Screenshot feature; screenshots are sent to the provider the user picks.
+- Sparkle (sparkle-project.org), MIT License, if and when the updater is
+  enabled. Its licence text is in Contents/Resources/Notices.
