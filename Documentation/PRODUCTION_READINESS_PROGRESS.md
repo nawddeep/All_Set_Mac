@@ -86,7 +86,7 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T10.1 AI artefacts out
 - [x] T10.2 One docs tree; no personal paths
 - [x] T10.3 Counts from code
-- [ ] T10.4 gitignore, hygiene script, CONTRIBUTING, SECURITY
+- [x] T10.4 gitignore, hygiene script, CONTRIBUTING, SECURITY
 - [ ] T10.5 228-file restructure
 - [ ] T10.6 Git identity (owner action)
 

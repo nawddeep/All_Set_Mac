@@ -27,6 +27,22 @@ secrets=$(echo "$tracked" | grep -E '(^|/)[^/]*\.env$|\.p12$|\.mobileprovision$'
 litter=$(echo "$tracked" | grep -E '(^|/)\.DS_Store$' || true)
 [ -n "$litter" ] && report ".DS_Store files are tracked: $(echo "$litter" | tr '\n' ' ')"
 
+# Absolute paths into someone's home folder. Placeholders used in tests and
+# examples (/Users/me, /Users/someone, /Users/server, /Users/YOU, /Users/USER) are fine.
+homes=$(git grep -nE '/Users/[A-Za-z0-9._-]+' -- . ':!*.png' ':!*.jpg' 2>/dev/null \
+  | grep -vE '/Users/(me|someone|server|YOU|USER|Shared)\b' | head -5 || true)
+[ -n "$homes" ] && report "a personal path is tracked: $(echo "$homes" | tr '\n' ' ')"
+
+# Pictures over 1 MB outside the app's own resources: design exports and screenshots
+# belong outside the repository (../AllSet-personal).
+while IFS= read -r file; do
+  case "$file" in Resources/*|Sources/*) continue ;; esac
+  case "$file" in *.png|*.jpg|*.jpeg|*.heic|*.gif) ;; *) continue ;; esac
+  [ -f "$file" ] || continue
+  size=$(du -k "$file" | cut -f1)
+  if [ "$size" -gt 1024 ]; then report "$file is a ${size} KB picture outside Resources/Sources"; fi
+done <<< "$tracked"
+
 while IFS= read -r file; do
   [ -f "$file" ] || continue
   size=$(du -k "$file" | cut -f1)
