@@ -85,7 +85,7 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 ### Phase 10: repo hygiene
 - [x] T10.1 AI artefacts out
 - [x] T10.2 One docs tree; no personal paths
-- [ ] T10.3 Counts from code
+- [x] T10.3 Counts from code
 - [ ] T10.4 gitignore, hygiene script, CONTRIBUTING, SECURITY
 - [ ] T10.5 228-file restructure
 - [ ] T10.6 Git identity (owner action)
