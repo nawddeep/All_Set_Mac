@@ -4,13 +4,14 @@ import SwiftUI
 
 /// Ways to browse the library.
 enum ThemeDiscovery: String, CaseIterable, Identifiable {
-    case all, datasetTwo, studioOriginals, desktopEdit, featured, trending, new, artist, football, music, popular, minimal, dark, colorful, developer, favorites
+    case all, funkyThemes, datasetTwo, studioOriginals, desktopEdit, featured, trending, new, artist, football, music, popular, minimal, dark, colorful, developer, favorites
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .all: "All"
+        case .funkyThemes: "Funky Themes"
         case .datasetTwo: "Monochrome Edit"
         case .studioOriginals: "Studio Originals"
         case .desktopEdit: "Desktop Edit"
@@ -32,6 +33,7 @@ enum ThemeDiscovery: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .all: "square.grid.2x2"
+        case .funkyThemes: "sparkles.rectangle.stack"
         case .datasetTwo: "square.grid.3x3.topleft.filled"
         case .studioOriginals: "circle.hexagongrid"
         case .desktopEdit: "sparkles.rectangle.stack"
@@ -56,6 +58,7 @@ enum ThemeDiscovery: String, CaseIterable, Identifiable {
         let all = ThemeLibrary.all
         switch self {
         case .all: return all
+        case .funkyThemes: return ThemeLibrary.sets(in: .funkyThemes)
         case .datasetTwo: return ThemeLibrary.sets(in: .datasetTwo)
         case .studioOriginals: return ThemeLibrary.sets(in: .studioOriginals)
         case .desktopEdit: return ThemeLibrary.sets(in: .desktopEdit)
@@ -238,6 +241,7 @@ struct ThemesPage: View {
             return fresh
         }
         var shelves: [Rail] = [
+            ("Funky Themes", claim(ThemeDiscovery.funkyThemes.sets(stats: stats)), .funkyThemes),
             ("Monochrome Edit", claim(ThemeDiscovery.datasetTwo.sets(stats: stats)), .datasetTwo),
             ("Studio Originals", claim(ThemeDiscovery.studioOriginals.sets(stats: stats)), .studioOriginals),
             ("Desktop Edit", claim(ThemeDiscovery.desktopEdit.sets(stats: stats)), .desktopEdit),

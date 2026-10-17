@@ -39,7 +39,7 @@ import Testing
             }
             for source in sources {
                 guard case .bundled = source else { Issue.record("Artwork must be bundled"); continue }
-                #expect(try library.fileURL(for: source) != nil)
+            #expect(library.fileURL(for: source) != nil)
                 #expect(await library.image(for: source, maxPixels: 768) != nil)
             }
         }

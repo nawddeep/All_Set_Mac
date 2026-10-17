@@ -230,6 +230,15 @@ extension AppServices {
     private func themeWidgets(_ set: ThemeSet, on screen: NSScreen?) -> [WidgetInstance] {
         let layout = set.widgets(screenName: screen?.localizedName, bounds: Self.unbounded).map { $0.placed(on: screen) }
         let personal = ThemeSet.personalized(layout, with: themePhotos.sources(for: set.id))
+        if let id = set.setup?.id, FunkyThemes.design(id) != nil {
+            let fitted = FunkyThemes.fitted(personal, in: screen?.visibleFrame.size ?? CGSize(width: 1440, height: 860))
+            if let screen {
+                settings.screenFits[screen.stableID] = ScreenFit(scale: fitted.scale, size: screen.frame.size)
+            } else {
+                settings.widgetScale = fitted.scale
+            }
+            return prepared(fitted.widgets)
+        }
         let arranged = gridArranged(fittedToScreen(personal, on: screen))
         // Opened up to the screen's edges, so a wide display has no bare sides.
         return prepared(screen.map { widgetGrid(on: $0).spread(arranged) } ?? arranged)

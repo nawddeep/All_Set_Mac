@@ -98,7 +98,7 @@ extension WidgetRenderHarness {
             .split(separator: ",").map { "setup.\($0)" })
         let collectionSets = collection.map { ThemeLibrary.sets(in: $0) } ?? ThemeLibrary.all
         let sets = requestedIDs.isEmpty ? collectionSets : collectionSets.filter { requestedIDs.contains($0.id) }
-        if collection == .datasetTwo || collection == .desktopEdit || collection == .studioOriginals {
+        if collection == .funkyThemes || collection == .datasetTwo || collection == .desktopEdit || collection == .studioOriginals {
             let ids = sets.map(\.id)
             // Warm both stores before comparing lookup work.
             _ = ThemeWidgetCatalog.all.count
@@ -128,7 +128,7 @@ extension WidgetRenderHarness {
                     } else { print("MISSING preview \(set.id) \(variant)") }
                 }
             }
-        if collection == .datasetTwo || collection == .desktopEdit || collection == .studioOriginals {
+        if collection == .funkyThemes || collection == .datasetTwo || collection == .desktopEdit || collection == .studioOriginals {
                 let widgets = ThemeWidgetCatalog.widgets(in: set.id)
                 let view = VStack(alignment: .leading, spacing: 12) {
                     Text("\(set.name) · \(widgets.count) widgets").font(.title2).foregroundStyle(.white)
@@ -143,6 +143,9 @@ extension WidgetRenderHarness {
                 }
             }
             print("RENDERED \(set.id) · \(ThemeWidgetCatalog.widgets(in: set.id).count) widgets")
+            if collection == .funkyThemes {
+                await renderSuppliedDesktops(set, to: folder, services: services)
+            }
         }
         for (name, view) in [("page-themes", AnyView(ThemesPage(services: services))),
                              ("page-detail", AnyView(ThemeDetailPage(setID: sets.first?.id ?? "setup.floodlightGold", services: services))),
@@ -285,7 +288,7 @@ extension WidgetRenderHarness {
         print("resize overlaps:", overlaps)
     }
 
-    private static func capture(_ view: some View, size: CGSize) async -> CGImage? {
+    static func capture(_ view: some View, size: CGSize) async -> CGImage? {
         let host = NSHostingView(rootView: view.frame(width: size.width, height: size.height))
         host.frame = CGRect(origin: .zero, size: size)
         let window = NSWindow(contentRect: CGRect(origin: CGPoint(x: 80, y: 80), size: size), styleMask: [.borderless],

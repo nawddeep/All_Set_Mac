@@ -10,10 +10,11 @@ struct ThemeWidgetRails: View {
     var limit: Int?
 
     private var groups: [(set: ThemeSet, widgets: [ThemeWidget])] {
-        let ordered = ThemeLibrary.sets(in: .datasetTwo)
+        let ordered = ThemeLibrary.sets(in: .funkyThemes)
+            + ThemeLibrary.sets(in: .datasetTwo)
             + ThemeLibrary.sets(in: .studioOriginals)
             + ThemeLibrary.sets(in: .desktopEdit)
-            + ThemeLibrary.all.filter { !$0.collections.contains(.datasetTwo) && !$0.collections.contains(.studioOriginals) && !$0.collections.contains(.desktopEdit) }
+            + ThemeLibrary.all.filter { !$0.collections.contains(.funkyThemes) && !$0.collections.contains(.datasetTwo) && !$0.collections.contains(.studioOriginals) && !$0.collections.contains(.desktopEdit) }
         let sets = limit.map { Array(ordered.prefix($0)) } ?? ordered
         return sets.compactMap { set in
             let widgets = ThemeWidgetCatalog.widgets(in: set.id).filter {

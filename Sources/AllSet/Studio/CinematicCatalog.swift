@@ -41,14 +41,15 @@ struct CinematicCatalog: View {
             }
         }
         if !themed.isEmpty {
+            let supplied = themed.filter { FunkyThemes.design(String($0.setID.dropFirst("setup.".count))) != nil }
             let monochrome = themed.filter { DatasetTwoThemes.design(String($0.setID.dropFirst("setup.".count))) != nil }
             let originals = themed.filter { StudioOriginalThemes.design(String($0.setID.dropFirst("setup.".count))) != nil }
             let edit = themed.filter { ReferenceThemes.design(String($0.setID.dropFirst("setup.".count))) != nil }
             let rest = themed.filter {
                 let id = String($0.setID.dropFirst("setup.".count))
-                return DatasetTwoThemes.design(id) == nil && StudioOriginalThemes.design(id) == nil && ReferenceThemes.design(id) == nil
+                return FunkyThemes.design(id) == nil && DatasetTwoThemes.design(id) == nil && StudioOriginalThemes.design(id) == nil && ReferenceThemes.design(id) == nil
             }
-            for (name, id, items) in [("Monochrome Edit", "monochrome", monochrome), ("Studio Originals", "originals", originals), ("Desktop Edit", "edit", edit), ("From Themes", "all", rest)] where !items.isEmpty {
+            for (name, id, items) in [("Funky Themes", "supplied", supplied), ("Monochrome Edit", "monochrome", monochrome), ("Studio Originals", "originals", originals), ("Desktop Edit", "edit", edit), ("From Themes", "all", rest)] where !items.isEmpty {
                 result.append(Row(id: "theme-head-\(id)", content: .heading(name, "\(items.count) theme widgets")))
                 for (index, chunk) in metrics.chunks(items).enumerated() {
                     result.append(Row(id: "theme-\(id)-\(index)", content: .themes(chunk)))
