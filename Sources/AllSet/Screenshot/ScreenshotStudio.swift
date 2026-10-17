@@ -320,9 +320,27 @@ private struct AIPanel: View {
 
     private func send(_ text: String) {
         let text = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return }
+        guard !text.isEmpty, Self.confirmSending(to: studio.provider) else { return }
         instruction = ""
         Task { await studio.ask(text) }
+    }
+
+    /// Before the first send to a provider: the screenshot leaves this Mac,
+    /// said plainly, with a way to not be asked again.
+    static func confirmSending(to provider: AIProvider) -> Bool {
+        let key = "screenshot.sendNoticeSeen.\(provider.rawValue)"
+        guard !UserDefaults.standard.bool(forKey: key) else { return true }
+        let company = provider == .claude ? "Anthropic" : "OpenAI"
+        let alert = NSAlert()
+        alert.messageText = "Send this screenshot to \(company)?"
+        alert.informativeText = "The screenshot and your question are sent to \(company) with your API key, and handled under \(company)'s terms. Don't send anything you wouldn't share with them. Nothing else on your Mac is sent."
+        alert.addButton(withTitle: "Send")
+        alert.addButton(withTitle: "Cancel")
+        alert.showsSuppressionButton = true
+        alert.suppressionButton?.title = "Don't ask again for \(company)"
+        let sends = alert.runModal() == .alertFirstButtonReturn
+        if sends, alert.suppressionButton?.state == .on { UserDefaults.standard.set(true, forKey: key) }
+        return sends
     }
 
     private func saveKey() {

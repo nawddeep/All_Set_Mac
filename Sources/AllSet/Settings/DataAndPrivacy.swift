@@ -155,7 +155,7 @@ struct DataPrivacySettings: View {
                 Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([AppData.root]) }
             } label: {
                 Text("Where it\u{2019}s kept")
-                Text("Widgets, notes, workspaces, imported pictures, clipboard history and wallpapers are files in one folder on this Mac. Nothing is sent anywhere unless you set up your own wallpaper server.")
+                Text("Widgets, notes, workspaces, imported pictures, clipboard history and wallpapers are files in one folder on this Mac. Some widgets and features fetch things from the internet; each one is listed under Network use below.")
             }
             LabeledContent {
                 Text(services.clipboard.settings.isEnabled ? "On, \(services.clipboard.items.count) items" : "Off")
@@ -167,6 +167,8 @@ struct DataPrivacySettings: View {
         } header: {
             Text("Your data")
         }
+
+        NetworkUseSection()
 
         Section {
             SettingToggle("Include clipboard history", detail: "It can hold anything you have copied. Left out unless you turn this on.",
@@ -205,6 +207,36 @@ struct DataPrivacySettings: View {
         Task {
             status = await work()
             isWorking = false
+        }
+    }
+}
+
+/// Everything All Set can contact on the internet, from `NetworkUse`: when,
+/// and what is sent. Nothing else leaves the Mac.
+struct NetworkUseSection: View {
+    @State private var isExpanded = false
+
+    var body: some View {
+        Section {
+            DisclosureGroup("Every connection All Set can make (\(NetworkUse.allCases.count))", isExpanded: $isExpanded) {
+                ForEach(NetworkUse.allCases) { use in
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(use.title).font(.headline)
+                        Text("When: \(use.when)").foregroundStyle(.secondary)
+                        Text("Sends: \(use.sends)").foregroundStyle(.secondary)
+                    }
+                    .font(.callout)
+                    .padding(.vertical, 3)
+                    .accessibilityElement(children: .combine)
+                }
+            }
+            ForEach(NetworkUse.never, id: \.self) { line in
+                Label(line, systemImage: "checkmark.shield").foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Network use")
+        } footer: {
+            Text("Links you click (photo credits, where to get an API key, shortcut tiles) open in your browser.")
         }
     }
 }
