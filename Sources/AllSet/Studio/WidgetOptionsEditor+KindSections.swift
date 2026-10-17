@@ -39,6 +39,7 @@ extension WidgetOptionsEditor {
                                 Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("Remove City")
                             .help("Remove City")
                             .accessibilityLabel("Remove City")
                         }

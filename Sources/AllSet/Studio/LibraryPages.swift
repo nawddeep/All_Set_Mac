@@ -501,6 +501,7 @@ struct SearchBar: View {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
                 .help("Clear search")
             }
         }

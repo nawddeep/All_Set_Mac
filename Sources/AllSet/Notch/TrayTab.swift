@@ -50,6 +50,7 @@ private struct ShelfPane: View {
                         } label: {
                             Image(systemName: "doc.richtext")
                         }
+                        .accessibilityLabel("Make one PDF from the pictures and PDFs here")
                         .help("Make one PDF from the pictures and PDFs here")
                     }
                     Button {
@@ -63,6 +64,7 @@ private struct ShelfPane: View {
                     } label: {
                         Image(systemName: "trash")
                     }
+                    .accessibilityLabel("Clear the shelf")
                     .help("Clear the shelf")
                 }
             }
@@ -136,6 +138,7 @@ struct ShelfTile: View {
                         .foregroundStyle(.white, .black.opacity(0.6))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Remove from the shelf")
                 .help("Remove from the shelf")
                 .accessibilityLabel("Remove \(item.name) from the shelf")
                 .offset(x: 4, y: -4)

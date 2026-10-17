@@ -496,6 +496,7 @@ struct ShortcutRecorder: View {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Remove shortcut")
                 .help("Remove shortcut")
             }
         }

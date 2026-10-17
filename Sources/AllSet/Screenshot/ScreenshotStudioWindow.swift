@@ -246,6 +246,7 @@ private struct AIPanel: View {
                 if studio.isWorking {
                     Button { studio.cancel() } label: { Image(systemName: "stop.circle.fill").font(.title2) }
                         .buttonStyle(.borderless)
+                        .accessibilityLabel("Stop")
                         .help("Stop")
                         .accessibilityLabel("Stop")
                 } else {

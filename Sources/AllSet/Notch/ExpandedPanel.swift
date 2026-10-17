@@ -42,6 +42,7 @@ struct ExpandedPanel: View {
                                 .contentShape(Rectangle())
                         }
                         .buttonStyle(NotchIconButtonStyle())
+                        .accessibilityLabel("Screenshot with AI")
                         .help("Screenshot with AI")
                     }
                     if let battery = services.monitor.snapshot.battery {
@@ -54,6 +55,7 @@ struct ExpandedPanel: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(NotchIconButtonStyle())
+                    .accessibilityLabel("Settings")
                     .help("Settings")
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)

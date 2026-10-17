@@ -48,6 +48,7 @@ struct NotesTab: View {
                     Image(systemName: "arrow.up.forward.app")
                         .font(.system(size: 11, weight: .semibold))
                 }
+                .accessibilityLabel("Open Notes in All Set")
                 .help("Open Notes in All Set")
             }
             .buttonStyle(NotchIconButtonStyle())
@@ -130,6 +131,7 @@ struct NoteRow: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Edit")
                 .help("Edit")
                 .accessibilityLabel("Edit note")
                 Button {

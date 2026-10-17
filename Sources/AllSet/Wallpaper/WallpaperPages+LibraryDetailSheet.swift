@@ -63,6 +63,7 @@ struct LibraryDetailSheet: View {
                 }
                 .buttonStyle(PressableStyle())
                 .keyboardShortcut(.cancelAction)
+                .accessibilityLabel("Close the preview (Esc)")
                 .help("Close the preview (Esc)")
                 .accessibilityLabel("Close preview")
                 .padding(12)

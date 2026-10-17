@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 9
+**Current phase:** 10
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -80,7 +80,7 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T9.2 Smoke test harness
 - [x] T9.3 De-flake
 - [x] T9.4 Release checklist
-- [ ] T9.5 Accessibility
+- [x] T9.5 (VoiceOver pass by a person still to do) Accessibility
 
 ### Phase 10: repo hygiene
 - [ ] T10.1 AI artefacts out

@@ -29,6 +29,7 @@ struct ImageStrip: View {
                                         .foregroundStyle(.white, .black.opacity(0.6))
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityLabel("Remove Photo")
                                 .help("Remove Photo")
                                 .accessibilityLabel("Remove Photo")
                                 .padding(3)
@@ -322,6 +323,7 @@ struct GoalsEditor: View {
                             Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Remove Goal")
                         .help("Remove Goal")
                         .accessibilityLabel("Remove Goal")
                     }

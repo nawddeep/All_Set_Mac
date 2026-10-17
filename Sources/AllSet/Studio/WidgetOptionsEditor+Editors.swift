@@ -17,6 +17,7 @@ struct EndpointsEditor: View {
                             Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Remove Site")
                         .help("Remove Site")
                         .accessibilityLabel("Remove Site")
                     }
@@ -126,6 +127,7 @@ struct ShortcutsEditor: View {
                             Image(systemName: "minus.circle.fill").foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Remove")
                         .help("Remove")
                     }
                 }

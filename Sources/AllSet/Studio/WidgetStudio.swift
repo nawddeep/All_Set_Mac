@@ -123,6 +123,7 @@ struct GalleryCard: View {
                     .buttonStyle(FloatingButtonStyle(diameter: 30))
                     .padding(DS.Space.s)
                     .opacity(isHovering ? 1 : 0)
+                    .accessibilityLabel("Another photo or colors")
                     .help("Another photo or colors")
                     .accessibilityLabel("Show another look")
                 }
@@ -273,6 +274,7 @@ struct WidgetInspector: View {
                     }
                     .buttonStyle(.floating)
                     .padding(DS.Space.s)
+                    .accessibilityLabel("Remove from the desktop")
                     .help("Remove from the desktop")
                     .accessibilityLabel("Remove \(instance.kind.title) from the desktop")
                 }

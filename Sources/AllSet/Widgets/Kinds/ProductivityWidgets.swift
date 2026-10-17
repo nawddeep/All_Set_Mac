@@ -333,6 +333,7 @@ struct GoalsWidget: View {
         }
         .buttonStyle(PressableStyle())
         .contextMenu { menu(goal) }
+        .accessibilityLabel("\(goal.title): \(goal.progress) of \(goal.target) \(goal.unit). Click to add \(step(goal)).")
         .help("\(goal.title): \(goal.progress) of \(goal.target) \(goal.unit). Click to add \(step(goal)).")
         .accessibilityLabel("\(goal.title), \(goal.progress) of \(goal.target) \(goal.unit)")
     }
