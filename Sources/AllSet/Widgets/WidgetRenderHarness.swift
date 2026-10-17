@@ -835,7 +835,6 @@ private func captureOwnWindow(_ window: NSWindow) -> CGImage? {
     return capture(.null, CGWindowListOption.optionIncludingWindow.rawValue, UInt32(window.windowNumber),
                    CGWindowImageOption.boundsIgnoreFraming.rawValue)?.takeRetainedValue()
 }
-#endif
 
 extension WidgetRenderHarness {
     /// `-renderOnboarding folder`: each step of the first-run welcome, as a PNG.
@@ -854,3 +853,4 @@ extension WidgetRenderHarness {
         }
     }
 }
+#endif

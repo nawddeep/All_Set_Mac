@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 3 (T3.6 next)
+**Current phase:** 4
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -36,8 +36,8 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T3.3 Honest privacy, network-use registry + test, AI send notice
 - [x] T3.4 Screenshot shortcut opt-in; restore settings; uninstall
 - [x] T3.5 Deep link confirmation and rate limit
-- [ ] T3.6 Onboarding and permission rows
-- [ ] T3.7 Stored action validation
+- [x] T3.6 Onboarding and permission rows
+- [x] T3.7 Stored action validation
 
 ### Phase 4: distribution
 - [ ] T4.1 Entitlements, hardened runtime for every identity
