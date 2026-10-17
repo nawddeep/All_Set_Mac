@@ -24,6 +24,7 @@ import tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import catalog_lock  # noqa: E402
+import pgsql  # noqa: E402
 
 PSQL = "/opt/homebrew/bin/psql" if os.path.exists("/opt/homebrew/bin/psql") else "psql"
 FFMPEG = shutil.which("ffmpeg") or "/opt/homebrew/bin/ffmpeg"
@@ -41,16 +42,12 @@ def ffmpeg(*arguments):
     subprocess.run([FFMPEG, "-v", "error", "-y", *arguments], check=True)
 
 
-def psql(url, script):
-    result = subprocess.run([PSQL, url, "-q", "-At", "-v", "ON_ERROR_STOP=1", "-f", "-"],
-                            input=script, capture_output=True, text=True)
-    if result.returncode != 0:
-        sys.exit(result.stderr.strip())
-    return result.stdout.strip()
-
-
-def quoted(value):
-    return "null" if value is None else "'" + str(value).replace("'", "''") + "'"
+def psql(url, script, variables=None):
+    """Values reach psql as variables or COPY data (pgsql.py), never as SQL text."""
+    try:
+        return pgsql.run(url, script, variables, psql=PSQL, timeout=120)
+    except pgsql.DatabaseError as error:
+        sys.exit(str(error))
 
 
 def make(sample, work, storage):
@@ -79,10 +76,10 @@ def make(sample, work, storage):
             os.makedirs(os.path.dirname(destination), exist_ok=True)
             shutil.copyfile(made, destination)
     return dict(keys, id=id, title=title, kind=kind, category=category,
-                tags="{" + ",".join(tags) + "}", duration=SECONDS if kind == "video" else None,
+                tags=list(tags), duration=SECONDS if kind == "video" else None,
                 width=WIDTH, height=HEIGHT, fps=FPS if kind == "video" else None,
                 size_bytes=os.path.getsize(main), status="published", content_rating="Everyone",
-                provenance=json.dumps({"source": SOURCE, "author": "All Set dev sample", "license": "CC0-1.0"}))
+                provenance={"source": SOURCE, "author": "All Set dev sample", "license": "CC0-1.0"})
 
 
 def main():
@@ -92,7 +89,7 @@ def main():
     args = parser.parse_args()
     if not os.path.isdir(args.storage):
         sys.exit(f"{args.storage} isn't a folder")
-    if psql(args.url, f"select count(*) from wallpapers where provenance->>'source' = '{SOURCE}';") != "0":
+    if psql(args.url, "select count(*) from wallpapers where provenance->>'source' = :'source';", {"source": SOURCE}) != "0":
         print("The sample wallpapers are already there.")
         return
 
@@ -101,12 +98,14 @@ def main():
         rows = [make(sample, work, args.storage) for sample in SAMPLES]
     finally:
         shutil.rmtree(work, ignore_errors=True)
-    columns = list(rows[0])
-    values = ",\n".join("(" + ", ".join(quoted(row[c]) for c in columns) + ", now())" for row in rows)
+    columns = ", ".join(rows[0])
     # Rows that point at files, so under the catalog lock (catalog_lock.py); the
-    # files are already in their places.
-    psql(args.url, f"begin;\nselect pg_advisory_xact_lock({catalog_lock.ASSET_LOCK});\n"
-                   f"insert into wallpapers ({', '.join(columns)}, added_at) values\n{values};\ncommit;\n")
+    # files are already in their places. The rows arrive as COPY data.
+    psql(args.url, pgsql.incoming(rows) +
+         f"begin;\nselect pg_advisory_xact_lock({catalog_lock.ASSET_LOCK});\n"
+         f"insert into wallpapers ({columns}, added_at)\n"
+         f"select {', '.join('r.' + c for c in rows[0])}, now() from incoming, jsonb_populate_record(null::wallpapers, incoming.doc) r;\n"
+         "commit;\n")
     for row in rows:
         print(f"{row['id']}  {row['title']}")
 

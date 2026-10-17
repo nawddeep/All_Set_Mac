@@ -59,6 +59,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import accounts  # noqa: E402
+import pgsql  # noqa: E402
 from accounts import AccountError  # noqa: E402
 
 # The most rows one page of /catalog may ask for, and requests served at once.
@@ -81,10 +82,15 @@ COLUMNS = "id, title, kind, category, tags, duration, width, height, size_bytes"
 ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 DATABASE_TIMEOUT = 20
 TAILSCALE_NET = ipaddress.ip_network("100.64.0.0/10")
+# The list is read from the database at most this often. The delete service
+# touches changed_marker() when it changes a row, which ends the wait early;
+# sync_catalog.py runs on another Mac, so what it writes shows within CATALOG_TTL.
+CATALOG_TTL = 30
+def changed_marker():
+    """Read at call time: STORAGE can be pointed elsewhere (tests, --storage)."""
+    return os.path.join(STORAGE, ".catalog-changed")
 
-
-class DatabaseError(Exception):
-    pass
+DatabaseError = pgsql.DatabaseError
 
 
 def load_key():
@@ -101,23 +107,56 @@ def stored(key):
     return key if key and os.path.isfile(os.path.join(STORAGE, key)) else None
 
 
-def query(sql):
-    try:
-        result = subprocess.run([PSQL, DATABASE_URL, "-At", "-v", "ON_ERROR_STOP=1", "-c", sql],
-                                capture_output=True, text=True, timeout=DATABASE_TIMEOUT)
-    except (OSError, subprocess.TimeoutExpired) as error:
-        raise DatabaseError(str(error))
-    if result.returncode != 0:
-        raise DatabaseError(result.stderr.strip() or f"psql exited {result.returncode}")
-    return result.stdout.strip()
+def query(sql, variables=None):
+    """Values only ever travel as psql variables (`:'name'` in the SQL), never in its text."""
+    return pgsql.run(DATABASE_URL, sql, variables, psql=PSQL, timeout=DATABASE_TIMEOUT)
 
 
 def allowed_statuses(include_quarantined):
     return ("published", "quarantined") if include_quarantined else ("published",)
 
 
-def status_clause(include_quarantined):
-    return "status in (%s)" % ", ".join(f"'{s}'" for s in allowed_statuses(include_quarantined))
+# Matches the rows `allowed_statuses` allows; needs the variable from `status_variables`.
+STATUS_CLAUSE = "status in (select jsonb_array_elements_text((:'statuses')::jsonb))"
+
+
+def status_variables(include_quarantined):
+    return {"statuses": list(allowed_statuses(include_quarantined))}
+
+
+class CatalogCache:
+    """The rows /catalog serves, kept for CATALOG_TTL seconds or until the
+    changed marker moves, so a burst of requests reads the database once."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.entries = {}
+
+    @staticmethod
+    def marker():
+        try:
+            return os.path.getmtime(changed_marker())
+        except OSError:
+            return 0
+
+    def rows(self, include_quarantined, load, now=None):
+        now = time.monotonic() if now is None else now
+        marker = self.marker()
+        with self.lock:
+            entry = self.entries.get(include_quarantined)
+            if entry and now - entry[0] < CATALOG_TTL and entry[1] == marker:
+                return entry[2]
+        rows = load()
+        with self.lock:
+            self.entries[include_quarantined] = (now, marker, rows)
+        return rows
+
+    def clear(self):
+        with self.lock:
+            self.entries.clear()
+
+
+CACHE = CatalogCache()
 
 
 def parse_range(header, size):
@@ -305,10 +344,11 @@ class Handler(BaseHTTPRequestHandler):
         """The whole list, or with ?limit= (and ?offset=) one page of it. The
         body is the same list either way; a page also says how many rows there
         are in all (X-Total-Count) and where the next page starts (X-Next-Offset,
-        absent on the last one). A page can hold fewer than `limit` items: rows
-        whose file isn't on this server are left out after the page is cut."""
-        where = status_clause(self.include_quarantined)
-        paging, headers = "", {}
+        absent on the last one). Only wallpapers whose file is on this server
+        count, and they are counted before the page is cut, so every page but
+        the last is full and the total is what can actually be fetched."""
+        headers = {}
+        page = None
         if "limit" in parameters or "offset" in parameters:
             try:
                 limit = int(parameters.get("limit", [str(MAX_PAGE)])[0])
@@ -317,17 +357,23 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(400, {"error": "limit and offset must be whole numbers"})
             if not 1 <= limit <= MAX_PAGE or offset < 0:
                 return self._json(400, {"error": f"limit must be 1 to {MAX_PAGE}, offset 0 or more"})
-            total = int(query(f"select count(*) from wallpapers where {where}") or 0)
-            paging = f" limit {limit} offset {offset}"
-            headers["X-Total-Count"] = str(total)
-            if offset + limit < total:
+            page = (offset, limit)
+        rows = CACHE.rows(self.include_quarantined, lambda: self._servable_rows())
+        if page:
+            offset, limit = page
+            headers["X-Total-Count"] = str(len(rows))
+            if offset + limit < len(rows):
                 headers["X-Next-Offset"] = str(offset + limit)
+            rows = rows[offset:offset + limit]
+        return self._json(200, rows, headers)
+
+    def _servable_rows(self):
+        """Every listed wallpaper whose file is on this server, in catalog order."""
         rows = query(f"select coalesce(json_agg(t), '[]') from (select {COLUMNS}, playback_key from wallpapers "
-                     f"where {where} order by category, title, id{paging}) t")
-        # only list wallpapers whose file is actually on this server
-        return self._json(200, [{k: v for k, v in r.items() if k != "playback_key"}
-                                for r in json.loads(rows)
-                                if os.path.isfile(os.path.join(STORAGE, r["playback_key"] or "-"))], headers)
+                     f"where {STATUS_CLAUSE} order by category, title, id) t", status_variables(self.include_quarantined))
+        return [{k: v for k, v in r.items() if k != "playback_key"}
+                for r in json.loads(rows or "[]")
+                if os.path.isfile(os.path.join(STORAGE, r["playback_key"] or "-"))]
 
     def _library(self):
         """Every wallpaper /catalog lists, shaped like the app's catalog.json
@@ -336,7 +382,7 @@ class Handler(BaseHTTPRequestHandler):
         rows = query("select coalesce(json_agg(t), '[]') from (select id, title, kind, category, tags, "
                      "playback_key, still_key, thumbnail_key, duration, width, height, fps, size_bytes, "
                      "status, content_rating, added_at from wallpapers "
-                     f"where {status_clause(self.include_quarantined)} order by category, title, id) t")
+                     f"where {STATUS_CLAUSE} order by category, title, id) t", status_variables(self.include_quarantined))
         items = []
         for row in json.loads(rows or "[]"):
             playback, still = stored(row["playback_key"]), stored(row["still_key"])
@@ -354,8 +400,8 @@ class Handler(BaseHTTPRequestHandler):
     def _file(self, item_id):
         if not ID_PATTERN.match(item_id):
             return self._json(400, {"error": "bad id"})
-        key = query(f"select playback_key from wallpapers where id = '{item_id}' "
-                    f"and {status_clause(self.include_quarantined)}")
+        key = query(f"select playback_key from wallpapers where id = :'id' and {STATUS_CLAUSE}",
+                    {"id": item_id, **status_variables(self.include_quarantined)})
         path = os.path.realpath(os.path.join(STORAGE, key)) if key else ""
         if not key or not path.startswith(os.path.realpath(STORAGE) + os.sep) or not os.path.isfile(path):
             return self._json(404, {"error": "not found"})

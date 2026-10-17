@@ -29,6 +29,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import catalog_lock  # noqa: E402
+import pgsql  # noqa: E402
 
 MIGRATIONS = os.path.join(HERE, "migrations")
 PSQL = "/opt/homebrew/bin/psql" if os.path.exists("/opt/homebrew/bin/psql") else "psql"
@@ -39,9 +40,10 @@ class MigrationError(Exception):
     pass
 
 
-def run(url, script, psql=None):
+def run(url, script, psql=None, variables=None):
+    """`variables` reach the script as psql variables (`:'name'`), never in its text."""
     try:
-        result = subprocess.run([psql or PSQL, url, "-q", "-At", "-v", "ON_ERROR_STOP=1", "-f", "-"],
+        result = subprocess.run([psql or PSQL, url, "-q", "-At", "-v", "ON_ERROR_STOP=1"] + pgsql.arguments(variables) + ["-f", "-"],
                                 input=script, capture_output=True, text=True, timeout=TIMEOUT)
     except (OSError, subprocess.TimeoutExpired) as error:
         raise MigrationError(str(error))
@@ -76,10 +78,9 @@ def apply(url, psql=None, directory=None):
     for name in pending(url, psql, directory):
         with open(os.path.join(directory, name)) as handle:
             body = handle.read()
-        version = name.replace("'", "''")
         try:
             run(url, f"begin;\nselect pg_advisory_xact_lock({catalog_lock.ASSET_LOCK});\n{body}\n"
-                     f"insert into schema_migrations (version) values ('{version}');\ncommit;\n", psql)
+                     "insert into schema_migrations (version) values (:'version');\ncommit;\n", psql, {"version": name})
         except MigrationError as error:
             raise MigrationError(f"{name} failed and was rolled back: {error}")
         finished.append(name)

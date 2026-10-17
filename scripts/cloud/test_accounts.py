@@ -35,8 +35,18 @@ class PasswordTests(unittest.TestCase):
             with self.assertRaises(accounts.AccountError, msg=bad):
                 accounts.normalise(bad)
 
-    def test_sql_text_is_quoted(self):
-        self.assertEqual(accounts.lit("it's"), "'it''s'")
+    def test_no_value_is_written_into_sql(self):
+        """Every value reaches psql as a variable: the SQL text names it, never holds it."""
+        seen = []
+        fake = accounts.Accounts(lambda sql, variables=None: seen.append((sql, variables)) or "[]")
+        hostile = "x'); drop table accounts; --@example.com"
+        with self.assertRaises(accounts.AccountError):
+            fake.reset(hostile)
+        fake.sign_out("token' or 1=1 --")
+        for sql, variables in seen:
+            self.assertNotIn("drop table", sql)
+            self.assertNotIn("or 1=1", sql)
+        self.assertTrue(any(variables for _, variables in seen))
 
 
 @unittest.skipUnless(pgtest.AVAILABLE, "needs a local Postgres")
@@ -79,8 +89,8 @@ class AccountFlowTests(unittest.TestCase):
         session, _ = self.accounts.sign_in("old.session@example.com", password)
         self.assertIsNotNone(self.accounts.who(session))
         # Expiry is judged by the database's clock, so age the session there.
-        self.accounts.run(f"update sessions set expires_at = now() - interval '1 minute' "
-                          f"where token_hash = {accounts.lit(accounts.token_hash(session))}")
+        self.accounts.run("update sessions set expires_at = now() - interval '1 minute' where token_hash = :'token'",
+                          {"token": accounts.token_hash(session)})
         self.assertIsNone(self.accounts.who(session))
 
     def test_signing_out_ends_the_session(self):

@@ -76,6 +76,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import catalog_lock  # noqa: E402
+import pgsql  # noqa: E402
 
 STORAGE = os.path.expanduser("~/AllSetStorage/wallpapers")
 TOKEN_PATH = os.path.expanduser("~/.allset_delete_token")
@@ -132,33 +133,32 @@ def retired_dir(item_id=None):
     return root if item_id is None else os.path.join(root, item_id)
 
 
-def quote(value):
-    # Ids are checked against ID_PATTERN before reaching SQL; quoted regardless.
-    return "'" + value.replace("'", "''") + "'"
-
-
-def sql(statement):
+def sql(statement, variables=None):
+    """Values travel as psql variables (`:'name'` in the SQL), never in its text."""
     try:
-        result = subprocess.run([PSQL, DATABASE_URL, "-At", "-v", "ON_ERROR_STOP=1", "-c", statement],
-                                capture_output=True, text=True, timeout=DATABASE_TIMEOUT)
-    except (OSError, subprocess.TimeoutExpired) as error:
-        raise DatabaseError(str(error))
-    if result.returncode != 0:
-        raise DatabaseError(result.stderr.strip() or f"psql exited {result.returncode}")
-    return result.stdout.strip()
+        return pgsql.run(DATABASE_URL, statement, variables, psql=PSQL, timeout=DATABASE_TIMEOUT)
+    except pgsql.DatabaseError as error:
+        raise DatabaseError(str(error)) from error
 
 
-def sql_script(script):
+def sql_script(script, variables=None):
     """Several statements in one session (so one transaction can span them).
     Returns the output lines."""
     try:
-        result = subprocess.run([PSQL, DATABASE_URL, "-q", "-At", "-v", "ON_ERROR_STOP=1", "-f", "-"],
-                                input=script, capture_output=True, text=True, timeout=DATABASE_TIMEOUT)
-    except (OSError, subprocess.TimeoutExpired) as error:
-        raise DatabaseError(str(error))
-    if result.returncode != 0:
-        raise DatabaseError(result.stderr.strip() or f"psql exited {result.returncode}")
-    return result.stdout.splitlines()
+        return pgsql.run(DATABASE_URL, script, variables, psql=PSQL, timeout=DATABASE_TIMEOUT, lines=True)
+    except pgsql.DatabaseError as error:
+        raise DatabaseError(str(error)) from error
+
+
+def touch_changed_marker():
+    """Tells catalog_service.py the list changed, so it reads it again now."""
+    try:
+        os.makedirs(STORAGE, exist_ok=True)
+        with open(os.path.join(STORAGE, ".catalog-changed"), "a"):
+            pass
+        os.utime(os.path.join(STORAGE, ".catalog-changed"))
+    except OSError:
+        pass
 
 
 class AssetLock:
@@ -213,8 +213,8 @@ class AssetLock:
             self.session.wait()
 
 
-def text_array(values):
-    return "array[%s]::text[]" % ", ".join(quote(value) for value in values)
+# A list of keys, passed as the JSON variable `relatives`.
+RELATIVES = "(select jsonb_array_elements_text((:'relatives')::jsonb))"
 
 
 def delete_row_and_find_shared(item_id, relatives):
@@ -227,13 +227,14 @@ def delete_row_and_find_shared(item_id, relatives):
     columns = ", ".join("w." + column for column in KEY_COLUMNS)
     lines = sql_script(f"""begin;
 select pg_advisory_xact_lock({catalog_lock.ASSET_LOCK});
-with gone as (delete from wallpapers where id = {quote(item_id)} returning 1)
-select '{marker}' || coalesce(json_agg(m.k), '[]')::text from unnest({text_array(relatives)}) as m(k)
- where exists (select 1 from wallpapers w where w.id <> {quote(item_id)} and m.k in ({columns}));
+with gone as (delete from wallpapers where id = :'id' returning 1)
+select '{marker}' || coalesce(json_agg(m.k), '[]')::text from {RELATIVES} as m(k)
+ where exists (select 1 from wallpapers w where w.id <> :'id' and m.k in ({columns}));
 commit;
-""")
+""", {"id": item_id, "relatives": list(relatives)})
     for line in lines:
         if line.startswith(marker):
+            touch_changed_marker()
             return json.loads(line[len(marker):])
     raise DatabaseError("the delete gave no answer")
 
@@ -242,23 +243,23 @@ def referenced_keys(relatives):
     """Which of `relatives` any row references."""
     if not relatives:
         return set()
-    out = sql("select coalesce(json_agg(m.k), '[]') from unnest(%s) as m(k) where exists "
+    out = sql("select coalesce(json_agg(m.k), '[]') from %s as m(k) where exists "
               "(select 1 from wallpapers w where m.k in (%s))"
-              % (text_array(relatives), ", ".join("w." + column for column in KEY_COLUMNS)))
+              % (RELATIVES, ", ".join("w." + column for column in KEY_COLUMNS)), {"relatives": list(relatives)})
     return set(json.loads(out or "[]"))
 
 
 def row_keys(item_id):
     """The row's storage keys, or None if there's no row."""
-    out = sql("select coalesce(json_agg(json_build_array(%s)), '[]') from wallpapers where id = %s"
-              % (", ".join(KEY_COLUMNS), quote(item_id)))
+    out = sql("select coalesce(json_agg(json_build_array(%s)), '[]') from wallpapers where id = :'id'"
+              % ", ".join(KEY_COLUMNS), {"id": item_id})
     rows = json.loads(out or "[]")
     return None if not rows else [key for key in rows[0] if key]
 
 
 def key_used_elsewhere(key, item_id):
-    count = sql("select count(*) from wallpapers where id <> %s and %s in (%s)"
-                % (quote(item_id), quote(key), ", ".join(KEY_COLUMNS)))
+    count = sql("select count(*) from wallpapers where id <> :'id' and :'key' in (%s)" % ", ".join(KEY_COLUMNS),
+                {"id": item_id, "key": key})
     return int(count or 0) > 0
 
 
@@ -446,7 +447,9 @@ def reference_asset(item_id, column, key):
                 move(os.path.join(batch, relative), destination)
                 remove_if_empty(batch)
                 remove_if_empty(os.path.dirname(batch))
-            sql("update wallpapers set %s = %s where id = %s" % (column, quote(relative), quote(item_id)))
+            # `column` is one of KEY_COLUMNS (checked above): a name, so it can't be a variable.
+            sql("update wallpapers set %s = :'relative' where id = :'id'" % column, {"relative": relative, "id": item_id})
+            touch_changed_marker()
             return None
     except DatabaseError as error:
         return f"database unavailable: {error.args[0]}"

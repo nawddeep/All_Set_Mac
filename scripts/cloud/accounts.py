@@ -42,11 +42,6 @@ def normalise(email):
     return email
 
 
-def lit(text):
-    """A string as a SQL literal. Only for values that have been checked above."""
-    return "'" + str(text).replace("'", "''") + "'"
-
-
 HASH_ROUNDS = 600_000
 
 
@@ -79,19 +74,22 @@ def token_hash(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def rows(sql_text, run):
-    return json.loads(run(f"select coalesce(json_agg(t), '[]') from ({sql_text}) t") or "[]")
+def rows(sql_text, run, variables=None):
+    return json.loads(run(f"select coalesce(json_agg(t), '[]') from ({sql_text}) t", variables) or "[]")
 
 
 class Accounts:
-    """Every method takes `run(sql) -> str`: psql's output for one statement."""
+    """Every method takes `run(sql, variables) -> str`: psql's output, with each
+    value passed as a psql variable and named in the SQL as `:'name'`, never
+    written into the SQL itself."""
 
     def __init__(self, run, clock=None):
         self.run = run
         self.clock = clock or (lambda: datetime.datetime.now(datetime.timezone.utc))
 
     def _user(self, email):
-        found = rows(f"select email, password_hash, must_change, disabled from accounts where email = {lit(email)}", self.run)
+        found = rows("select email, password_hash, must_change, disabled from accounts where email = :'email'", self.run,
+                     {"email": email})
         return found[0] if found else None
 
     def invite(self, email):
@@ -99,8 +97,8 @@ class Accounts:
         if self._user(email):
             raise AccountError(f"{email} already has an account. Use reset to give them a new temporary password.")
         password = temporary_password()
-        self.run(f"insert into accounts (email, password_hash, must_change) values "
-                 f"({lit(email)}, {lit(hash_password(password))}, true)")
+        self.run("insert into accounts (email, password_hash, must_change) values (:'email', :'hash', true)",
+                 {"email": email, "hash": hash_password(password)})
         return password
 
     def reset(self, email):
@@ -108,18 +106,18 @@ class Accounts:
         if not self._user(email):
             raise AccountError(f"No account for {email}.")
         password = temporary_password()
-        self.run(f"update accounts set password_hash = {lit(hash_password(password))}, must_change = true "
-                 f"where email = {lit(email)}")
-        self.run(f"delete from sessions where email = {lit(email)}")
+        self.run("update accounts set password_hash = :'hash', must_change = true where email = :'email';\n"
+                 "delete from sessions where email = :'email'", {"email": email, "hash": hash_password(password)})
         return password
 
     def set_disabled(self, email, disabled):
         email = normalise(email)
         if not self._user(email):
             raise AccountError(f"No account for {email}.")
-        self.run(f"update accounts set disabled = {'true' if disabled else 'false'} where email = {lit(email)}")
+        self.run("update accounts set disabled = (:'disabled')::boolean where email = :'email'",
+                 {"email": email, "disabled": bool(disabled)})
         if disabled:
-            self.run(f"delete from sessions where email = {lit(email)}")
+            self.run("delete from sessions where email = :'email'", {"email": email})
 
     def list(self):
         return rows("select email, must_change, disabled, created_at from accounts order by email", self.run)
@@ -139,22 +137,22 @@ class Accounts:
             return None
         token = secrets.token_urlsafe(32)
         expires = self.clock() + datetime.timedelta(days=SESSION_DAYS)
-        self.run(f"insert into sessions (token_hash, email, expires_at) values "
-                 f"({lit(token_hash(token))}, {lit(email)}, {lit(expires.isoformat())})")
+        self.run("insert into sessions (token_hash, email, expires_at) values (:'token', :'email', (:'expires')::timestamptz)",
+                 {"token": token_hash(token), "email": email, "expires": expires.isoformat()})
         return token, bool(user["must_change"])
 
     def who(self, token):
         """(email, must_change) for a live session of an enabled account, else None."""
         if not token:
             return None
-        found = rows(f"select a.email, a.must_change from sessions s join accounts a on a.email = s.email "
-                     f"where s.token_hash = {lit(token_hash(token))} and s.expires_at > now() and not a.disabled",
-                     self.run)
+        found = rows("select a.email, a.must_change from sessions s join accounts a on a.email = s.email "
+                     "where s.token_hash = :'token' and s.expires_at > now() and not a.disabled",
+                     self.run, {"token": token_hash(token)})
         return (found[0]["email"], bool(found[0]["must_change"])) if found else None
 
     def sign_out(self, token):
         if token:
-            self.run(f"delete from sessions where token_hash = {lit(token_hash(token))}")
+            self.run("delete from sessions where token_hash = :'token'", {"token": token_hash(token)})
 
     def change_password(self, token, new_password):
         """Sets a new password for the signed-in account, ends its other sessions, and
@@ -165,13 +163,14 @@ class Accounts:
         if len(new_password or "") < MIN_PASSWORD:
             raise AccountError(f"Use at least {MIN_PASSWORD} characters.")
         email = who[0]
-        self.run(f"update accounts set password_hash = {lit(hash_password(new_password))}, must_change = false "
-                 f"where email = {lit(email)}")
-        self.run(f"delete from sessions where email = {lit(email)}")
         token = secrets.token_urlsafe(32)
         expires = self.clock() + datetime.timedelta(days=SESSION_DAYS)
-        self.run(f"insert into sessions (token_hash, email, expires_at) values "
-                 f"({lit(token_hash(token))}, {lit(email)}, {lit(expires.isoformat())})")
+        self.run("begin;\n"
+                 "update accounts set password_hash = :'hash', must_change = false where email = :'email';\n"
+                 "delete from sessions where email = :'email';\n"
+                 "insert into sessions (token_hash, email, expires_at) values (:'token', :'email', (:'expires')::timestamptz);\n"
+                 "commit",
+                 {"email": email, "hash": hash_password(new_password), "token": token_hash(token), "expires": expires.isoformat()})
         return token
 
 

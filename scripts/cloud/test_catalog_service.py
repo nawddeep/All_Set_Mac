@@ -9,6 +9,7 @@ import shutil
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from http.server import ThreadingHTTPServer
 
@@ -67,6 +68,9 @@ class CatalogServiceTests(unittest.TestCase):
 
     def setUp(self):
         catalog_service.Handler.include_quarantined = False
+        # These tests change rows straight in the database, not through sync_catalog,
+        # so nothing touches the changed marker: start each from an empty cache.
+        catalog_service.CACHE.clear()
 
     def get(self, path, headers=None, token=None):
         connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
@@ -173,6 +177,49 @@ class CatalogServiceTests(unittest.TestCase):
                 self.assertEqual(self.get(f"/catalog?{bad}")[0], 400, bad)
         finally:
             self.pg.sql("delete from wallpapers where category = 'zz-pages'")
+
+    def test_hostile_ids_never_reach_the_sql(self):
+        for hostile in ("pub1'--", "x'%20or%20'1'='1", "%27%3B%20drop%20table%20wallpapers%3B--"):
+            self.assertIn(self.get(f"/file/{hostile}")[0], (400, 404), hostile)
+        # The ids that do reach SQL go as a psql variable: quotes inside are just text.
+        self.assertEqual(catalog_service.query("select :'id'", {"id": "it's; drop table wallpapers; --"}),
+                         "it's; drop table wallpapers; --")
+        self.assertEqual(self.pg.sql("select count(*) from wallpapers where id = 'pub1'"), "1")
+
+    def test_rows_without_a_file_are_left_out_before_paging(self):
+        """Pages are full and the total counts only what can be fetched."""
+        for index in range(6):
+            item_id = f"gap{index}"
+            self.pg.sql(f"insert into wallpapers (id, title, kind, category, status, playback_key) values "
+                        f"('{item_id}', 'g{index}', 'video', 'zz-gaps', 'published', 'live/{item_id}.mp4')")
+            if index % 2 == 0:  # only half have a file on this server
+                with open(os.path.join(self.storage, f"live/{item_id}.mp4"), "wb") as handle:
+                    handle.write(b"x")
+        try:
+            status, headers, body = self.get("/catalog?limit=2&offset=0")
+            self.assertEqual((status, headers["X-Total-Count"], len(json.loads(body))), (200, "4", 2))
+            self.assertEqual(headers["X-Next-Offset"], "2")
+            _, headers, body = self.get("/catalog?limit=2&offset=2")
+            self.assertEqual(len(json.loads(body)), 2)
+            self.assertNotIn("X-Next-Offset", headers)
+        finally:
+            self.pg.sql("delete from wallpapers where category = 'zz-gaps'")
+
+    def test_the_list_is_cached_until_it_changes(self):
+        first = json.loads(self.get("/catalog")[2])
+        self.pg.sql("update wallpapers set title = 'renamed' where id = 'pub1'")
+        try:
+            self.assertEqual(json.loads(self.get("/catalog")[2]), first, "read again within the cache time")
+            # sync_catalog.py touches the marker when it writes: the next request reads afresh.
+            marker = catalog_service.changed_marker()
+            self.assertTrue(marker.startswith(self.storage))
+            os.makedirs(os.path.dirname(marker), exist_ok=True)
+            with open(marker, "a"):
+                pass
+            os.utime(marker, (time.time() + 5, time.time() + 5))
+            self.assertEqual(json.loads(self.get("/catalog")[2])[0]["title"], "renamed")
+        finally:
+            self.pg.sql("update wallpapers set title = 'pub1' where id = 'pub1'")
 
     def test_more_requests_than_it_serves_at_once_are_told_to_come_back(self):
         full = catalog_service.Handler.slots

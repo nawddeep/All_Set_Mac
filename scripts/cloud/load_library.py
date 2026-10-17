@@ -35,6 +35,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import catalog_lock  # noqa: E402
+import pgsql  # noqa: E402
 from publish_catalog import contained  # noqa: E402
 
 LIBRARY = os.path.expanduser("~/Library/Application Support/AllSet/Wallpaper/Library")
@@ -60,9 +61,6 @@ def copy(source, destination):
         shutil.copyfile(source, partial)
     os.replace(partial, destination)
 
-
-def quoted(value):
-    return "null" if value is None else "'" + value.replace("'", "''") + "'"
 
 
 def load(items, library, storage, dry_run=False):
@@ -109,18 +107,20 @@ def set_keys(url, keys, psql=None):
     if not keys:
         return 0
     columns = [column for _, column in KEYS]
-    values = ",\n".join("(" + ", ".join([quoted(id)] + [quoted(found.get(column)) for column in columns]) + ")"
-                        for id, found in sorted(keys.items()))
-    script = (f"begin;\nselect pg_advisory_xact_lock({catalog_lock.ASSET_LOCK});\n"
-              "with loaded (id, playback_key, still_key, thumbnail_key) as (values\n" + values + "\n), changed as (\n"
+    rows = [{"id": id, **{column: found.get(column) for column in columns}} for id, found in sorted(keys.items())]
+    # The rows go in as data through COPY (pgsql.incoming), never as SQL text.
+    script = (pgsql.incoming(rows) +
+              f"begin;\nselect pg_advisory_xact_lock({catalog_lock.ASSET_LOCK});\n"
+              "with loaded as (select doc->>'id' as id, " + ", ".join(f"doc->>'{c}' as {c}" for c in columns) +
+              " from incoming), changed as (\n"
               "update wallpapers w set " + ", ".join(f"{c} = coalesce(loaded.{c}, w.{c})" for c in columns) +
               ", uploaded_at = now() from loaded where w.id = loaded.id returning 1)\n"
               "select count(*) from changed;\ncommit;\n")
-    result = subprocess.run([psql or PSQL, url, "-q", "-At", "-v", "ON_ERROR_STOP=1", "-f", "-"],
-                            input=script, capture_output=True, text=True)
-    if result.returncode != 0:
-        raise LoadError(result.stderr.strip() or f"psql exited {result.returncode}")
-    return int(result.stdout.split()[-1])
+    try:
+        output = pgsql.run(url, script, psql=psql or PSQL, timeout=600)
+    except pgsql.DatabaseError as error:
+        raise LoadError(str(error)) from error
+    return int(output.split()[-1])
 
 
 def main():

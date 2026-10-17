@@ -179,6 +179,6 @@ jobs:
       - name: Test
         run: |
           set -o pipefail
-          /usr/bin/python3 -m unittest -v scripts/test_check_probe_budgets.py scripts/cloud/test_sync_catalog.py scripts/cloud/test_delete_service.py scripts/cloud/test_catalog_service.py scripts/cloud/test_migrate.py scripts/cloud/test_backup.py scripts/cloud/test_install_services.py scripts/cloud/test_publish_catalog.py scripts/cloud/test_load_library.py scripts/cloud/test_install_public_server.py 2>&1 | tee server-tests.log
+          /usr/bin/python3 -m unittest -v scripts/test_check_probe_budgets.py scripts/cloud/test_sync_catalog.py scripts/cloud/test_delete_service.py scripts/cloud/test_catalog_service.py scripts/cloud/test_migrate.py scripts/cloud/test_backup.py scripts/cloud/test_install_services.py scripts/cloud/test_publish_catalog.py scripts/cloud/test_load_library.py scripts/cloud/test_install_public_server.py scripts/cloud/test_pgsql.py scripts/cloud/test_accounts.py 2>&1 | tee server-tests.log
           # Skipped tests (no Postgres) would pass silently: require that none were.
           ! grep -q "skipped" server-tests.log
