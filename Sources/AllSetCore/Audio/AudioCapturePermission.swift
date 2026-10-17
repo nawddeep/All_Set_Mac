@@ -28,7 +28,12 @@ public enum AudioCapturePermission {
 
     public static var status: Status {
         // If TCC ever changes, say so rather than guess; macOS asks by itself on first use.
-        guard let symbol = dlsym(framework, "TCCAccessPreflight") else { return .unverifiable }
+        guard Capabilities.shared.isEnabled(.audioPermissionCheck) else { return .unverifiable }
+        guard let symbol = dlsym(framework, "TCCAccessPreflight") else {
+            Capabilities.shared.report(.audioPermissionCheck, .unavailable("TCC's preflight isn't there"))
+            return .unverifiable
+        }
+        Capabilities.shared.report(.audioPermissionCheck, .available)
         switch unsafeBitCast(symbol, to: PreflightFunction.self)(service, nil) {
         case 0: return .authorized
         case 1: return .denied
@@ -42,7 +47,8 @@ public enum AudioCapturePermission {
         // TCC waits for the person to answer, so never on the main thread.
         DispatchQueue.global(qos: .userInitiated).async {
             // No way to ask: report not granted, and `status` says it's unverifiable.
-            guard let symbol = dlsym(framework, "TCCAccessRequest") else { return completion(false) }
+            guard Capabilities.shared.isEnabled(.audioPermissionCheck),
+                  let symbol = dlsym(framework, "TCCAccessRequest") else { return completion(false) }
             unsafeBitCast(symbol, to: RequestFunction.self)(service, nil) { granted in
                 completion(granted)
             }

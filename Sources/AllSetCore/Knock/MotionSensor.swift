@@ -20,11 +20,15 @@ public final class MotionSensor: @unchecked Sendable {
     public enum Failure: Error, CustomStringConvertible {
         case notFound
         case cannotOpen(IOReturn)
+        case timedOut
+        case switchedOff
 
         public var description: String {
             switch self {
             case .notFound: "This Mac has no motion sensor"
             case .cannotOpen(let code): String(format: "The motion sensor couldn't be opened (0x%08x)", code)
+            case .timedOut: "The motion sensor didn't answer within 3 seconds"
+            case .switchedOff: "The motion sensor is switched off (capability.motionSensor.disabled)"
             }
         }
     }
@@ -53,7 +57,11 @@ public final class MotionSensor: @unchecked Sendable {
 
     /// Whether this Mac has the sensor at all.
     public static var isAvailable: Bool {
-        guard let device = service(class: "AppleSPUHIDDevice") else { return false }
+        guard Capabilities.shared.isEnabled(.motionSensor) else { return false }
+        guard let device = service(class: "AppleSPUHIDDevice") else {
+            Capabilities.shared.report(.motionSensor, .unavailable("this Mac has no motion sensor"))
+            return false
+        }
         IOObjectRelease(device)
         return true
     }
@@ -79,6 +87,7 @@ public final class MotionSensor: @unchecked Sendable {
     /// Opens the sensor on a new thread, returning once it's open or has failed.
     public func start() throws {
         guard thread == nil else { return }
+        guard Capabilities.shared.isEnabled(.motionSensor) else { throw Failure.switchedOff }
         let opened = DispatchSemaphore(value: 0)
         let outcome = OpenOutcome()
         lock.withLock { isStopping = false }
@@ -88,11 +97,19 @@ public final class MotionSensor: @unchecked Sendable {
         thread.qualityOfService = .userInitiated
         self.thread = thread
         thread.start()
-        opened.wait()
+        // A sensor that never answers mustn't hang whoever asked.
+        guard opened.wait(timeout: .now() + 3) == .success else {
+            stop()
+            self.thread = nil
+            Capabilities.shared.report(.motionSensor, .failed("no answer within 3 seconds"))
+            throw Failure.timedOut
+        }
         if let failure = outcome.failure {
             self.thread = nil
+            Capabilities.shared.report(.motionSensor, .failed(failure.description))
             throw failure
         }
+        Capabilities.shared.report(.motionSensor, .available)
     }
 
     /// Closes the sensor. Returns straight away; the thread finishes shortly after.

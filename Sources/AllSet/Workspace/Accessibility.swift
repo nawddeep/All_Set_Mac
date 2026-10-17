@@ -152,6 +152,7 @@ final class HotKeyCenter {
     /// re-registers its keys whenever they change.
     @discardableResult
     func register(_ shortcut: Shortcut, group: String = "windows", handler: @escaping @MainActor () -> Void) -> Bool {
+        guard Capabilities.shared.isEnabled(.globalHotKeys) else { return false }
         installHandlerIfNeeded()
         let id = nextID
         nextID += 1
@@ -159,7 +160,14 @@ final class HotKeyCenter {
         let hotKeyID = EventHotKeyID(signature: OSType(0x414C_5354), id: id) // "ALST"
         let status = RegisterEventHotKey(shortcut.keyCode, Self.carbonModifiers(shortcut.modifiers), hotKeyID,
                                          GetApplicationEventTarget(), 0, &reference)
-        guard status == noErr, let reference else { return false }
+        guard status == noErr, let reference else {
+            // Taken by another app is normal; anything else means the API itself failed.
+            if status != OSStatus(eventHotKeyExistsErr) {
+                Capabilities.shared.report(.globalHotKeys, .failed("RegisterEventHotKey returned \(status)"))
+            }
+            return false
+        }
+        Capabilities.shared.report(.globalHotKeys, .available)
         references[id] = reference
         handlers[id] = handler
         groups[id] = group

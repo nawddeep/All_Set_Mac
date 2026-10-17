@@ -84,11 +84,22 @@ final class ScreenshotShortcutController {
     }
 
     private func takeOverSystemShortcut() {
+        guard Capabilities.shared.isEnabled(.systemShortcuts) else {
+            problem = "Taking ⌘⇧5 is switched off on this Mac; choose ⌃⌥⌘5."
+            return
+        }
         let current = hotKeys()
         guard SymbolicHotKeys.isEnabled(SymbolicHotKeys.screenshotOptions, in: current) else { return }
         UserDefaults.standard.set(true, forKey: Self.marker)
         write(SymbolicHotKeys.setting(SymbolicHotKeys.screenshotOptions, enabled: false, in: current,
                                       defaultEntry: SymbolicHotKeys.screenshotOptionsEntry))
+        // Read back: if macOS kept the shortcut on, the format changed under us.
+        if SymbolicHotKeys.isEnabled(SymbolicHotKeys.screenshotOptions, in: hotKeys()) {
+            Capabilities.shared.report(.systemShortcuts, .failed("macOS kept its ⌘⇧5 after the change"))
+            problem = "macOS didn't let go of ⌘⇧5 on this version; choose ⌃⌥⌘5."
+        } else {
+            Capabilities.shared.report(.systemShortcuts, .available)
+        }
     }
 
     func restoreSystemShortcut() {

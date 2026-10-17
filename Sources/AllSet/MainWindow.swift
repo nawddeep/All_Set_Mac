@@ -374,6 +374,7 @@ struct MainView: View {
                 GeneralSettings(settings: services.settings)
                 DataPrivacySettings(services: services)
                 PermissionSettings(services: services)
+                CompatibilitySettings()
                 SystemRestoreSettings(services: services)
             }
         case .about:

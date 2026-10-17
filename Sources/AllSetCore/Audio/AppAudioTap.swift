@@ -151,10 +151,19 @@ final class AppAudioTap {
     }
 
     private func makeTap() throws {
+        guard Capabilities.shared.isEnabled(.audioTaps) else {
+            throw AudioRoutingError(step: "Per-app audio is switched off on this Mac (capability.audioTaps.disabled)", status: -1)
+        }
         var id = AudioObjectID(kAudioObjectUnknown)
-        try AudioRoutingError.check(
-            AudioHardwareCreateProcessTap(Self.description(of: processes, uuid: tapUUID, name: name), &id),
-            "Capturing \(name)")
+        do {
+            try AudioRoutingError.check(
+                AudioHardwareCreateProcessTap(Self.description(of: processes, uuid: tapUUID, name: name), &id),
+                "Capturing \(name)")
+        } catch {
+            Capabilities.shared.report(.audioTaps, .failed("\(error)"))
+            throw error
+        }
+        Capabilities.shared.report(.audioTaps, .available)
         tapID = id
     }
 

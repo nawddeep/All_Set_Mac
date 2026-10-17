@@ -28,8 +28,12 @@ final class TemperatureReader {
     private let client: IOHIDEventSystemClient?
     private var sensors: [(service: IOHIDServiceClient, kind: TemperatureSensorKind)] = []
 
-    init() {
-        client = IOHIDEventSystemClientCreate(kCFAllocatorDefault)
+    init(capabilities: Capabilities = .shared) {
+        // Switched off (Capabilities' kill switch): never touch the private API.
+        client = capabilities.isEnabled(.temperatures) ? IOHIDEventSystemClientCreate(kCFAllocatorDefault) : nil
+        if capabilities.isEnabled(.temperatures) && client == nil {
+            capabilities.report(.temperatures, .unavailable("the sensor service didn't open"))
+        }
         if let client {
             // Apple vendor page 0xff00, usage 5: temperature sensors.
             _ = IOHIDEventSystemClientSetMatching(client, ["PrimaryUsagePage": 0xff00, "PrimaryUsage": 5] as CFDictionary)
@@ -61,6 +65,7 @@ final class TemperatureReader {
                   let kind = TemperatureSensorKind.classify(name) else { return nil }
             return (service, kind)
         }
+        Capabilities.shared.report(.temperatures, sensors.isEmpty ? .unavailable("no temperature sensors are exposed") : .available)
     }
 
     private func average(_ values: [Double]?) -> Double? {

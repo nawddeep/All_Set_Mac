@@ -23,7 +23,12 @@ public final class MediaController {
     @ObservationIgnored private var input: FileHandle?
     @ObservationIgnored private var artworkID: String?
     @ObservationIgnored private var isStopping = false
-    @ObservationIgnored private var recentLaunches: [Date] = []
+    /// Restarts after a failure, this launch: at most `maximumRetries`, each
+    /// after a longer wait (2, 4, 8 s), then Now Playing is marked unavailable.
+    @ObservationIgnored private var retries = 0
+    @ObservationIgnored private var readyTimeout: Task<Void, Never>?
+    nonisolated static let maximumRetries = 3
+    nonisolated static let readyDeadline: Duration = .seconds(3)
     @ObservationIgnored private let log = Logger(subsystem: "com.pratik.allset", category: "media")
 
     nonisolated static let helperLibraryName = "libAllSetMediaHelper.dylib"
@@ -43,12 +48,16 @@ public final class MediaController {
 
     public func start() {
         guard process == nil else { return }
+        guard Capabilities.shared.isEnabled(.nowPlaying) else {
+            markUnavailable("Now Playing is switched off on this Mac (capability.nowPlaying.disabled).")
+            return
+        }
         guard let library = Self.helperLibraryURL() else {
             markUnavailable("The media helper library is missing from the app.")
+            Capabilities.shared.report(.nowPlaying, .unavailable("the helper library is missing"))
             return
         }
         isStopping = false
-        recentLaunches = recentLaunches.filter { $0.timeIntervalSinceNow > -60 } + [.now]
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/perl")
@@ -93,15 +102,26 @@ public final class MediaController {
             try process.run()
         } catch {
             markUnavailable("Couldn't start /usr/bin/perl: \(error.localizedDescription)")
+            Capabilities.shared.report(.nowPlaying, .unavailable("/usr/bin/perl couldn't start"))
             return
         }
         self.process = process
         input = stdin.fileHandleForWriting
         isAvailable = true
+        // The helper says "ready" once MediaRemote is loaded; silence means it's stuck.
+        readyTimeout?.cancel()
+        readyTimeout = Task { [weak self] in
+            try? await Task.sleep(for: Self.readyDeadline)
+            guard !Task.isCancelled, let self, self.process === process else { return }
+            log.error("Media helper didn't answer within 3 s")
+            Capabilities.shared.report(.nowPlaying, .failed("the helper didn't answer within 3 seconds"))
+            process.terminate()  // helperExited decides whether to try again
+        }
     }
 
     public func stop() {
         isStopping = true
+        readyTimeout?.cancel()
         try? input?.close()
         process?.terminate()
         process = nil
@@ -153,8 +173,13 @@ public final class MediaController {
         switch message.type {
         case "nowPlaying":
             apply(message)
+        case "ready":
+            readyTimeout?.cancel()
+            retries = 0
+            Capabilities.shared.report(.nowPlaying, .available)
         case "error":
             markUnavailable(message.message ?? "Now Playing isn't available.")
+            Capabilities.shared.report(.nowPlaying, .unavailable(message.message ?? "MediaRemote refused"))
         default:
             break
         }
@@ -194,17 +219,22 @@ public final class MediaController {
         process = nil
         input = nil
         guard !isStopping else { return }
+        readyTimeout?.cancel()
         if status == Self.unavailableExitStatus {
             markUnavailable(unavailableReason ?? "Now Playing isn't available on this Mac.")
+            Capabilities.shared.report(.nowPlaying, .unavailable(unavailableReason ?? "MediaRemote isn't available"))
             return
         }
         log.error("Media helper exited with status \(status)")
-        guard recentLaunches.count < 5 else {
+        guard retries < Self.maximumRetries else {
             markUnavailable("The media helper keeps stopping (exit status \(status)).")
+            Capabilities.shared.report(.nowPlaying, .failed("the helper stopped \(retries + 1) times"))
             return
         }
+        retries += 1
+        let wait = Self.retryDelay(attempt: retries)
         Task { [weak self] in
-            try? await Task.sleep(for: .seconds(2))
+            try? await Task.sleep(for: wait)
             self?.start()
         }
     }
@@ -215,6 +245,11 @@ public final class MediaController {
         unavailableReason = reason
         setArtwork(nil, id: nil)
         setInfo(nil)
+    }
+
+    /// 2, 4, 8 seconds: never a tight loop.
+    nonisolated static func retryDelay(attempt: Int) -> Duration {
+        .seconds(2 << max(0, min(attempt - 1, 4)))
     }
 
     /// Next to the executable when run from `.build`, or in Contents/Frameworks

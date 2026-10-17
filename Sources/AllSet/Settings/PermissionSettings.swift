@@ -80,3 +80,32 @@ struct PermissionSettings: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in refresh += 1 }
     }
 }
+
+/// General › Compatibility: the private macOS interfaces All Set relies on
+/// (`Capabilities`), whether each works here, and what stops without it.
+struct CompatibilitySettings: View {
+    @State private var refresh = 0
+
+    var body: some View {
+        Section {
+            ForEach(Capability.allCases) { capability in
+                let status = Capabilities.shared.status(capability)
+                LabeledContent {
+                    Text(status.label)
+                        .foregroundStyle(status.isUsable ? Color.secondary : Color.orange)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Text(capability.title)
+                    if !status.isUsable { Text(capability.feature) }
+                }
+                .id("\(capability.id)-\(refresh)")
+                .accessibilityElement(children: .combine)
+            }
+        } header: {
+            Text("Compatibility")
+        } footer: {
+            Text("These use parts of macOS Apple doesn't document, so a macOS update can change them. When one stops working, only the feature listed stops; the rest of All Set carries on.")
+        }
+        .onAppear { refresh += 1 }
+    }
+}
