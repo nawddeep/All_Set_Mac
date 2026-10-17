@@ -197,12 +197,14 @@ extension WidgetTheme {
                                             + StudioOriginalThemes.all.map(\.theme)
                                             + ReferenceThemes.all.map(\.theme)
                                             + DatasetTwoThemes.all.map(\.theme)
+                                            + FunkyThemes.all.map(\.theme)
 
     /// Whether the wallpaper is dark (a night photo counts as dark).
     public var isDark: Bool {
         if let reference = ReferenceThemes.design(id) { return reference.dark }
         if let original = StudioOriginalThemes.design(id) { return original.dark }
         if let newEdit = DatasetTwoThemes.design(id) { return newEdit.dark }
+        if let supplied = FunkyThemes.design(id) { return supplied.dark }
         return switch wallpaper {
         case .art(let piece): !piece.palette.isLight
         case .photo, .video, .library: true

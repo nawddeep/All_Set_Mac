@@ -27,6 +27,7 @@ public enum ThemeLibrary {
         let reference = ReferenceThemes.design(theme.id)
         let original = StudioOriginalThemes.design(theme.id)
         let newEdit = DatasetTwoThemes.design(theme.id)
+        let supplied = FunkyThemes.design(theme.id)
         let isMoodboard = index < WidgetTheme.moodboards.count
         let (collections, tags): ([ThemeCollection], String) = switch theme.id {
         case "midnightAurora": ([.featured, .night, .dreamy, .cinematic, .ambient], "aurora northern lights fjord blue violet glass calm nature")
@@ -92,12 +93,12 @@ public enum ThemeLibrary {
             : "Original artwork and free-to-use photos in the mood of an era fans know: no official photos, logos or lyrics. Add your own photos to make it yours."
         return ThemeSet(id: "setup.\(theme.id)", name: theme.title, tagline: theme.tagline,
                         description: "\(theme.tagline) A whole desktop, with its own wallpaper and layout.",
-                        philosophy: newEdit?.philosophy ?? original?.philosophy ?? reference?.philosophy ?? philosophy, inspiration: inspirations[theme.id],
-                        collections: newEdit?.collections ?? original?.collections ?? reference?.collections ?? collections,
-                        tags: "\(theme.id) \(newEdit?.tags ?? original?.tags ?? reference?.tags ?? tags)", look: .setup(theme.id), layout: [],
-                        added: newEdit != nil || original != nil || reference != nil ? "2026-10-08" : theme.id == "midnightAurora" ? "2026-10-05" : isColour ? "2026-09-30" : isMoodboard || fanIndex != nil ? "2026-09-25" : "2026-09-24",
-                        baseline: newEdit != nil ? 97 : original != nil ? 96 : reference != nil ? 94 : theme.id == "midnightAurora" ? 98 : isMoodboard ? 90 - Double(index) : fanIndex.map { spotlight[theme.id] ?? 88 - Double($0) } ?? (isColour ? 70 : 55),
-                        accent: newEdit?.lighting ?? original?.lighting ?? reference?.lighting ?? accents[theme.id])
+                        philosophy: supplied?.philosophy ?? newEdit?.philosophy ?? original?.philosophy ?? reference?.philosophy ?? philosophy, inspiration: inspirations[theme.id],
+                        collections: supplied?.collections ?? newEdit?.collections ?? original?.collections ?? reference?.collections ?? collections,
+                        tags: "\(theme.id) \(supplied?.tags ?? newEdit?.tags ?? original?.tags ?? reference?.tags ?? tags)", look: .setup(theme.id), layout: [],
+                        added: supplied != nil ? "2026-10-18" : newEdit != nil || original != nil || reference != nil ? "2026-10-08" : theme.id == "midnightAurora" ? "2026-10-05" : isColour ? "2026-09-30" : isMoodboard || fanIndex != nil ? "2026-09-25" : "2026-09-24",
+                        baseline: supplied != nil ? 98 : newEdit != nil ? 97 : original != nil ? 96 : reference != nil ? 94 : theme.id == "midnightAurora" ? 98 : isMoodboard ? 90 - Double(index) : fanIndex.map { spotlight[theme.id] ?? 88 - Double($0) } ?? (isColour ? 70 : 55),
+                        accent: supplied?.lighting ?? newEdit?.lighting ?? original?.lighting ?? reference?.lighting ?? accents[theme.id])
     }
 }
 

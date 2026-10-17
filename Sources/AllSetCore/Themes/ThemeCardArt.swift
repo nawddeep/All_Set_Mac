@@ -63,6 +63,7 @@ public enum ThemeCardArt {
     ].merging(Dictionary(uniqueKeysWithValues: ReferenceThemes.all.map { ("setup.\($0.theme.id)", $0.cardArt) })) { _, new in new }
      .merging(Dictionary(uniqueKeysWithValues: StudioOriginalThemes.all.map { ("setup.\($0.theme.id)", $0.cardArt) })) { _, new in new }
      .merging(Dictionary(uniqueKeysWithValues: DatasetTwoThemes.all.map { ("setup.\($0.theme.id)", $0.cardArt) })) { _, new in new }
+     .merging(Dictionary(uniqueKeysWithValues: FunkyThemes.all.map { ("setup.\($0.theme.id)", $0.cardArt) })) { _, new in new }
 
     /// The widgets a card shows when nobody has chosen them: the theme's
     /// word art across the top, its first large widget in the middle, and
