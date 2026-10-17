@@ -45,7 +45,9 @@ let package = Package(
         .testTarget(
             name: "AllSetCoreTests",
             dependencies: ["AllSetCore"],
-            path: "Tests/AllSetCoreTests"
+            path: "Tests/AllSetCoreTests",
+            // Read by path (#filePath), not bundled.
+            exclude: ["Fixtures"]
         ),
     ]
 )
