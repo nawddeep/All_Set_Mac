@@ -88,7 +88,6 @@ final class AppServices {
     lazy var mixer = MixerController(store: appVolumes, output: volume)
     let knockStore = KnockStore()
     let notes = NotesStore()
-    let lidPlane = LidPlaneController(settings: LidPlaneSettings())
     lazy var knocks = KnockController(services: self)
     lazy var screenshotShortcut = ScreenshotShortcutController(services: self)
     lazy var clipboardMonitor = ClipboardMonitor(services: self)
@@ -137,7 +136,6 @@ final class AppServices {
         power.start()
         calendar.start()
         themes.start(services: self)
-        lidPlane.start()
         screenshotShortcut.start()
         startLibrary()
     }
@@ -209,7 +207,6 @@ final class AppServices {
         // A preview nobody kept isn't the desktop: quitting puts the real one back.
         if ui.themePreview != nil { endThemePreview(keep: false) }
         knocks.stop()
-        lidPlane.stop()
         screenshotShortcut.stop()
         notes.save()
         mixer.stop()
@@ -337,7 +334,7 @@ final class AppServices {
             let pages: [String: AppPage] = [
                 "home": .island, "island": .island, "themes": .themes, "gallery": .gallery(nil), "monitor": .monitor,
                 "wallpaper": .wallpaper, "art": .wallpaper, "clipboard": .clipboard, "notes": .notes,
-                "workspaces": .workspaces, "mixer": .mixer, "settings": .general, "desktop": .desktop, "lid": .lidPlane,
+                "workspaces": .workspaces, "mixer": .mixer, "settings": .general, "desktop": .desktop,
             ]
             openWindow(pages[name] ?? WidgetCategory(rawValue: name).map { .gallery($0) } ?? .island)
         case .widget(let id):

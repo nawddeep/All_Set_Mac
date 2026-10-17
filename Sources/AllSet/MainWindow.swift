@@ -35,7 +35,6 @@ enum AppPage: Hashable {
     case screenshot
     // System
     case monitor
-    case lidPlane
     case general
     case about
 }
@@ -346,8 +345,6 @@ struct MainView: View {
             ScreenshotPage(services: services)
         case .monitor:
             MonitorPage(services: services)
-        case .lidPlane:
-            LidPlanePage(services: services)
         case .general:
             FormPage(eyebrow: "System", title: "General", subtitle: "Startup, the Dock, the menu bar, and your data.") {
                 GeneralSettings(settings: services.settings)

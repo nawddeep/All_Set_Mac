@@ -22,7 +22,7 @@ All Set is a macOS menu-bar/Dock utility built from these pieces:
 - **System monitor** — CPU, GPU, memory, disk, network, battery, thermal, top apps.
 - **Settings** — general, widgets, notch, wallpaper.
 
-Main window pages (`AppPage`), reached from a floating navigation of five places (Island, Desktop, Workspace, Tools, System; ⌘1–⌘5) with each place's pages as pills: Dynamic Island, Activities, Themes, Favorites, one Theme Set's detail page, Widget Gallery (per category or all), On Your Desktop (the widgets placed now), per-widget customization, widget appearance, Wallpaper (aerials, generative art, your videos), Wallpaper Options, Window Snapping, Workspaces, Clipboard, Shelf, Mixer, Knocks (TapTap), Notes, AI Screenshot, System Monitor, Lid Plane, General settings, About.
+Main window pages (`AppPage`), reached from a floating navigation of five places (Island, Desktop, Workspace, Tools, System; ⌘1–⌘5) with each place's pages as pills: Dynamic Island, Activities, Themes, Favorites, one Theme Set's detail page, Widget Gallery (per category or all), On Your Desktop (the widgets placed now), per-widget customization, widget appearance, Wallpaper (aerials, generative art, your videos), Wallpaper Options, Window Snapping, Workspaces, Clipboard, Shelf, Mixer, Knocks (TapTap), Notes, AI Screenshot, System Monitor, General settings, About.
 
 **The window's look:** always dark, on a deep navy backdrop with soft blue light drifting across it (frozen under Reduce Motion, Low Power Mode, a hot Mac, or while the window is hidden). Wallpaper, Themes and Art open on a full-bleed hero (what's on the desktop, the featured theme, today's art piece) that runs under the navigation and fades into the backdrop; the rest of each page uses the same headers, pills, rails and cards.
 
@@ -227,8 +227,6 @@ The Monitor page shows a tile per resource with its recent history, the heaviest
 
 ---
 
-## 14b. Lid Plane (System → Lid Plane)
-The effect from Lid Plane by Jhey (github.com/jh3y/lid-plane, GPL-3.0-or-later): the desktop is held at one apparent angle and progressively blurred as the lid closes. The tab has a live lid-angle readout from the hinge sensor, a preview of the effect on generated artwork (with a fold slider), on/off with ⌃⌘L, "start at a lid angle" (10–180°, default 110°) or movement-based anchoring with settle delay, jitter tolerance (0–5°), progressive blur, hold content angle, perspective taper, Simulate a Fold and Reset to Recommended. Needs Screen & System Audio Recording. Closing the lid, an external-only display, mirroring or a lost sensor always pauses it; nothing is saved or sent.
 
 ## 15. Settings
 

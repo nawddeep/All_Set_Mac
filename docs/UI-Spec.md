@@ -119,7 +119,7 @@ Sections and their pages:
 | Desktop | Themes, Widgets, Favorites, Wallpaper, Look & Layout, Wallpaper Options, On Your Desktop (count) | Themes |
 | Workspace | Window Snapping, Workspaces | Window Snapping |
 | Tools | Clipboard (count), Shelf (count), Sound Mixer, TapTap, AI Screenshot, Notes (open count) | Clipboard |
-| System | Monitor, Lid Plane, General, About | Monitor |
+| System | Monitor, General, About | Monitor |
 
 Each section remembers the last page you were on. Detail pages (a theme set, a widget) keep their parent pill lit.
 
@@ -239,7 +239,7 @@ Only layout numbers that were read from the source are listed. Unmeasured items 
 
 Built from the shared components above (page margin 24/32, section gap 40; `GlassPanel` only for floating chrome). Per-page layout numbers were **not** measured for this document; the pages are:
 
-Window Snapping · Workspaces · Clipboard (+ picker overlay) · Shelf · Sound Mixer · TapTap · AI Screenshot · Notes · Monitor · Lid Plane · General · About.
+Window Snapping · Workspaces · Clipboard (+ picker overlay) · Shelf · Sound Mixer · TapTap · AI Screenshot · Notes · Monitor · General · About.
 
 ---
 

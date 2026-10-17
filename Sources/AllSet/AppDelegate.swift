@@ -73,40 +73,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             return
         }
-        // `-renderLidPlane /folder`: the effect on generated artwork, and the renderer's own checks.
-        if let folder = UserDefaults.standard.string(forKey: "renderLidPlane") {
-            NSApp.setActivationPolicy(.accessory)
-            do {
-                guard let gpu = MTLCreateSystemDefaultDevice() else { print("Metal unavailable"); exit(1) }
-                let renderer = try LidPlaneRenderer(gpu: gpu)
-                let directory = URL(fileURLWithPath: folder)
-                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-                func save(_ image: CGImage, _ name: String) {
-                    try? NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])?.write(to: directory.appendingPathComponent(name))
-                }
-                renderer.perspective = false
-                save(try renderer.preview(to: nil, angle: 0), "open.png")
-                save(try renderer.preview(to: nil, angle: 35 * .pi / 180), "folded.png")
-                renderer.perspective = true
-                save(try renderer.preview(to: nil, angle: 35 * .pi / 180), "perspective.png")
-                try LidPlaneRenderChecks.run(renderer)
-                let started = CACurrentMediaTime()
-                for degrees in stride(from: 0.0, through: 60, by: 6) { _ = try renderer.preview(to: nil, angle: Float(degrees * .pi / 180)) }
-                print(String(format: "preview: %.1f ms each (11 renders)", (CACurrentMediaTime() - started) * 1000 / 11))
-                print(String(format: "live frame, 2560x1600 GPU: %.2f ms", renderer.frameCost(width: 2560, height: 1600, angle: 0.6)))
-                func timed(_ label: String, _ count: Int = 1, _ work: () throws -> Void) rethrows {
-                    let start = CACurrentMediaTime()
-                    for _ in 0..<count { try work() }
-                    print(String(format: "%@: %.2f ms", label, (CACurrentMediaTime() - start) * 1000 / Double(count)))
-                }
-                try timed("new renderer") { _ = try LidPlaneRenderer(gpu: gpu) }
-                var sensor: LidSensor?
-                timed("sensor connect") { sensor = LidSensor() }
-                timed("sensor read", 100) { _ = sensor?.read() }
-                print("sensor:", LidSensor().diagnostic, "screen access:", CGPreflightScreenCaptureAccess())
-            } catch { print(error); exit(1) }
-            exit(0)
-        }
         if let folder = UserDefaults.standard.string(forKey: "renderPhotos") {
             NSApp.setActivationPolicy(.accessory)
             Task {

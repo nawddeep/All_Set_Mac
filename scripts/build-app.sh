@@ -29,15 +29,12 @@ if BUILD_NUMBER="$(git rev-list --count HEAD 2>/dev/null)"; then
   /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$PLIST"
 fi
 
-# Third-party notices travel with the app: what's in Documentation/third-party
-# (Lid Plane's copyright and licence) goes into Contents/Resources/Notices. A
-# package without them isn't built.
+# Third-party notices travel with the app: whatever is in Documentation/third-party
+# goes into Contents/Resources/Notices, if there is anything.
 NOTICES="$APP_DIR/Contents/Resources/Notices"
 mkdir -p "$NOTICES"
-cp Documentation/third-party/* "$NOTICES/"
-if [ -z "$(ls -A "$NOTICES")" ]; then
-  echo "error: no third-party notices copied" >&2
-  exit 1
+if [ -d Documentation/third-party ] && [ -n "$(ls -A Documentation/third-party)" ]; then
+  cp Documentation/third-party/* "$NOTICES/"
 fi
 
 # A public library (scripts/cloud/publish_catalog.py behind Caddyfile.public):
