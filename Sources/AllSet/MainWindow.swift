@@ -33,8 +33,10 @@ enum AppPage: Hashable {
     case knocks
     case notes
     case screenshot
-    // System
+    // Extras
+    case extras
     case monitor
+    // Settings
     case general
     case about
 }
@@ -299,6 +301,16 @@ struct MainView: View {
 
     @ViewBuilder
     private func detail(_ page: AppPage) -> some View {
+        // A link or a search can still land on an extra that's off: it says so, with its switch.
+        if let extra = page.extra, !services.extras.isOn(extra) {
+            ExtraOffPage(extra: extra, extras: services.extras)
+        } else {
+            pageView(page)
+        }
+    }
+
+    @ViewBuilder
+    private func pageView(_ page: AppPage) -> some View {
         switch page {
         case .island:
             IslandPage(services: services)
@@ -343,6 +355,8 @@ struct MainView: View {
             NotesPage(notes: services.notes)
         case .screenshot:
             ScreenshotPage(services: services)
+        case .extras:
+            ExtrasPage(extras: services.extras)
         case .monitor:
             MonitorPage(services: services)
         case .general:

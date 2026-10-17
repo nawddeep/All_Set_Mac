@@ -36,9 +36,26 @@ final class WindowManager {
         observe({ [services] in [services.clipboard.settings.pickerShortcut.map(\.display) ?? "", String(services.clipboard.settings.isEnabled)] }) { [weak self] _ in
             self?.registerShortcuts()
         }
-        mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .leftMouseDragged, .leftMouseUp]) { [weak self] event in
-            let type = event.type
-            MainActor.assumeIsolated { self?.handleMouse(type) }
+        observe({ [services] in services.extras.enabled }) { [weak self] _ in
+            self?.registerShortcuts()
+            self?.watchMouse()
+        }
+        watchMouse()
+    }
+
+    /// Drag-to-edge snapping watches the mouse only while Window Snapping is on.
+    private func watchMouse() {
+        let wanted = services.extras.isOn(.snapping)
+        if wanted, mouseMonitor == nil {
+            mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .leftMouseDragged, .leftMouseUp]) { [weak self] event in
+                let type = event.type
+                MainActor.assumeIsolated { self?.handleMouse(type) }
+            }
+        } else if !wanted, let monitor = mouseMonitor {
+            NSEvent.removeMonitor(monitor)
+            mouseMonitor = nil
+            drag = nil
+            preview.hide()
         }
     }
 
@@ -58,7 +75,8 @@ final class WindowManager {
         HotKeyCenter.shared.unregisterAll()
         var conflicts = Set<String>()
         let settings = services.workspaces.settings
-        if settings.shortcutsEnabled {
+        let extras = services.extras
+        if settings.shortcutsEnabled, extras.isOn(.snapping) {
             for action in WindowAction.allCases {
                 guard let shortcut = settings.shortcut(for: action) else { continue }
                 if !HotKeyCenter.shared.register(shortcut, handler: { [weak self] in self?.perform(action) }) {
@@ -66,7 +84,7 @@ final class WindowManager {
                 }
             }
         }
-        for workspace in services.workspaces.workspaces {
+        for workspace in services.workspaces.workspaces where extras.isOn(.workspaces) {
             guard let shortcut = workspace.shortcut else { continue }
             let id = workspace.id
             if !HotKeyCenter.shared.register(shortcut, handler: { [weak self] in
@@ -78,7 +96,7 @@ final class WindowManager {
         }
         // The clipboard picker's shortcut lives here too, since the hot key
         // center is shared and re-registered as a whole.
-        if services.clipboard.settings.isEnabled, let shortcut = services.clipboard.settings.pickerShortcut {
+        if extras.isOn(.clipboard), services.clipboard.settings.isEnabled, let shortcut = services.clipboard.settings.pickerShortcut {
             if !HotKeyCenter.shared.register(shortcut, handler: { [weak self] in
                 guard let self else { return }
                 ClipboardPickerController.shared.toggle(services: services)

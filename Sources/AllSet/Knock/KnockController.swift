@@ -30,6 +30,10 @@ final class KnockController {
         listener.onKnock = { [weak self] event in self?.handle(event) }
         apply(store.settings)
         observe({ [store] in store.settings }) { [weak self] settings in self?.apply(settings) }
+        observe({ [services] in services.extras.isOn(.knocks) }) { [weak self] _ in
+            guard let self else { return }
+            apply(store.settings)
+        }
         listener.isOnBattery = services.power.state?.isPluggedIn == false
         observe({ [services] in services.power.state?.isPluggedIn }) { [weak self] pluggedIn in
             self?.listener.isOnBattery = pluggedIn == false
@@ -59,7 +63,8 @@ final class KnockController {
         listener.restsOnBattery = settings.restOnBattery && !isTuning
         // Nothing to run means nothing to listen for: the sensor stays off,
         // unless the settings page is open to try knocking.
-        listener.isEnabled = settings.isEnabled && (!settings.assignedCounts.isEmpty || isTuning)
+        // TapTap switched off as an extra reads nothing at all, whatever its own switch says.
+        listener.isEnabled = services.extras.isOn(.knocks) && settings.isEnabled && (!settings.assignedCounts.isEmpty || isTuning)
     }
 
     private func handle(_ event: KnockEvent) {

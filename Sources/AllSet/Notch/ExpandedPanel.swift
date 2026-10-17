@@ -16,8 +16,13 @@ struct ExpandedPanel: View {
             HStack(spacing: 0) {
                 HStack(spacing: 4) {
                     tabButton(.home, symbol: "house.fill", help: "Home")
-                    tabButton(.tray, symbol: "tray.full.fill", help: "Shelf & Clipboard")
-                    tabButton(.mixer, symbol: "slider.vertical.3", help: "Sound")
+                    // Tabs for extras that are off stay out of the island.
+                    if services.extras.isOn(.shelf) || services.extras.isOn(.clipboard) {
+                        tabButton(.tray, symbol: "tray.full.fill", help: "Shelf & Clipboard")
+                    }
+                    if services.extras.isOn(.mixer) {
+                        tabButton(.mixer, symbol: "slider.vertical.3", help: "Sound")
+                    }
                     tabButton(.notes, symbol: "note.text", help: "Notes")
                     tabButton(.system, symbol: "gauge.with.dots.needle.50percent", help: "System")
                 }
@@ -27,16 +32,18 @@ struct ExpandedPanel: View {
                 Color.clear.frame(width: model.geometry.notchRect.width)
 
                 HStack(spacing: 12) {
-                    Button {
-                        Task { await ScreenshotStudioController.shared.capture(services: services) }
-                    } label: {
-                        Image(systemName: "camera.viewfinder")
-                            .font(.system(size: 12, weight: .semibold))
-                            .frame(width: 24, height: 22)
-                            .contentShape(Rectangle())
+                    if services.extras.isOn(.screenshot) {
+                        Button {
+                            Task { await ScreenshotStudioController.shared.capture(services: services) }
+                        } label: {
+                            Image(systemName: "camera.viewfinder")
+                                .font(.system(size: 12, weight: .semibold))
+                                .frame(width: 24, height: 22)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(NotchIconButtonStyle())
+                        .help("Screenshot with AI")
                     }
-                    .buttonStyle(NotchIconButtonStyle())
-                    .help("Screenshot with AI")
                     if let battery = services.monitor.snapshot.battery {
                         BatteryBadge(battery: battery)
                     }

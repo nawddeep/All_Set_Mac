@@ -72,11 +72,15 @@ final class MixerController {
         refresh()
     }
 
-    /// Hands every app its sound back.
+    /// Hands every app its sound back and stops listening, so `start` can run again.
     func stop() {
         if let activationObserver { NotificationCenter.default.removeObserver(activationObserver) }
         activationObserver = nil
+        processListListener = nil
+        playingListeners = [:]
+        output.onOutputChange = nil
         router.removeAll()
+        lastApplied = nil
         store.save()
     }
 

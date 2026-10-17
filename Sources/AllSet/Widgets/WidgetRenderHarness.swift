@@ -657,7 +657,7 @@ extension WidgetRenderHarness {
         ("gallery", .gallery(nil)), ("gallery-themes", .gallery(nil)), ("look", .widgetAppearance), ("desktop", .desktop), ("widget", .desktop), ("wallpaper", .wallpaper),
         ("wallpaper-options", .wallpaperOptions), ("snapping", .snapping), ("workspaces", .workspaces),
         ("clipboard", .clipboard), ("shelf", .shelf), ("mixer", .mixer), ("taptap", .knocks), ("notes", .notes),
-        ("screenshot", .screenshot), ("monitor", .monitor), ("general", .general), ("about", .about),
+        ("screenshot", .screenshot), ("extras", .extras), ("monitor", .monitor), ("general", .general), ("about", .about),
     ]
 
     /// Opt-in visual cases; keep the normal CI page/probe inventory unchanged.

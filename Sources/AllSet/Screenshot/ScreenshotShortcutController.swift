@@ -25,6 +25,7 @@ final class ScreenshotShortcutController {
     func start() {
         apply()
         observe({ [services] in services.settings.screenshotShortcut }) { [weak self] _ in self?.apply() }
+        observe({ [services] in services.extras.isOn(.screenshot) }) { [weak self] _ in self?.apply() }
     }
 
     /// Hands macOS's shortcut back; the setting stays, so the next launch takes it over again.
@@ -36,6 +37,11 @@ final class ScreenshotShortcutController {
     func apply() {
         HotKeyCenter.shared.unregisterAll(group: Self.group)
         problem = nil
+        // AI Screenshot switched off as an extra holds no shortcut and leaves macOS's own alone.
+        guard services.extras.isOn(.screenshot) else {
+            restoreSystemShortcut()
+            return
+        }
         let choice = services.settings.screenshotShortcut
         if choice.needsSystemShortcutOff {
             takeOverSystemShortcut()

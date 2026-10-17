@@ -199,12 +199,16 @@ public final class KnockStore {
     @ObservationIgnored private let defaults: UserDefaults
     static let removedShellCommandsKey = "knock.removedShellCommands"
 
-    public init(fileURL: URL? = nil, defaults: UserDefaults = .standard) {
+    /// `enabledWithoutFile`: whether knocks are on when nothing was ever saved;
+    /// true only for installs from before knocks defaulted to off.
+    public init(fileURL: URL? = nil, defaults: UserDefaults = .standard, enabledWithoutFile: Bool = false) {
         self.fileURL = fileURL ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("AllSet/knocks.json")
         self.defaults = defaults
         let loaded = StoreFile.load(KnockSettings.self, from: self.fileURL)
-        settings = loaded ?? KnockSettings()
+        var fresh = KnockSettings()
+        fresh.isEnabled = enabledWithoutFile
+        settings = loaded ?? fresh
         removedShellCommands = defaults.integer(forKey: Self.removedShellCommandsKey)
         if let found = loaded?.removedShellCommands, found > 0 {
             // Written again at once without them, so they're never read back; the notice waits until it's seen.

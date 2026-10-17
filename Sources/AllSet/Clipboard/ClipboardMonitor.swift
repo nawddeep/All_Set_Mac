@@ -46,6 +46,7 @@ final class ClipboardMonitor {
         schedule()
         observe({ [services] in services.ui.performance.clipboardInterval }) { [weak self] _ in self?.schedule() }
         observe({ [services] in services.clipboard.settings.isEnabled }) { [weak self] _ in self?.schedule() }
+        observe({ [services] in services.extras.isOn(.clipboard) }) { [weak self] _ in self?.schedule() }
     }
 
     /// The timer exists only while history is on: with it off (as it is until
@@ -55,7 +56,7 @@ final class ClipboardMonitor {
         let wasRunning = timer != nil
         timer?.invalidate()
         timer = nil
-        guard services.clipboard.settings.isEnabled else { return }
+        guard services.clipboard.settings.isEnabled, services.extras.isOn(.clipboard) else { return }
         // Whatever was copied while history was off stays out of it.
         if !wasRunning { changeCount = NSPasteboard.general.changeCount }
         let interval = services.ui.performance.clipboardInterval
@@ -75,7 +76,7 @@ final class ClipboardMonitor {
         frontSinceCheck = source.map { [$0] } ?? []
         guard pasteboard.changeCount != changeCount else { return }
         changeCount = pasteboard.changeCount
-        guard services.clipboard.settings.isEnabled, changeCount != ownChangeCount else { return }
+        guard services.clipboard.settings.isEnabled, services.extras.isOn(.clipboard), changeCount != ownChangeCount else { return }
         guard Set(pasteboard.types ?? []).isDisjoint(with: Self.privateTypes) else { return }
         if services.clipboard.settings.ignores(anyOf: candidates) { return }
         if let cgImage = copiedImage(pasteboard) {

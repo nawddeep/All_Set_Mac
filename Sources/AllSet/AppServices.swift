@@ -51,6 +51,8 @@ struct RemovedWidget: Equatable {
 /// The app's long-lived models, shared by the notch, widgets, menu bar and settings.
 @MainActor
 final class AppServices {
+    /// First, so it sees the data folder as the last version left it.
+    let extras = ExtrasSettings()
     let settings = AppSettings()
     let monitor = SystemMonitor()
     let media = MediaController()
@@ -86,7 +88,7 @@ final class AppServices {
     let shelf = ShelfStore()
     let appVolumes = AppVolumeStore()
     lazy var mixer = MixerController(store: appVolumes, output: volume)
-    let knockStore = KnockStore()
+    private(set) lazy var knockStore = KnockStore(enabledWithoutFile: extras.isLegacyInstall)
     let notes = NotesStore()
     lazy var knocks = KnockController(services: self)
     lazy var screenshotShortcut = ScreenshotShortcutController(services: self)
@@ -131,7 +133,12 @@ final class AppServices {
         monitor.start()
         media.start()
         volume.start()
-        mixer.start()
+        // The mixer taps Core Audio only while it's on as an extra.
+        if extras.isOn(.mixer) { mixer.start() }
+        observe({ [extras] in extras.isOn(.mixer) }) { [weak self] on in
+            guard let self else { return }
+            if on { mixer.start() } else { mixer.stop() }
+        }
         knocks.start()
         power.start()
         calendar.start()
@@ -209,7 +216,7 @@ final class AppServices {
         knocks.stop()
         screenshotShortcut.stop()
         notes.save()
-        mixer.stop()
+        if extras.isOn(.mixer) { mixer.stop() }
         media.stop()
         monitor.stop()
         widgets.saveNow()
