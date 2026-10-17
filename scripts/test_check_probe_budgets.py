@@ -10,12 +10,13 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import check_probe_budgets as probe  # noqa: E402
 
 BUDGETS = {"page_cpu_percent": 40, "scroll_cpu_percent": 160, "scroll_max_frame_ms": 1500, "scroll_hitches": 60,
-           "gallery_part_worst_ms": 3000, "required": ["page", "scroll", "gallery part"]}
+           "gallery_part_worst_ms": 3000, "idle_widget_cpu_percent": 1, "required": ["page", "scroll", "gallery part", "idle"]}
 GOOD = [
-    "themes               4.2% CPU ( 1.1% kernel)    60 GPU frames/s",
+    "themes               1.2% CPU ( 1.1% kernel)    60 GPU frames/s",
     # Exactly as PageCPUProbe.runScroll prints it: the name has a space.
     "scroll gallery 1st  48.3% CPU  frames 240  p50  8.1 ms  p95 18.2 ms  max  80.0 ms  hitches(>33ms) 3  range 9000 pt",
     "gallery part hero             median   12.0 ms  worst   40.0 ms",
+    "clock visible: 0.378% CPU",
 ]
 
 
@@ -35,7 +36,7 @@ class ProbeBudgetTests(unittest.TestCase):
         self.assertEqual(len(probe.check(lines, BUDGETS)), 2)
 
     def test_a_probe_that_measured_nothing_fails(self):
-        self.assertEqual(len(probe.check([], BUDGETS)), 3)
+        self.assertEqual(len(probe.check([], BUDGETS)), 4)  # page, scroll, gallery part, idle
 
     def test_scroll_names_with_spaces_are_read(self):
         """The first CI run failed with "no scroll measurements": every line the
@@ -58,6 +59,11 @@ class ProbeBudgetTests(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "probe-budgets.json")) as handle:
             self.assertEqual(probe.check(GOOD, json.load(handle)), [])
 
+
+    def test_an_idle_clock_that_costs_too_much_fails(self):
+        problems = probe.check(GOOD + ["clock covered: 3.5% CPU"], BUDGETS)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("idle seconds clock covered", problems[0])
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,14 +1,16 @@
 {
-  "_note": "Ceilings for the CI probe (.github/workflows/ci.yml, job probe). Set wide on purpose, so they catch a page that got several times heavier or a probe that measured nothing, not small drift; the job prints what it measured, so tighten each to about 1.5x its usual CI value once a few runs are in. A null ceiling isn't checked.",
-  "page_cpu_percent": 40,
-  "scroll_cpu_percent": 160,
-  "scroll_max_frame_ms": 1500,
+  "_note": "Ceilings for the CI probe (.github/workflows/ci.yml, job probe), which runs the optimised build (-c release -Xswiftc -DDEBUG). Set on 2026-10-18 from the numbers measured on the owner's M4 MacBook Air plus 25% (Documentation/PRODUCTION_READINESS_PROGRESS.md, 'Phase 7 measurements'). GitHub's macOS VMs have no GPU and draw in software, so CI may read higher than the Mac: if a first CI run fails only on these, raise each to its CI value + 25% and say so in Documentation/DECISIONS.md. A null ceiling isn't checked.",
+  "page_cpu_percent": 2.75,
+  "scroll_cpu_percent": 128,
+  "scroll_max_frame_ms": 195,
   "scroll_hitches": null,
-  "gallery_part_worst_ms": 3000,
+  "gallery_part_worst_ms": 91,
+  "idle_widget_cpu_percent": 0.51,
   "required": [
     "page",
     "scroll",
-    "gallery part"
+    "gallery part",
+    "idle"
   ],
   "_hitches": "scroll_hitches is null: GitHub's macOS runners have no GPU, so nearly every scroll frame there is over 33 ms (about 80 ms, see Documentation/HANDOFF.md) and the count says nothing about the app. Longest frame and CPU still count."
 }

@@ -3,7 +3,7 @@ measurement is missing (a probe that printed nothing must not pass).
 
     /usr/bin/python3 scripts/check_probe_budgets.py probe.txt [scripts/probe-budgets.json]
 
-Reads the lines the app's DEBUG `-probe pages | scroll | galleryparts` print.
+Reads the lines the app's DEBUG `-probe pages | scroll | galleryparts | covered` print.
 """
 import json
 import os
@@ -15,6 +15,8 @@ PAGE = re.compile(r"^(?P<name>\S.*?)\s+(?P<cpu>[\d.]+)% CPU \(\s*[\d.]+% kernel\
 SCROLL = re.compile(r"^scroll (?P<name>\S.*?)\s+(?P<cpu>[\d.]+)% CPU\s+frames\s+\d+\s+p50\s+[\d.]+ ms\s+p95\s+[\d.]+ ms\s+"
                     r"max\s+(?P<max>[\d.]+) ms\s+hitches\(>33ms\) (?P<hitches>\d+)")
 PART = re.compile(r"^gallery part (?P<name>\S.*?)\s+median\s+[\d.]+ ms\s+worst\s+(?P<worst>[\d.]+) ms")
+# `-probe covered`: one seconds clock, on screen and then covered.
+IDLE = re.compile(r"^clock (?P<name>visible|covered): (?P<cpu>[\d.]+)% CPU")
 
 
 def over(value, budgets, key):
@@ -45,6 +47,11 @@ def check(lines, budgets, measured=None):
             measured.append(f"gallery part {match['name']}: worst {match['worst']} ms")
             if over(float(match["worst"]), budgets, "gallery_part_worst_ms"):
                 problems.append(f"gallery part {match['name']}: worst {match['worst']} ms > {budgets['gallery_part_worst_ms']} ms")
+        elif match := IDLE.match(line):
+            seen.add("idle")
+            measured.append(f"idle seconds clock {match['name']}: {match['cpu']}% CPU")
+            if over(float(match["cpu"]), budgets, "idle_widget_cpu_percent"):
+                problems.append(f"idle seconds clock {match['name']}: {match['cpu']}% CPU > {budgets['idle_widget_cpu_percent']}%")
         elif match := PAGE.match(line):
             seen.add("page")
             measured.append(f"page {match['name']}: {match['cpu']}% CPU idle")

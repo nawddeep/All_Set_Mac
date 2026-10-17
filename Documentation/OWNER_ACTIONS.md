@@ -12,3 +12,4 @@ Things only the owner can do. Ordered by priority at the end of the run.
 - Lid Plane: if you want it back, the only legal route is licensing the whole app GPL-3.0. Decide, then `git revert c5192d2`.
 
 ## Blocked
+- **T7.1 / CPU targets (findings 17).** Release measurements (progress file, "Phase 7 measurements"): Themes scroll 41–49% CPU, Gallery 30–60%, Wallpaper library 59–100% against a 20% target; switching to Themes holds the main thread 75–140 ms (target < 100 ms). There is no 2 s preview stall in release (that was a debug build on CI). Profiling (xctrace, attached) puts the cost in SwiftUI attribute-graph updates for the whole page, not in any one function of ours; one decode-deferral experiment showed no gain and was reverted. Getting to 20% needs a page-structure redesign (fewer live views per screen, AppKit/Core Animation for repeated cards). Needs a decision on how much of the current look to keep.

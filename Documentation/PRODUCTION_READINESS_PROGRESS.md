@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 7
+**Current phase:** 8
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -59,12 +59,12 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T6.2 Minimum OS; Apple Silicon only
 
 ### Phase 7: performance
-- [ ] T7.1 Theme previews off the main thread
-- [ ] T7.2 Gallery cards as stills
-- [ ] T7.3 Pointer poll only in Arrange mode
-- [ ] T7.4 Seconds clock on Core Animation
-- [ ] T7.5 Timer audit
-- [ ] T7.6 CI probes on optimised build
+- [blocked] T7.1 Theme previews off the main thread
+- [x] T7.2 Gallery cards as stills
+- [x] T7.3 Pointer poll only in Arrange mode
+- [x] T7.4 Seconds clock on Core Animation
+- [x] T7.5 Timer audit
+- [x] T7.6 CI probes on optimised build
 
 ### Phase 8: architecture
 - [ ] T8.1 Split AppServices

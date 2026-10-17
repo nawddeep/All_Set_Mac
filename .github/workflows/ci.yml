@@ -149,24 +149,27 @@ jobs:
           git push -qf "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ci-screenshots
 
   probe:
-    # Idle CPU per page and scroll smoothness (missed frames while scrolling
-    # the busiest pages), from the real app (DEBUG `-probe`). Numbers only:
-    # compare runs to catch a page that got heavier.
+    # Idle CPU per page, scroll smoothness, gallery card build time and an idle
+    # seconds clock, from the real app (DEBUG `-probe`) built the way it ships:
+    # optimised, with the DEBUG probes compiled in. A debug build measured the
+    # compiler, not the app.
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
 
-      - name: Build
-        run: swift build
+      - name: Build (optimised, with probes)
+        run: swift build -c release -Xswiftc -DDEBUG --build-path .build-probe
 
       - name: Probe
         run: |
           set -o pipefail  # a probe that fails fails the step, not hidden behind tee
-          ( sleep 600; pkill -f ".build/debug/AllSet" ) &
-          .build/debug/AllSet -probe scroll -AppleLanguages '(en)' | tee probe.txt
-          .build/debug/AllSet -probe pages -AppleLanguages '(en)' | tee -a probe.txt
-          .build/debug/AllSet -probe galleryparts -AppleLanguages '(en)' | tee -a probe.txt
+          ( sleep 900; pkill -f ".build-probe/release/AllSet" ) &
+          app=.build-probe/release/AllSet
+          $app -probe scroll -AppleLanguages '(en)' | tee probe.txt
+          $app -probe pages -AppleLanguages '(en)' | tee -a probe.txt
+          $app -probe galleryparts -AppleLanguages '(en)' | tee -a probe.txt
+          $app -probe covered -AppleLanguages '(en)' | tee -a probe.txt
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           cat probe.txt >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
