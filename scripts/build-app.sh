@@ -103,6 +103,10 @@ if [ -f Resources/AppIcon.icns ]; then
   cp Resources/AppIcon.icns "$APP_DIR/Contents/Resources/"
 fi
 cp -R Sources/AllSetCore/Resources/ThemeArt "$APP_DIR/Contents/Resources/"
+# Localized text (Resources/<lang>.lproj): the app bundle's own, where Text and String(localized:) look.
+for strings in Resources/*.lproj; do
+  [ -d "$strings" ] && cp -R "$strings" "$APP_DIR/Contents/Resources/"
+done
 
 # Sign with the local development certificate when it exists (see
 # setup-signing.sh) so macOS keeps Accessibility permission across rebuilds;

@@ -1,0 +1,4 @@
+/* All Set's user-facing text. English is the development language: SwiftUI
+   Text("…") and String(localized: "…") use the English in the code itself, so
+   this file only needs entries once a string is reworded for display or a
+   language is added (copy this folder to <lang>.lproj and translate). */

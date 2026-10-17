@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "AllSet",
+    defaultLocalization: "en",
     platforms: [.macOS("14.2")],
     products: [
         .executable(name: "AllSet", targets: ["AllSet"]),

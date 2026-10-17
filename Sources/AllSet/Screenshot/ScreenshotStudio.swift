@@ -50,7 +50,7 @@ final class ScreenshotStudioController {
             // pass, which can loop (see MainWindowController).
             controller.sizingOptions = []
             let window = NSWindow(contentViewController: controller)
-            window.title = "AI Screenshot"
+            window.title = String(localized: "AI Screenshot")
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
             window.isReleasedWhenClosed = false
             window.contentMinSize = NSSize(width: 900, height: 560)
@@ -332,12 +332,12 @@ private struct AIPanel: View {
         guard !UserDefaults.standard.bool(forKey: key) else { return true }
         let company = provider == .claude ? "Anthropic" : "OpenAI"
         let alert = NSAlert()
-        alert.messageText = "Send this screenshot to \(company)?"
-        alert.informativeText = "The screenshot and your question are sent to \(company) with your API key, and handled under \(company)'s terms. Don't send anything you wouldn't share with them. Nothing else on your Mac is sent."
-        alert.addButton(withTitle: "Send")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = String(localized: "Send this screenshot to \(company)?")
+        alert.informativeText = String(localized: "The screenshot and your question are sent to \(company) with your API key, and handled under \(company)'s terms. Don't send anything you wouldn't share with them. Nothing else on your Mac is sent.")
+        alert.addButton(withTitle: String(localized: "Send"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         alert.showsSuppressionButton = true
-        alert.suppressionButton?.title = "Don't ask again for \(company)"
+        alert.suppressionButton?.title = String(localized: "Don't ask again for \(company)")
         let sends = alert.runModal() == .alertFirstButtonReturn
         if sends, alert.suppressionButton?.state == .on { UserDefaults.standard.set(true, forKey: key) }
         return sends
@@ -367,10 +367,10 @@ private struct ShortcutPicker: View {
     /// Taking ⌘⇧5 changes a macOS setting: only after saying so.
     static func confirmTakeover() -> Bool {
         let alert = NSAlert()
-        alert.messageText = "Use ⌘⇧5 for AI Screenshot?"
-        alert.informativeText = "macOS uses ⌘⇧5 for its screenshot and screen-recording toolbar. To take it, All Set switches that macOS shortcut off while All Set runs, and switches it back on when you quit, pick another shortcut, or choose General › Restore macOS settings. If All Set is deleted while running, run scripts/uninstall.sh to get it back."
-        alert.addButton(withTitle: "Use ⌘⇧5")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = String(localized: "Use ⌘⇧5 for AI Screenshot?")
+        alert.informativeText = String(localized: "macOS uses ⌘⇧5 for its screenshot and screen-recording toolbar. To take it, All Set switches that macOS shortcut off while All Set runs, and switches it back on when you quit, pick another shortcut, or choose General › Restore macOS settings. If All Set is deleted while running, run scripts/uninstall.sh to get it back.")
+        alert.addButton(withTitle: String(localized: "Use ⌘⇧5"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         return alert.runModal() == .alertFirstButtonReturn
     }
 

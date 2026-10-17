@@ -18,12 +18,12 @@ enum SystemRestore {
     /// to the Trash, then moves the app to the Trash and quits.
     static func uninstall(services: AppServices) {
         let alert = NSAlert()
-        alert.messageText = "Uninstall All Set?"
-        alert.informativeText = "macOS's screenshot shortcut and your system wallpaper are put back, All Set stops opening at login, and the app moves to the Trash. You can drag it back out of the Trash until you empty it."
-        alert.addButton(withTitle: "Uninstall")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = String(localized: "Uninstall All Set?")
+        alert.informativeText = String(localized: "macOS's screenshot shortcut and your system wallpaper are put back, All Set stops opening at login, and the app moves to the Trash. You can drag it back out of the Trash until you empty it.")
+        alert.addButton(withTitle: String(localized: "Uninstall"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         alert.showsSuppressionButton = true
-        alert.suppressionButton?.title = "Also move my All Set data (widgets, notes, wallpapers, clipboard history) to the Trash"
+        alert.suppressionButton?.title = String(localized: "Also move my All Set data (widgets, notes, wallpapers, clipboard history) to the Trash")
         alert.suppressionButton?.state = .off
         guard alert.runModal() == .alertFirstButtonReturn else { return }
         let removesData = alert.suppressionButton?.state == .on
@@ -52,8 +52,8 @@ enum SystemRestore {
         }
         if !leftovers.isEmpty {
             let note = NSAlert()
-            note.messageText = "Almost done"
-            note.informativeText = "Couldn't move these to the Trash; drag them there yourself:\n" + leftovers.joined(separator: "\n")
+            note.messageText = String(localized: "Almost done")
+            note.informativeText = String(localized: "Couldn't move these to the Trash; drag them there yourself:") + "\n" + leftovers.joined(separator: "\n")
             note.runModal()
         }
         exit(0)

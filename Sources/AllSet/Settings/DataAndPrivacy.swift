@@ -47,16 +47,16 @@ enum AppData {
         let alert = NSAlert()
         switch outcome {
         case .applied(let manifest, let previous):
-            alert.messageText = "Your All Set data was restored"
-            alert.informativeText = "From the backup made \(manifest.created.formatted(date: .abbreviated, time: .shortened)). "
+            alert.messageText = String(localized: "Your All Set data was restored")
+            alert.informativeText = String(localized: "From the backup made \(manifest.created.formatted(date: .abbreviated, time: .shortened)). ")
                 + "What was here before is kept in \u{201C}\(previous.lastPathComponent)\u{201D} in All Set\u{2019}s data folder, "
                 + "in case you want it back."
-            alert.addButton(withTitle: "OK")
-            alert.addButton(withTitle: "Show in Finder")
+            alert.addButton(withTitle: String(localized: "OK"))
+            alert.addButton(withTitle: String(localized: "Show in Finder"))
             if alert.runModal() == .alertSecondButtonReturn { NSWorkspace.shared.activateFileViewerSelecting([previous]) }
         case .failed(let why):
             alert.alertStyle = .warning
-            alert.messageText = "The restore wasn\u{2019}t applied"
+            alert.messageText = String(localized: "The restore wasn\u{2019}t applied")
             alert.informativeText = why
             alert.runModal()
         }
@@ -110,14 +110,14 @@ enum AppData {
         }
 
         let alert = NSAlert()
-        alert.messageText = "Restore this backup?"
+        alert.messageText = String(localized: "Restore this backup?")
         var carries = "your widgets, notes, workspaces, pictures and settings"
         if manifest.includesClipboard { carries += ", clipboard history" }
         if manifest.includesWallpaperLibrary { carries += ", the wallpaper library" }
-        alert.informativeText = "Made \(manifest.created.formatted(date: .abbreviated, time: .shortened)) by All Set \(manifest.appVersion): "
+        alert.informativeText = String(localized: "Made \(manifest.created.formatted(date: .abbreviated, time: .shortened)) by All Set \(manifest.appVersion): ")
             + "\(carries). All Set will restart. What you have now is kept in its data folder, not deleted."
-        alert.addButton(withTitle: "Restore and Restart")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: String(localized: "Restore and Restart"))
+        alert.addButton(withTitle: String(localized: "Cancel"))
         guard alert.runModal() == .alertFirstButtonReturn else { return nil }
 
         let root = root

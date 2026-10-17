@@ -52,8 +52,8 @@ final class Diagnostics: NSObject, MXMetricManagerSubscriber {
                     NSWorkspace.shared.activateFileViewerSelecting([destination])
                 } else {
                     let alert = NSAlert()
-                    alert.messageText = "Couldn't export diagnostics"
-                    alert.informativeText = "The zip couldn't be written to \(destination.path)."
+                    alert.messageText = String(localized: "Couldn't export diagnostics")
+                    alert.informativeText = String(localized: "The zip couldn't be written to \(destination.path).")
                     alert.runModal()
                 }
             }

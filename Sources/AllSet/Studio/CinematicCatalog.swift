@@ -131,7 +131,7 @@ private struct CatalogLibraryCard: View {
                 Spacer(minLength: 2)
                 Button {
                     services.addWidget(entry.make())
-                    services.ui.toast = Toast(message: "\(entry.title) added to desktop", symbol: "plus")
+                    services.ui.toast = Toast(message: String(localized: "\(entry.title) added to desktop"), symbol: "plus")
                 } label: { Image(systemName: "plus") }
                 .buttonStyle(FloatingButtonStyle(diameter: 28)).accessibilityLabel("Add \(entry.title) to Desktop")
             }

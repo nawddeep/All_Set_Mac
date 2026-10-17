@@ -36,6 +36,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: Nothing tracked that shouldn't be
         run: scripts/check-repo-hygiene.sh
+      - name: Alerts, buttons, menus and toasts are localizable
+        run: scripts/check-localization.sh
 
   build-and-test:
     runs-on: macos-26

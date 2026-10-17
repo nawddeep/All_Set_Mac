@@ -72,7 +72,7 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T8.3 No file over 600 lines
 - [x] T8.4 (file ops; ~197 other try? not individually reviewed) try? audit
 - [x] T8.5 (TSan run blocked) Concurrency
-- [ ] T8.6 Localization scaffolding
+- [x] T8.6 Localization scaffolding
 - [ ] T8.7 Dead code
 
 ### Phase 9: testing

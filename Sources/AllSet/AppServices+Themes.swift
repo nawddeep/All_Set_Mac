@@ -72,7 +72,7 @@ extension AppServices {
         if setsWallpaper, let source = set.wallpaper { wallpaper.set(source) }
         settings.adopt(set)
         if recordChange(.theme(set.name), before: before) {
-            ui.toast = Toast(message: "\(set.name) is on your desktop", symbol: "wand.and.stars")
+            ui.toast = Toast(message: String(localized: "\(set.name) is on your desktop"), symbol: "wand.and.stars")
         }
         return true
     }
@@ -86,7 +86,7 @@ extension AppServices {
         // Written down before anything changes: quitting or a crash mid-trial
         // then puts this desktop back rather than keeping the trial.
         guard desktopJournal.beginPreview(PendingPreview(setID: set.id, before: before)) else {
-            ui.toast = Toast(message: "Couldn't start the preview: your desktop couldn't be saved first", symbol: "exclamationmark.triangle")
+            ui.toast = Toast(message: String(localized: "Couldn't start the preview: your desktop couldn't be saved first"), symbol: "exclamationmark.triangle")
             return
         }
         ui.themePreview = ThemePreview(setID: set.id, before: before)
@@ -106,7 +106,7 @@ extension AppServices {
                 themeStats.record(.install, for: set.id)
             }
             if !desktopJournal.keepPreview() {
-                ui.toast = Toast(message: "Kept, but couldn't record that: the next launch may undo this theme",
+                ui.toast = Toast(message: String(localized: "Kept, but couldn't record that: the next launch may undo this theme"),
                                  symbol: "exclamationmark.triangle")
             }
         } else {
@@ -127,10 +127,10 @@ extension AppServices {
         case .restored(let setID):
             guard atLaunch else { return }
             let name = ThemeLibrary.set(setID)?.name ?? "A theme"
-            ui.toast = Toast(message: "\(name) was only a preview: your desktop is back", symbol: "arrow.uturn.backward")
+            ui.toast = Toast(message: String(localized: "\(name) was only a preview: your desktop is back"), symbol: "arrow.uturn.backward")
         case .notSaved:
             // The record stays, so the next launch restores and saves again.
-            ui.toast = Toast(message: "Your desktop is back but couldn't be saved; it will be restored again next launch",
+            ui.toast = Toast(message: String(localized: "Your desktop is back but couldn't be saved; it will be restored again next launch"),
                              symbol: "exclamationmark.triangle")
         }
     }
@@ -148,14 +148,14 @@ extension AppServices {
         let current = desktopSnapshot
         previous.before.restore(settings: settings, widgets: widgets, wallpaper: wallpaper)
         guard widgets.saveNow(), wallpaper.saveNow() else {
-            ui.toast = Toast(message: "Restored, but couldn't save it: the stored previous desktop is kept", symbol: "exclamationmark.triangle")
+            ui.toast = Toast(message: String(localized: "Restored, but couldn't save it: the stored previous desktop is kept"), symbol: "exclamationmark.triangle")
             return
         }
         ui.desktopUndo = nil
         if desktopJournal.remember(PreviousDesktop(change: "Restored the previous desktop", before: current)) {
-            ui.toast = Toast(message: "Previous desktop restored", symbol: "arrow.uturn.backward")
+            ui.toast = Toast(message: String(localized: "Previous desktop restored"), symbol: "arrow.uturn.backward")
         } else {
-            ui.toast = Toast(message: "Previous desktop restored, but the one before it couldn't be kept to switch back to",
+            ui.toast = Toast(message: String(localized: "Previous desktop restored, but the one before it couldn't be kept to switch back to"),
                              symbol: "exclamationmark.triangle")
         }
     }
@@ -172,7 +172,7 @@ extension AppServices {
         case .link(let what): what
         }
         guard desktopJournal.remember(PreviousDesktop(change: words, before: before)) else {
-            ui.toast = Toast(message: "Done, but a copy of the previous desktop couldn't be saved: Undo works only until you quit",
+            ui.toast = Toast(message: String(localized: "Done, but a copy of the previous desktop couldn't be saved: Undo works only until you quit"),
                              symbol: "exclamationmark.triangle")
             return false
         }
@@ -191,7 +191,7 @@ extension AppServices {
         if saved { desktopJournal.endPreview() }
         ui.desktopUndo = nil
         if !saved {
-            ui.toast = Toast(message: "Undone, but couldn't save it", symbol: "exclamationmark.triangle")
+            ui.toast = Toast(message: String(localized: "Undone, but couldn't save it"), symbol: "exclamationmark.triangle")
         }
     }
 
@@ -205,7 +205,7 @@ extension AppServices {
         settings.resetWidgetLook()
         ui.isArrangingWidgets = false
         if recordChange(.turnedOff(name), before: before) {
-            ui.toast = Toast(message: "\(name) is off", symbol: "power")
+            ui.toast = Toast(message: String(localized: "\(name) is off"), symbol: "power")
         }
     }
 
@@ -216,7 +216,7 @@ extension AppServices {
         if ui.themePreview != nil { endThemePreview(keep: false) }
         let before = desktopSnapshot
         wallpaper.set(source)
-        ui.toast = Toast(message: "Wallpaper applied", symbol: "photo.artframe")
+        ui.toast = Toast(message: String(localized: "Wallpaper applied"), symbol: "photo.artframe")
         guard wallpaper.config != before.wallpaper else { return }
         recordChange(.wallpaper, before: before)
     }
@@ -247,10 +247,10 @@ extension AppServices {
         let screens = NSScreen.screens.sorted { ($0.isBuiltIn ? 0 : 1) < ($1.isBuiltIn ? 0 : 1) }
         guard screens.count > 1 else { return screens.first }
         let alert = NSAlert()
-        alert.messageText = "Where should \(set.name) go?"
-        alert.informativeText = "A second display is connected. The theme's widgets go on the one you pick; the other keeps its own."
+        alert.messageText = String(localized: "Where should \(set.name) go?")
+        alert.informativeText = String(localized: "A second display is connected. The theme's widgets go on the one you pick; the other keeps its own.")
         for screen in screens { alert.addButton(withTitle: screen.isBuiltIn ? "On this Mac" : "On \(screen.localizedName)") }
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: String(localized: "Cancel"))
         let index = alert.runModal().rawValue - NSApplication.ModalResponse.alertFirstButtonReturn.rawValue
         return screens.indices.contains(index) ? screens[index] : nil
     }

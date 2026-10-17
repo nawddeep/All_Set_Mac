@@ -25,7 +25,7 @@ final class OnboardingController: NSObject, NSWindowDelegate {
                               styleMask: [.titled, .closable, .fullSizeContentView], backing: .buffered, defer: false)
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
-        window.title = "Welcome to All Set"
+        window.title = String(localized: "Welcome to All Set")
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(rootView: view.environment(\.colorScheme, .dark))
         window.center()

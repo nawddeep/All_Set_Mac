@@ -72,7 +72,7 @@ final class MainWindowController: NSObject, NSWindowDelegate {
     /// No title or bar: the page runs to the top, the navigation floats
     /// beneath the window buttons, and each page names itself.
     static func dress(_ window: NSWindow) {
-        window.title = "All Set"
+        window.title = String(localized: "All Set")
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView]
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
