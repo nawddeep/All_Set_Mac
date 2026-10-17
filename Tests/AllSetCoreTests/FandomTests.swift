@@ -66,8 +66,11 @@ import Testing
         let licensed = CuratedBackgrounds.licensed.flatMap(\.photos)
         #expect(licensed.count >= 140)
         for photo in licensed {
-            #expect(["CC0", "PDM"].contains(photo.license ?? "") || (photo.license ?? "").hasPrefix("CC BY"), "\(photo.id): \(photo.license ?? "none")")
-            #expect(photo.imageURLString?.hasPrefix("https://") == true)
+            // Public domain, checked when bundled (scripts/bundle_licensed_photos.py), and shipped: never fetched.
+            #expect(["CC0", "PDM"].contains(photo.license ?? ""), "\(photo.id): \(photo.license ?? "none")")
+            #expect(photo.provider == WebPhoto.bundledProvider && photo.imageURLString == nil && photo.thumbnailURLString == nil)
+            #expect(photo.bundledFile.map { FileManager.default.fileExists(atPath: $0.path) } == true, "\(photo.id) isn't bundled")
+            #expect(photo.displayURL.isFileURL && photo.thumbnailURL().isFileURL)
         }
     }
 }

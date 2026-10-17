@@ -17,7 +17,9 @@ public enum ImageSource: Codable, Hashable, Sendable {
 }
 
 /// An online photo: from Picsum (Unsplash photos, free to use) when `provider`
-/// is nil, or from an Openverse search (Creative Commons photos).
+/// is nil, or from an Openverse search (Creative Commons photos). Photos picked
+/// from Wallhaven before its search was removed keep `provider: "wallhaven"`
+/// and still show from their own address.
 public struct WebPhoto: Codable, Hashable, Identifiable, Sendable {
     public var id: String
     public var author: String
@@ -48,9 +50,20 @@ public struct WebPhoto: Codable, Hashable, Identifiable, Sendable {
         self.origin = origin
     }
 
+    /// A photo shipped inside the app (`provider: "bundled"`): the theme
+    /// photos in `LicensedPhotos.swift`, public domain, checked when bundled.
+    public static let bundledProvider = "bundled"
+
+    /// The app's own copy of a bundled photo. Theme photos saved in a layout
+    /// before they were bundled (`provider: "openverse"`) find it too.
+    var bundledFile: URL? {
+        provider == Self.bundledProvider || provider == "openverse" ? ImageLibrary.bundledURL("licensed-\(id).jpg") : nil
+    }
+
     /// A small version for grids. Taken straight from the photo's own site
     /// where it offers sizes, which spares Openverse's daily thumbnail limit.
     public func thumbnailURL(side: Int = 240) -> URL {
+        if let bundledFile { return bundledFile }
         if let direct = Self.resized(imageURLString, origin: origin, small: true) { return direct }
         return thumbnailURLString.flatMap(URL.init(string:)) ?? Self.picsum(id, side, side)
     }
@@ -63,6 +76,7 @@ public struct WebPhoto: Codable, Hashable, Identifiable, Sendable {
     /// Picsum scales on its server; other sources give a large version, which
     /// is scaled down after downloading.
     public var displayURL: URL {
+        if let bundledFile { return bundledFile }
         if let large = Self.resized(imageURLString, origin: origin, small: false) { return large }
         if let url = imageURLString.flatMap(URL.init(string:)) { return url }
         let width = 2400
@@ -102,18 +116,17 @@ public struct WebPhoto: Codable, Hashable, Identifiable, Sendable {
         }
     }
 
-    /// "Photo by X" plus the license where there is one; a Wallhaven
-    /// wallpaper by its size, since the uploader rarely made it.
+    /// The creator plus the licence for a search result, the photographer
+    /// plus "Unsplash" for a Picsum photo: shown wherever the photo is offered.
     public var credit: String {
-        if provider == "wallhaven" { return width > 0 ? "\(width) × \(height) · Wallhaven" : "Wallhaven" }
-        return [author, license].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+        let source = provider == nil ? "Unsplash" : license
+        return [author, source].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 
     /// Where the picture came from, to credit it or find its creator.
     public var pageURL: URL? {
         switch provider {
-        case "wallhaven": Wallhaven.pageURL(id: id)
-        case "openverse": URL(string: "https://openverse.org/image/\(id)")
+        case "openverse", Self.bundledProvider: URL(string: "https://openverse.org/image/\(id)")
         default: nil
         }
     }
@@ -483,7 +496,8 @@ public final class ImageLibrary {
         guard let file = fileURL(for: source) else { return nil }
         guard case .web(let photo) = source, !FileManager.default.fileExists(atPath: file.path) else {
             guard FileManager.default.fileExists(atPath: file.path) else { return nil }
-            if case .web = source { Self.markUsed(file) }
+            // The app's own copies are never touched: that would change the signed bundle.
+            if case .web(let photo) = source, photo.bundledFile == nil { Self.markUsed(file) }
             return file
         }
         let key = photo.cacheName
@@ -596,11 +610,11 @@ public final class ImageLibrary {
         case .art: nil
         case .file(let name): userDirectory.appendingPathComponent(name)
         case .bundled(let name): Self.bundledURL(name)
-        case .web(let photo): cacheDirectory.appendingPathComponent(photo.cacheName)
+        case .web(let photo): photo.bundledFile ?? cacheDirectory.appendingPathComponent(photo.cacheName)
         }
     }
 
-    private static func bundledURL(_ name: String) -> URL? {
+    nonisolated static func bundledURL(_ name: String) -> URL? {
         // App bundles put art in Resources; SwiftPM tools use the resource bundle.
         if Bundle.main.bundleURL.pathExtension == "app" {
             return Bundle.main.url(forResource: name, withExtension: nil, subdirectory: "ThemeArt")

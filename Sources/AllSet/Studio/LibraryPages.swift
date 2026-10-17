@@ -313,7 +313,7 @@ struct WebPhotosPage: View {
             VStack(alignment: .leading, spacing: 18) {
                 PageHeader(title: "Photos", subtitle: showsPicks
                            ? "Photos by Unsplash photographers. Search, or pick a topic, for more."
-                           : "Wallpapers from Wallhaven and free photos from Openverse, searched together. Hover one to see where it's from.")
+                           : "Free-licensed photos from Openverse, each credited to its creator with its licence.")
                 SearchBar(text: $query, focused: $searchFocused, isSearching: search.isSearching)
                     .onChange(of: query) { _, text in
                         let trimmed = text.trimmingCharacters(in: .whitespaces)
@@ -358,14 +358,14 @@ struct WebPhotosPage: View {
                                && (typed.count >= 2 || !typed.isEmpty == false),
                            retry: { search.search(typed.isEmpty ? (topic ?? "") : typed, immediately: true) },
                            more: { search.loadMore() })
-                    Text("Wallpapers come from the Wallhaven community (safe-for-work only) and belong to their creators: they're for your own desktop. Openverse photos keep their free licenses. Right-click any picture to open its source.")
+                    Text("Photos from Openverse under CC0, Public Domain, CC BY or CC BY-SA licences. Each keeps its licence and belongs to its creator, shown under the photo. Right-click any picture to open its source.")
                         .font(.caption).foregroundStyle(.tertiary)
                         .fixedSize(horizontal: false, vertical: true)
                 } else {
                     photoGrid(library.webPhotos) { library.loadMoreWebPhotos() }
                     footer(loading: library.isLoadingWebPhotos, error: library.webPhotosError, hasMore: library.hasMoreWebPhotos,
                            empty: false, retry: { library.loadMoreWebPhotos() }, more: { library.loadMoreWebPhotos() })
-                    Text("Photos from Unsplash, served by Picsum.")
+                    Text("Photos by Unsplash photographers under the Unsplash License, served by Picsum. Each is credited under the photo.")
                         .font(.caption).foregroundStyle(.tertiary)
                 }
             }
@@ -544,18 +544,13 @@ private struct TopicChips: View {
     }
 }
 
-/// Order, size, shape and color for a search. Sorting and colors come from
-/// Wallhaven, so choosing one searches Wallhaven alone.
+/// Size and shape for a search.
 private struct SearchFilters: View {
     let search: PhotoSearch
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 10) {
-                Picker("Sort", selection: Binding(get: { search.sort }, set: { search.sort = $0 })) {
-                    ForEach(Wallhaven.Sort.allCases) { Text($0.title).tag($0) }
-                }
-                .frame(width: 180)
                 Picker("Size", selection: Binding(get: { search.minimumSize }, set: { search.minimumSize = $0 })) {
                     ForEach(PhotoSearch.MinimumSize.allCases) { Text($0.title).tag($0) }
                 }
@@ -569,35 +564,8 @@ private struct SearchFilters: View {
                 Spacer(minLength: 0)
             }
             .controlSize(.small)
-            HStack(spacing: 6) {
-                Text("Color").font(.callout).foregroundStyle(.secondary)
-                swatch(nil)
-                ForEach(Wallhaven.colors, id: \.self) { swatch($0) }
-            }
         }
         .font(.callout)
-    }
-
-    private func swatch(_ hex: String?) -> some View {
-        let selected = search.color == hex
-        return Button {
-            withMotion(Motion.quick) { search.color = selected ? nil : hex }
-        } label: {
-            Circle()
-                .fill(hex.map { Color(hex: Int($0, radix: 16) ?? 0) } ?? Color.clear)
-                .overlay {
-                    if hex == nil {
-                        Image(systemName: "circle.slash").font(.system(size: 13)).foregroundStyle(.secondary)
-                    }
-                }
-                .overlay(Circle().strokeBorder(Color.primary.opacity(0.25), lineWidth: 1))
-                .frame(width: 18, height: 18)
-                .padding(2)
-                .overlay(Circle().strokeBorder(Color.accentColor, lineWidth: selected ? 2 : 0))
-                .contentShape(Circle())
-        }
-        .buttonStyle(PressableStyle())
-        .help(hex == nil ? "Any color" : "Mostly #\(hex!)")
     }
 }
 

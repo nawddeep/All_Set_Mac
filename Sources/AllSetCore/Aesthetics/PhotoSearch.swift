@@ -3,21 +3,17 @@ import Foundation
 import Observation
 import OSLog
 
-/// Wallpaper and photo search across two libraries at once:
+/// Photo search in Openverse: free-licensed photos from the WordPress Photo
+/// Directory, Rawpixel and Flickr, strong on aesthetics, nature and everyday
+/// things. Only licences that allow any use, commercial included, are asked
+/// for and kept (`allowedLicenses`: CC0, the Public Domain Mark, CC BY and
+/// CC BY-SA), and every result carries its creator and licence for credit.
 ///
-/// - **Wallhaven**, about a million wallpapers tagged by what's in them:
-///   films, games, anime, cars, space, art. Safe-for-work only.
-/// - **Openverse**, free-licensed photos from the WordPress Photo Directory,
-///   Rawpixel and Flickr: strong on aesthetics, nature and everyday things.
-///
-/// What's typed is understood first (`WallpaperQuery`): nicknames spelled out,
-/// filler dropped, "-word" excluded. Names from pop culture go to Wallhaven
-/// alone (Openverse has none of them, only things that share the words);
-/// everything else asks both and interleaves the pages. An aesthetic
-/// ("coquette") becomes concrete Openverse searches, and a search that finds
-/// little is retried with its spelling fixed. Requests are paced under each
-/// site's anonymous limit and every page is cached for a day (and kept a
-/// month, for when the network or a limit says no).
+/// What's typed is understood first (`WallpaperQuery`): filler dropped,
+/// "-word" excluded. An aesthetic ("coquette") becomes concrete searches, and
+/// a search that finds little is retried with its spelling fixed. Requests are
+/// paced under Openverse's anonymous limit and every page is cached for a day
+/// (and kept a month, for when the network or the limit says no).
 @Observable @MainActor
 public final class PhotoSearch {
     public enum Orientation: String, CaseIterable, Identifiable, Sendable {
@@ -60,9 +56,6 @@ public final class PhotoSearch {
 
     public var minimumSize = MinimumSize.hd { didSet { if oldValue != minimumSize { restart() } } }
     public var orientation = Orientation.any { didSet { if oldValue != orientation { restart() } } }
-    public var sort = Wallhaven.Sort.relevance { didSet { if oldValue != sort { restart() } } }
-    /// One of `Wallhaven.colors`, or nil for any.
-    public var color: String? { didSet { if oldValue != color { restart() } } }
     /// The main screen's size in pixels, for "Sharp on This Screen".
     public var screenPixels = CGSize(width: 2560, height: 1600)
 
@@ -77,17 +70,15 @@ public final class PhotoSearch {
     static let fallbackSources = "flickr"
     /// Openverse turns away anonymous requests for more than 20 (with a 401).
     static let pageSize = 20
+    /// Licences that allow any use, commercial included, as Openverse names them.
+    nonisolated static let allowedLicenses = ["cc0", "pdm", "by", "by-sa"]
 
     @ObservationIgnored private var page = 1
     @ObservationIgnored private var understood = WallpaperQuery.understand("")
     /// The concrete Openverse searches behind `query`; pages take turns through them.
     @ObservationIgnored private var searches: [String] = []
-    @ObservationIgnored private var usesOpenverse = true
-    @ObservationIgnored private var wallhavenMore = true
     @ObservationIgnored private var openverseMore = true
-    @ObservationIgnored private var seed = ""
     @ObservationIgnored private var openversePacer = SearchPacer()
-    @ObservationIgnored private var wallhavenPacer = SearchPacer(limit: 40)
     @ObservationIgnored private var task: Task<Void, Never>?
     /// Recent pages in memory (older ones are read back from disk).
     @ObservationIgnored private var memoryCache = CostCache<String, CachedPage>(costLimit: 200)
@@ -123,14 +114,9 @@ public final class PhotoSearch {
         isSearching = false
         understood = WallpaperQuery.understand(trimmed)
         searches = AestheticSearch.searches(for: understood.meaning)
-        // Openverse has no films, games or cars, and can't sort or filter by color.
-        usesOpenverse = !understood.isPopCulture && !searches.isEmpty
-            && (sort == .relevance && color == nil || !understood.searchesWallhaven)
-        wallhavenMore = understood.searchesWallhaven
-        openverseMore = usesOpenverse
-        seed = String((0..<6).map { _ in "abcdefghijklmnopqrstuvwxyz0123456789".randomElement()! })
-        interpretation = understood.note ?? (usesOpenverse ? AestheticSearch.explanation(for: understood.meaning) : nil)
-        guard trimmed.count >= 2, !understood.meaning.isEmpty else { return }
+        openverseMore = !searches.isEmpty
+        interpretation = understood.note ?? AestheticSearch.explanation(for: understood.meaning)
+        guard trimmed.count >= 2, !understood.meaning.isEmpty, !searches.isEmpty else { return }
         task = Task { [weak self] in
             if !immediately {
                 try? await Task.sleep(for: .milliseconds(400))
@@ -181,50 +167,37 @@ public final class PhotoSearch {
         }
     }
 
-    private var filters: Wallhaven.Filters {
-        var filters = Wallhaven.Filters()
-        filters.sort = sort
-        filters.minimumPixels = minimumPixels
-        filters.orientation = orientation
-        filters.color = color
-        filters.seed = seed
-        return filters
-    }
-
     private func load(page: Int) async {
         isSearching = true
         defer { isSearching = false }
-        let wantsWallhaven = wallhavenMore
-        let wantsOpenverse = usesOpenverse && openverseMore
-        async let wallhaven = wantsWallhaven ? wallhavenPage(page, query: understood) : nil
-        async let openverse = wantsOpenverse ? openversePage(page) : nil
-        var (wide, free) = await (wallhaven, openverse)
+        guard openverseMore else { return }
+        var free = await openversePage(page)
         guard !Task.isCancelled else { return }
 
         // Next to nothing, maybe from a typo: try the nearest real words.
-        if page == 1, (wide?.photos.count ?? 0) + (free?.photos.count ?? 0) < 8,
+        if page == 1, (free?.photos.count ?? 0) < 8,
            let corrected = WallpaperQuery.correctedSpelling(of: understood.meaning) {
             let fixed = WallpaperQuery.understand(corrected + understood.excluded.map { " -\($0)" }.joined())
-            if fixed.searchesWallhaven, let retry = await wallhavenPage(1, query: fixed), retry.photos.count > (wide?.photos.count ?? 0) {
+            let before = searches
+            searches = AestheticSearch.searches(for: fixed.meaning)
+            if let retry = await openversePage(1), retry.photos.count > (free?.photos.count ?? 0) {
                 guard !Task.isCancelled else { return }
                 understood = fixed
-                wide = retry
-                free = nil
-                usesOpenverse = false
+                free = retry
                 interpretation = "Showing results for \u{201C}\(fixed.meaning)\u{201D}"
+            } else {
+                searches = before
             }
         }
 
-        if wantsWallhaven { wallhavenMore = wide.map { page < $0.pageCount && !$0.photos.isEmpty } ?? false }
-        if wantsOpenverse { openverseMore = free.map(\.hasMore) ?? false }
-        hasMore = wallhavenMore || (usesOpenverse && openverseMore)
+        openverseMore = free.map(\.hasMore) ?? false
+        hasMore = openverseMore
 
-        if wide == nil, free == nil, wantsWallhaven || wantsOpenverse {
+        guard let free else {
             errorMessage = lastError ?? "Search failed. Check your connection and try again."
             return
         }
-        let merged = Self.interleave(wide?.photos ?? [], free?.photos ?? [])
-            .filter { fits($0) }
+        let merged = free.photos.filter { fits($0) && understood.allows(title: $0.title) }
         let seen = Set(results.map(\.id))
         let fresh = merged.filter { !seen.contains($0.id) }
         results = page == 1 ? fresh : results + fresh
@@ -234,17 +207,6 @@ public final class PhotoSearch {
 
     @ObservationIgnored private var lastError: String?
 
-    /// Two lists, alternating, the rest of the longer one after.
-    nonisolated static func interleave(_ a: [WebPhoto], _ b: [WebPhoto]) -> [WebPhoto] {
-        var merged: [WebPhoto] = []
-        merged.reserveCapacity(a.count + b.count)
-        for index in 0..<max(a.count, b.count) {
-            if index < a.count { merged.append(a[index]) }
-            if index < b.count { merged.append(b[index]) }
-        }
-        return merged
-    }
-
     /// Big enough and the right shape, where the size is known.
     private func fits(_ photo: WebPhoto) -> Bool {
         guard photo.width > 0, photo.height > 0 else { return true }
@@ -253,28 +215,9 @@ public final class PhotoSearch {
         case .landscape: if photo.width < photo.height { return false }
         case .portrait: if photo.height < photo.width { return false }
         }
-        guard let minimum = minimumPixels, photo.provider != "wallhaven" else { return true }
+        guard let minimum = minimumPixels else { return true }
         // Free photos are rarely 4K; a little short of the mark still looks sharp.
         return max(photo.width, photo.height) >= Int(max(minimum.width, minimum.height) * 0.75)
-    }
-
-    // MARK: Wallhaven
-
-    private func wallhavenPage(_ page: Int, query: WallpaperQuery) async -> (photos: [WebPhoto], pageCount: Int)? {
-        let url = Wallhaven.url(for: query, page: page, filters: filters)
-        let key = "wh1|\(url.absoluteString)"
-        let cacheable = sort != .random
-        if cacheable, let cached = cachedPage(key, maxAge: 86_400) { return (cached.photos, cached.pageCount) }
-        do {
-            let data = try await fetch(url, pacer: \.wallhavenPacer, name: "Wallhaven", limit: "45")
-            let decoded = try Wallhaven.decode(data, sort: sort)
-            if cacheable { store(CachedPage(photos: decoded.photos, pageCount: decoded.pageCount, date: .now), key: key) }
-            return decoded
-        } catch {
-            if cacheable, let stale = cachedPage(key, maxAge: 30 * 86_400) { return (stale.photos, stale.pageCount) }
-            note(error, source: "Wallhaven")
-            return nil
-        }
     }
 
     // MARK: Openverse
@@ -371,6 +314,7 @@ public final class PhotoSearch {
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "page_size", value: String(Self.pageSize)),
             URLQueryItem(name: "mature", value: "false"),
+            URLQueryItem(name: "license", value: Self.allowedLicenses.joined(separator: ",")),
         ]
         // Flickr's big pool needs the size filter; the curated ones are all large.
         if minimumSize != .any, sources == Self.fallbackSources { items.append(URLQueryItem(name: "size", value: "large")) }
@@ -386,8 +330,8 @@ public final class PhotoSearch {
     // MARK: Cache
 
     private func cacheKey(_ text: String, page: Int) -> String {
-        // "v4": keyed by the search actually sent, after aesthetics are expanded.
-        "v4|\(SearchMatch.normalize(text))|\(minimumSize != .any)|\(orientation.rawValue)|\(page)"
+        // "v5": keyed by the search actually sent, after aesthetics are expanded; licence-filtered since v5.
+        "v5|\(SearchMatch.normalize(text))|\(minimumSize != .any)|\(orientation.rawValue)|\(page)"
     }
 
     private func cachedPage(_ key: String, maxAge: TimeInterval) -> CachedPage? {
@@ -437,7 +381,9 @@ public final class PhotoSearch {
         let response = try JSONDecoder().decode(Response.self, from: data)
         var seen = Set<String>()
         let photos = response.results.compactMap { result -> WebPhoto? in
-            guard let url = result.url, isWallpaperWorthy(title: result.title, filetype: result.filetype,
+            // Only licences that allow any use, whatever the server sent back.
+            guard let url = result.url, let name = result.license?.lowercased(), allowedLicenses.contains(name),
+                  isWallpaperWorthy(title: result.title, filetype: result.filetype,
                                                           width: result.width, height: result.height),
                   // The same shot is often listed twice under slightly different titles.
                   seen.insert("\(result.width ?? 0)x\(result.height ?? 0)|\(result.creator ?? "")|\((result.title ?? "").prefix(12))").inserted
