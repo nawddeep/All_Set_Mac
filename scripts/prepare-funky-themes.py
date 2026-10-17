@@ -157,7 +157,7 @@ def swift_more(themes):
             f"        make(\"{theme['id']}\", \"{meta['title']}\", \"{meta['tagline']}\",",
             f"             card: 0x{meta['card']}, ink: 0x{meta['ink']}, accent: 0x{meta['accent']}, dark: {str(meta['dark']).lower()}, font: .{meta['font']},",
             f"             style: .{meta['style']}, filter: .{meta['filter']}, charm: \"{meta['charm']}\",",
-            f"             collections: [{collections}], tags: \"{meta['tags']}\"" + (f", radius: {meta['radius']}" if "radius" in meta else "") + "),",
+            f"             collections: [{collections}], tags: \"{meta['tags']}\"" + (f", radius: {meta['radius']}" if "radius" in meta else "") + (f", glow: (0x{meta['glow'][0]}, 0x{meta['glow'][1]})" if "glow" in meta else "") + "),",
         ]
     lines += ["    ]", "}", ""]
     with open(SWIFT_MORE, "w") as file:

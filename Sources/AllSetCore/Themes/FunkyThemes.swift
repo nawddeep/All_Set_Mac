@@ -88,7 +88,7 @@ public enum FunkyThemes {
         _ id: String, _ title: String, _ tagline: String,
         card: Int, ink: Int, accent: Int, dark: Bool, font: WidgetFont,
         style: TextStyle, filter: PhotoFilter, charm: String,
-        collections: [ThemeCollection]? = nil, tags: String? = nil, radius corner: Double? = nil
+        collections: [ThemeCollection]? = nil, tags: String? = nil, radius corner: Double? = nil, glow: (Int, Int)? = nil
     ) -> Design {
         let items = kit(id)
         let radius = corner ?? (["chromeFangEditorial", "acidStarlet", "creamModPoster"].contains(id) ? 7 : 17)
@@ -119,9 +119,11 @@ public enum FunkyThemes {
                       tags: "supplied funky collage \(title.lowercased()) \(tags ?? "scrapbook") \(dark ? "dark" : "light")",
                       philosophy: "\(tagline) The design's own collage is the wallpaper; its clock, calendar, music and notes are live widgets set into the cards it drew for them.",
                       cardArt: ThemeCardArt.Picks(hero: hero, flankers: items.indices.filter { $0 != hero }),
-                      lighting: ThemeAccent(primary: WidgetColor(hex: accent).lit,
-                                            secondary: WidgetColor(hex: accent).paled,
-                                            glowIntensity: dark ? 0.75 : 0.55), dark: dark)
+                      // A black-and-white design's own accent has no color to light the page with.
+                      lighting: glow.map { ThemeAccent($0.0, $0.1, glow: dark ? 0.75 : 0.55) }
+                          ?? ThemeAccent(primary: WidgetColor(hex: accent).lit,
+                                         secondary: WidgetColor(hex: accent).paled,
+                                         glowIntensity: dark ? 0.75 : 0.55), dark: dark)
     }
 
     public static let all: [Design] = original + additional

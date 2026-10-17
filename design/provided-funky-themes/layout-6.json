@@ -1,0 +1,801 @@
+{
+ "about": "Batch 6: Black & White Monochrome. See layout.json.",
+ "themes": [
+  {
+   "id": "ebonyJournal",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/ebony_journal_a_quieter_mind.png",
+   "dock": [
+    437,
+    908,
+    1152,
+    985
+   ],
+   "meta": {
+    "title": "Ebony Journal",
+    "tagline": "Torn grey paper, moon phases and a charcoal column of quiet cards.",
+    "card": "242321",
+    "ink": "EEE8DE",
+    "accent": "B9B2A6",
+    "dark": true,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "mono",
+    "charm": "moon",
+    "collections": [
+     "minimal",
+     "night",
+     "zen"
+    ],
+    "tags": "monochrome ebony journal torn paper moon books charcoal black white",
+    "radius": 16,
+    "glow": [
+     "C9A27A",
+     "7A6A5A"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      32,
+      54,
+      366,
+      316
+     ],
+     "ink": "F0EADF"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      32,
+      337,
+      388,
+      578
+     ],
+     "ink": "EEE8DE"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      32,
+      597,
+      328,
+      916
+     ],
+     "ink": "EEE8DE"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1288,
+      54,
+      1560,
+      320
+     ],
+     "ink": "EEE8DE"
+    }
+   ]
+  },
+  {
+   "id": "inkIvory",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/ink_ivory_desktop_dashboard.png",
+   "dock": [
+    520,
+    905,
+    1072,
+    985
+   ],
+   "meta": {
+    "title": "Ink & Ivory",
+    "tagline": "Ivory paper, black ink halftones and one big kind headline.",
+    "card": "F1EEE6",
+    "ink": "151515",
+    "accent": "1A1A1A",
+    "dark": false,
+    "font": "serif",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "minimal",
+     "designer"
+    ],
+    "tags": "monochrome ink ivory halftone paper editorial black white poster",
+    "radius": 16,
+    "glow": [
+     "E0553A",
+     "D9B38C"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      34,
+      62,
+      370,
+      262
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      22,
+      302,
+      356,
+      544
+     ],
+     "ink": "F2EEE6"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      376,
+      342,
+      710,
+      544
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      406,
+      566,
+      710,
+      788
+     ],
+     "ink": "1A1A1A"
+    }
+   ]
+  },
+  {
+   "id": "lunarLace",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/lunar_lace_desktop_collage.png",
+   "dock": [
+    312,
+    900,
+    1280,
+    985
+   ],
+   "meta": {
+    "title": "Lunar Lace",
+    "tagline": "Black lace, moon phases and soft script on grey paper.",
+    "card": "D8D3CC",
+    "ink": "241F1C",
+    "accent": "8A8178",
+    "dark": false,
+    "font": "serif",
+    "style": "script",
+    "filter": "mono",
+    "charm": "moon",
+    "collections": [
+     "minimal",
+     "dreamy",
+     "night"
+    ],
+    "tags": "monochrome lunar lace moon phases script black lace paper bow",
+    "radius": 16,
+    "glow": [
+     "C79AB0",
+     "8A7A90"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      30,
+      64,
+      290,
+      298
+     ],
+     "ink": "1F1B18"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      30,
+      318,
+      398,
+      486
+     ],
+     "ink": "2A2420"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      30,
+      504,
+      380,
+      730
+     ],
+     "ink": "2A2420"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1306,
+      56,
+      1562,
+      298
+     ],
+     "ink": "2A2420"
+    }
+   ]
+  },
+  {
+   "id": "monochromeGalleryDesk",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/monochrome_gallery_desk_dashboard.png",
+   "dock": null,
+   "meta": {
+    "title": "Monochrome Gallery Desk",
+    "tagline": "A marble desk, museum prints and a gallery wall of quiet cards.",
+    "card": "EDEBE6",
+    "ink": "161616",
+    "accent": "1A1A1A",
+    "dark": false,
+    "font": "serif",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "minimal",
+     "luxury",
+     "designer"
+    ],
+    "tags": "monochrome gallery desk museum marble statue prints black white editorial",
+    "radius": 8,
+    "glow": [
+     "D9B38C",
+     "8A6A3A"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      60,
+      60,
+      482,
+      225
+     ],
+     "ink": "111111"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1170,
+      30,
+      1560,
+      330
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      416,
+      308,
+      802,
+      648
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1118,
+      350,
+      1560,
+      612
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "weather",
+     "size": "M",
+     "clear": [
+      418,
+      672,
+      636,
+      802
+     ],
+     "ink": "FFFFFF"
+    }
+   ],
+   "menubar": false
+  },
+  {
+   "id": "monochromeMuse",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/monochrome_muse_desktop_collage.png",
+   "dock": [
+    305,
+    903,
+    1308,
+    985
+   ],
+   "meta": {
+    "title": "Monochrome Muse",
+    "tagline": "Script lettering, lace edges and moonlit cards in charcoal and cream.",
+    "card": "1E1C1B",
+    "ink": "EFE7DB",
+    "accent": "CFC4B4",
+    "dark": true,
+    "font": "serif",
+    "style": "script",
+    "filter": "mono",
+    "charm": "moon",
+    "collections": [
+     "minimal",
+     "night",
+     "dreamy"
+    ],
+    "tags": "monochrome muse script lace moon archway candle charcoal cream",
+    "radius": 16,
+    "glow": [
+     "D4B596",
+     "8A7A68"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      1058,
+      58,
+      1292,
+      288
+     ],
+     "ink": "F0E6DA"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1310,
+      58,
+      1564,
+      290
+     ],
+     "ink": "2A2420"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1042,
+      308,
+      1564,
+      502
+     ],
+     "ink": "F0E6DA"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1090,
+      526,
+      1378,
+      736
+     ],
+     "ink": "2A2420"
+    }
+   ]
+  },
+  {
+   "id": "monochromeNoir",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/monochrome_noir_macos_collage.png",
+   "dock": [
+    412,
+    895,
+    1178,
+    975
+   ],
+   "meta": {
+    "title": "Monochrome Noir",
+    "tagline": "Black lace, a turntable and torn paper in grey and cream.",
+    "card": "D9D4CB",
+    "ink": "1E1A18",
+    "accent": "7E766C",
+    "dark": false,
+    "font": "serif",
+    "style": "handwritten",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "minimal",
+     "night"
+    ],
+    "tags": "monochrome noir black lace turntable moon torn paper coffee black white",
+    "radius": 16,
+    "glow": [
+     "C9A27A",
+     "8A7A6A"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      46,
+      84,
+      402,
+      268
+     ],
+     "ink": "1E1A18"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      46,
+      286,
+      402,
+      524
+     ],
+     "ink": "1E1A18"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      46,
+      542,
+      362,
+      764
+     ],
+     "ink": "1E1A18"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1256,
+      60,
+      1560,
+      334
+     ],
+     "ink": "EEE8DE"
+    }
+   ]
+  },
+  {
+   "id": "noirPaperWindow",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/noir_paper_window_desktop.png",
+   "dock": [
+    370,
+    900,
+    1220,
+    978
+   ],
+   "meta": {
+    "title": "Noir Paper Window",
+    "tagline": "Window light, torn paper and a quiet balcony in black and white.",
+    "card": "DDD8D0",
+    "ink": "2A2824",
+    "accent": "3A3834",
+    "dark": false,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "mono",
+    "charm": "moon",
+    "collections": [
+     "minimal",
+     "dreamy"
+    ],
+    "tags": "monochrome noir paper window light balcony torn paper script black white",
+    "radius": 16,
+    "glow": [
+     "9DB4C9",
+     "6A7A8A"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      90,
+      222,
+      352,
+      398
+     ],
+     "ink": "1A1A1A"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      430,
+      372,
+      850,
+      583
+     ],
+     "ink": "F0EAE0"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      436,
+      602,
+      712,
+      886
+     ],
+     "ink": "2A2824"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      920,
+      305,
+      1246,
+      640
+     ],
+     "ink": "2A2824"
+    }
+   ]
+  },
+  {
+   "id": "quietOrbit",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/quiet_orbit_a_monochrome_cosmic_desktop.png",
+   "dock": [
+    447,
+    893,
+    1130,
+    977
+   ],
+   "meta": {
+    "title": "Quiet Orbit",
+    "tagline": "A moon-lit silhouette, craters and clouds on a deep black sky.",
+    "card": "0F0F10",
+    "ink": "E8E4E0",
+    "accent": "B8B4B0",
+    "dark": true,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "mono",
+    "charm": "moon",
+    "collections": [
+     "night",
+     "cosmic",
+     "minimal"
+    ],
+    "tags": "monochrome quiet orbit moon cosmic space planets craters black silver",
+    "radius": 16,
+    "glow": [
+     "8FA6FF",
+     "5A6AA0"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      52,
+      76,
+      440,
+      232
+     ],
+     "ink": "F0ECE8",
+     "face": "flip"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      52,
+      385,
+      305,
+      614
+     ],
+     "ink": "E8E4E0"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "S",
+     "clear": [
+      328,
+      372,
+      590,
+      628
+     ],
+     "ink": "E8E4E0"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      982,
+      312,
+      1212,
+      622
+     ],
+     "ink": "E8E4E0"
+    }
+   ]
+  },
+  {
+   "id": "silverStatic",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/silver_static_editorial_desktop.png",
+   "dock": [
+    462,
+    895,
+    1116,
+    975
+   ],
+   "meta": {
+    "title": "Silver Static",
+    "tagline": "Silver editorial type over a black moonlit collage.",
+    "card": "141414",
+    "ink": "E6E2DE",
+    "accent": "B4B0AC",
+    "dark": true,
+    "font": "serif",
+    "style": "editorial",
+    "filter": "mono",
+    "charm": "star",
+    "collections": [
+     "minimal",
+     "night",
+     "designer"
+    ],
+    "tags": "monochrome silver static editorial moon lamp black white serif",
+    "radius": 16,
+    "glow": [
+     "A8B8D8",
+     "6A7490"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      1043,
+      64,
+      1424,
+      280
+     ],
+     "ink": "DAD8D6",
+     "face": "flip"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      1043,
+      300,
+      1424,
+      490
+     ],
+     "ink": "E8E4E0"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      1043,
+      515,
+      1272,
+      775
+     ],
+     "ink": "E0DCD8"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1286,
+      515,
+      1546,
+      742
+     ],
+     "ink": "E0DCD8"
+    }
+   ]
+  },
+  {
+   "id": "staticBloomDesk",
+   "file": "batch/All_Set_Funky_Themes_Batch_6_Black_White_Monochrome/static_bloom_monochrome_desktop.png",
+   "dock": [
+    330,
+    880,
+    1256,
+    968
+   ],
+   "meta": {
+    "title": "Static Bloom Desk",
+    "tagline": "A black-and-white peony and soft glass cards on a dark desk.",
+    "card": "161515",
+    "ink": "E8E4E0",
+    "accent": "A8A4A0",
+    "dark": true,
+    "font": "serif",
+    "style": "elegant",
+    "filter": "mono",
+    "charm": "flower",
+    "collections": [
+     "minimal",
+     "night",
+     "dreamy"
+    ],
+    "tags": "monochrome static bloom peony flower desk dark glass black white",
+    "radius": 16,
+    "glow": [
+     "C9A0A8",
+     "7A6068"
+    ]
+   },
+   "widgets": [
+    {
+     "kind": "clock",
+     "size": "M",
+     "clear": [
+      814,
+      70,
+      1070,
+      300
+     ],
+     "ink": "E8E4E0"
+    },
+    {
+     "kind": "nowPlaying",
+     "size": "M",
+     "clear": [
+      804,
+      345,
+      1246,
+      588
+     ],
+     "ink": "E8E4E0"
+    },
+    {
+     "kind": "calendar",
+     "size": "L",
+     "clear": [
+      1266,
+      345,
+      1560,
+      590
+     ],
+     "ink": "E0DCD8"
+    },
+    {
+     "kind": "todo",
+     "size": "L",
+     "clear": [
+      804,
+      606,
+      1048,
+      862
+     ],
+     "ink": "E0DCD8"
+    }
+   ]
+  }
+ ]
+}
