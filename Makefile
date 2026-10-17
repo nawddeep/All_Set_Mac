@@ -21,9 +21,5 @@ app:
 open: app
 	open build/AllSet.app
 
-# The Themes hero stacked under its design reference: build/review/reference-vs-now.png
-review:
-	./scripts/review-hero.sh
-
 clean:
 	rm -rf .build build
