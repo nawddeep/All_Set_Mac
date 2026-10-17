@@ -5,6 +5,9 @@ log; it never needs reading in full.
 
 ---
 
+### 2026-10-18 — production-readiness run (branch fix/production-readiness, not pushed)
+The October review's 37 findings addressed in 45 local commits: Lid Plane (GPL), Wallhaven, knock shell commands and the purge button gone; themes name no real person or club; 36 built-in wallpapers; Extras off by default for new installs; honest privacy with a generated network list; onboarding, permission rows, restore-macOS and uninstall; hardened runtime, notarization script, Sparkle (off until keyed), local diagnostics; server SQL never interpolated; Capabilities with kill switches; AppServices split; widget kinds one file each; no file over 600 lines; smoke test in CI. 469 Swift tests, 117 server, smoke 44/44, 0 warnings, clean clone builds and tests. Open: scroll CPU far above the 20% target, TSan blocked on this Mac, the restructure (stale plan), everything needing an Apple Developer ID. Full table: `PRODUCTION_READINESS_REPORT.md`.
+
 ### 2026-10-09 — a public wallpaper library, built and run on this Mac
 Wallpapers over public HTTPS with the database private and no Tailscale. `scripts/cloud/server.sh` runs it all in one folder (`~/Downloads/allSetServer`): Postgres 17, `load` (list and files in, no tunnel), `publish` (only published rows with a license; `catalog.json` plus per-file SHA-256), `serve` (Caddy on the public folder only), `backup` (drill passed), `install` (launchd; proven on a copy outside Downloads, where macOS allows it). The app, built with `ALLSET_PUBLIC_LIBRARY_URL`, reads the list itself with no key, checks every download, and carries no Tailscale address. 456 Swift and 100 server tests, 0 warnings. Nothing is on the internet. Open, all the user's: content that may be published (0 of 986), the 1,784 files that exist only on the home server, a public address, Apple signing. Not checked: the running app showing a public library. Details: `operations.md`, "A public library".
 

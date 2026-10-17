@@ -1,36 +1,19 @@
 # All Set: Handoff
 
-**Read this first at the start of every session, instead of reviewing the codebase.** It's rewritten at the end of every session. Dated session logs are in `Documentation/Reports/` (newest last). For what the app contains (widgets, themes, pages), see `CONTENT.md`. Only open the source files that the task at hand needs.
+**Read this first at the start of every session, instead of reviewing the codebase**, then `Documentation/PRODUCTION_READINESS_REPORT.md` for the latest large change and `Documentation/OWNER_ACTIONS.md` for what waits on the owner. For what the app contains, see `CONTENT.md`; for how to build, test and release, `CONTRIBUTING.md`. Only open the source files the task at hand needs.
 
-_Last updated: 2026-10-09 (public wallpaper library built and run locally. Read `operations.md`, "A public library", first; 456 Swift tests, 100 server tests.)_
+_Last updated: 2026-10-18 (production-readiness run on branch `fix/production-readiness`, 44 local commits from `5e7f5ee`, not pushed)._
 
-## Latest session (2026-10-09): a public wallpaper library, built and run on this Mac
-- The user wants the app to get wallpapers over public HTTPS with Postgres private, **no Tailscale anywhere** (they will uninstall it once the data is moved), on their own MacBook. They did not have the server Mac at hand. Read `operations.md`, "A public library": it has the pieces, what was run, the limits and the steps only the user can do.
-- New: `scripts/cloud/server.sh` (one folder, `~/Downloads/allSetServer`, the user's choice; Postgres 17 on 5433), `publish_catalog.py`, `load_library.py`, `Caddyfile.public`, `install_public_server.py`, `dev_sample.py`, each with tests. `brew install postgresql@17 caddy` was run.
-- App: built with `ALLSET_PUBLIC_LIBRARY_URL` it reads the public `catalog.json` itself with no key (`LibrarySync.update()`, `AppServices.startPublicLibrary`) and checks every download's SHA-256 (`LibraryVideo.checksums`). `build-app.sh` then leaves the Tailscale address out of the bundle. `release.yml` takes the address from a repository variable.
-- 456 Swift tests (one live test runs only with `ALLSET_PUBLIC_LIBRARY_TEST_URL`), 100 server tests, 0 warnings. Postgres on 5433 is running, started by hand; nothing starts at login.
-- **Blockers, all the user's:** (1) every wallpaper is quarantined, 0 published, so a real public catalog is empty; they have been told four times and have not said what will be public; (2) only 25 of 986 videos are on this Mac, the rest only on the home server, so the move needs that Mac before Tailscale goes; (3) a domain and how the folder becomes public; (4) Apple Developer signing.
-- **Not checked:** the running app showing a public library (this Mac has its own, so the app skips it). The Dock app was not rebuilt or relaunched. `install` cannot work while the repo and server folder are in Downloads (macOS refuses login services that folder).
-- **The server will be the user's other Mac, not this one.** `~/Downloads/AllSetServer-transfer.zip` (1.2 GB, made 2026-10-09) holds the server folder (database with the 986 rows, thumbnails, 25 playable files; no backups, no test wallpapers), `scripts/cloud` without `.env`, the app's `catalog.json` and a README with the steps for that Mac. Unzipped and started from a scratch copy as a check. The rendered videos are already on that Mac in `~/AllSetStorage/wallpapers`; `load` links rows to files already in storage. Postgres on this Mac is stopped. The user's two pendrives hold the Workshop sources for 765 of the 986 (not the 216 from `wallpaper phase 1 data`); they asked for no re-rendering.
-- `~/AllSetServerTest` is a leftover from a rehearsal; deleting it was refused to the assistant. No commit or push.
-
-## Latest session (2026-10-08, night): sharing the wallpaper library by API key
-- The user dropped per-person sign-in the same evening it was restored. A copy of the app for someone else now needs only the server's permanent key: `AllSet library <key>` in Terminal (`LibraryCommand.swift`, `LibrarySync.swift`, `LibraryKey.swift`). No sign-in screen exists in the app; `LibraryAccount`/`LibrarySignIn` are only on `perf-audit` (482a88a).
-- Server: `catalog_service.py` accepts the key in `~/.allset_catalog_token` wherever it accepts a session, and serves `/library` (the app's `catalog.json` shape). Accounts still work; two exist.
-- **The server does not run this version until the user runs `scripts/cloud/deploy_catalog.sh`.** Remote writes over SSH are refused to the assistant in auto mode; reads are allowed.
-- **Not checked end to end:** the command against the real server, and the app picking up the notification while it runs. Unit tests cover both halves with stubs.
-- The other Mac still has to reach the server over Tailscale (machine sharing). Unresolved for the user's teacher.
-- `build/release/AllSet-0.1.0-3-library.zip`: the dmg and the instructions. No commit or push.
-
-## Latest session (2026-10-08, evening): audit, fixes, scroll optimisation
-- Fixed: Undo / Go Back / Restore Previous Desktop losing the original system wallpapers (`DesktopSnapshot.restore` now keeps `originalWallpapers` and `libraryServerURL`; test added); the old wallpaper still deleted before its replacement existed; a drag left open when its widget disappears; clipboard copy not moving the item to the top; video import copying on the main thread (`importVideos` is now `async`); shelf file names from a browser; a trap on repeated widget ids.
-- Faster: `ScrollingWindowRelief` (`MainWindow.swift`) makes the window unmovable only while a scroll view in it is live-scrolling, which stops AppKit rebuilding the drag region every frame. Probe, interleaved: Themes 46% -> 39.6% CPU, Gallery 53-59% -> 46-50%, Wallpaper 67.5% -> 65%, then 63% with a one-text card caption. Wallpaper catalog checks (83-95 ms) and the theme-widget catalog dedupe (128 -> 26 ms, debug) no longer hold the main thread. The clipboard timer stops while history is off.
-- `-probe scroll` now posts `didLiveScrollNotification` each step and prints whether the window is movable again; `NORELIEF=1` gives the old behaviour for comparing.
-- **Not checked by hand:** dragging the window by its top edge right after a trackpad scroll; fixes 2-7 in the report (app target, no tests).
-- Open, with numbers: what still costs scrolling (hover re-hit-testing ~10% of main-thread samples, text layers blocking on the window server, per-tile dialogs), the 20 Hz pointer poll for widget resize handles, and repository clean-up (`.git` has 2.09 GiB of `tmp_pack_*` garbage; build products are in history). All in the report.
-- Rebuilt and relaunched `build/AllSet.app`. No commit or push.
-
----
+## Current state (2026-10-18)
+- **The production-readiness run** fixed or addressed the 37 findings of the October review; the table of what changed, how it was checked and what's open is `Documentation/PRODUCTION_READINESS_REPORT.md`. Decisions with their reversals: `Documentation/DECISIONS.md`. Checklist and measurements: `Documentation/PRODUCTION_READINESS_PROGRESS.md`.
+- **Product shape now:** four pillars (Island, Widgets, Themes, Wallpaper) plus eight Extras, each with a switch (`ExtrasSettings`; off for new installs, all on for installs from before). Navigation: Island, Desktop, Extras, Settings (⌘1–⌘4). First-run onboarding for new installs only.
+- **Gone:** Lid Plane (GPL), Wallhaven, knock shell commands, the `sudo purge` button, Wallpaper Engine tooling (moved to `../AllSet-personal`), real people and club trade dress in themes (old theme/palette ids still load via `LegacyIdentifiers`).
+- **New structure:** `AppFeatures.swift` (feature coordinators; `AppServices` forwards the old short names), widget kinds defined one file each in `Sources/AllSetCore/Widgets/Kinds/`, `Capabilities` (every private macOS interface, with kill switches), `NetworkUse` (every host; a test enforces it), `pgsql.py` on the server (values never in SQL text). No source file over 600 lines.
+- **Distribution:** hardened runtime + `Resources/AllSet.entitlements` on every build (dev/ad hoc also relax library validation so Sparkle loads); `scripts/notarize.sh`; Sparkle 2.9.6 embedded but off until the owner's key exists.
+- **Tests:** 469 Swift (5 clean runs in a row), server 117 (69 skip without Postgres), `-smokeTest` 44/44 on throwaway data, 0 warnings. CI adds smoke, minimum-os (arm64-apple-macos14.2) and optimised-build probes with budgets.
+- **Open, measured:** scroll CPU (Themes ~41–49%, Gallery 30–60%, Wallpaper library 59–100%) is far above the 20% target, and switching to Themes holds the main thread 75–140 ms; profiling puts it in SwiftUI's graph for the whole page. Thread Sanitizer won't load on this Mac. The 228-file restructure is blocked (stale plan). App-side widget registration is still switch-based. All in OWNER_ACTIONS.md.
+- **Never verified by a person yet:** the hardened app's Calendar, mixer and hotkeys; uninstall; a deep link from a browser; the live seconds clock layer; anything on macOS 14/15 or a second monitor. `Documentation/RELEASE_CHECKLIST.md` covers them.
+- Session history before this run, and notes about this Mac and Claude Code, are in `../AllSet-personal/HANDOFF-history.md`.
 
 ## Standing instructions from the user
 1. **After every change, rebuild and replace the Dock app:**
@@ -46,7 +29,7 @@ _Last updated: 2026-10-09 (public wallpaper library built and run locally. Read 
 
 ## Current Widgets and Wallpaper design
 - Widgets: `Studio/CinematicWidgets.swift`; Dark default; all 91 catalog entries and themed widgets remain available. Studio Originals contributes 260 individually usable presets, Desktop Edit contributes 227, and Monochrome Edit contributes 21 in separate groups. Widgets and Wallpaper share the cached Midnight Aurora Themes atmosphere via `StudioThemeStyle.swift`. Every page uses the same `CinemaNavigation`.
-- Wallpaper: `Wallpaper/WallpaperPages.swift` → `ClassicWallpaperPage`, always `VideosSection`. No Aerial/Art/My Videos tabs, source bar, Aerial service, unused cinematic replacement, or source-tab state. Search and horizontally scrollable category filters live in the library. Full-bleed hero preserves current desktop media; imported library, import/drop, sorting/Owned filters and details remain. Shared art models remain for Themes/widgets; old Art deep links now open the video library.
+- Wallpaper: `Wallpaper/WallpaperPages.swift` → `ClassicWallpaperPage`: a Built in section (36 generative live wallpapers, `BuiltInWallpaper`) first, then `VideosSection`. No Aerial/Art/My Videos tabs, source bar, Aerial service, unused cinematic replacement, or source-tab state. Search and horizontally scrollable category filters live in the library. Full-bleed hero preserves current desktop media; imported library, import/drop, sorting/Owned filters and details remain. Shared art models remain for Themes/widgets; old Art deep links now open the video library.
 - Aerial active data retired into `build/backups/retired-wallpaper-sources-2026-10-06/`: 71 cached manifest/preview files, one Aerial download, one retired preference. Video/server library records remain. `WallpaperCategory` preserves existing catalog JSON categories independently of the deleted Aerial model.
 - Spotlight preview, shadow and floor light share the fitted widget footprint and animate size changes. `StudioSegmentedControl` supplies independent sliding highlights for size/style, including Customize, with Reduce Motion support.
 - The three Monochrome Edit themes have explicit checks for offline decoding, editable widget presets, persistence and compact-screen spacing. Their desktops, cards and widget sheets were rendered and inspected in `build/review/dataset-two-2026-10-08/`; earlier evidence remains in `build/review/studio-originals-six/` and `build/review/desktop-edit-2026-10-08/verified/`.
@@ -54,26 +37,11 @@ _Last updated: 2026-10-09 (public wallpaper library built and run locally. Read 
 - Themes now total 110. **Monochrome Edit** is separate from **Studio Originals** and **Desktop Edit**. Dataset 2 consists of 19 low-resolution screenshots of laptop setups/search results, used as visual references rather than shipped as wallpaper; three distinct directions were implemented with existing high-resolution offline art. Five supplied cosmic wallpapers are applied to Studio Originals; the remaining concepts there still use native-art foundations. Exact Dock bundle: `build/AllSet.app`, rebuilt and development-signed. No commit/push.
 - Approved design references: `design/widgets-concepts/SELECTED.md`, `design/wallpaper-concepts/SELECTED.md`; previous unified visual style report remains `Reports/2026-10-06-unified-studio-theme-style.md`.
 
-## Outside the repo (set up 2026-10-02)
-- Claude Code has `ponytail@ponytail` (github.com/DietrichGebert/ponytail, MIT, hooks reviewed: local files only) enabled in `~/.claude/settings.json`, default level full; `/extension [status|on|off|lite|full|ultra]` (`~/.claude/commands/extension.md` → `~/.claude/ponytail-ctl.js`) shows and switches it. Needs a new session to load. Ponytail means: simplest working code, no unrequested abstractions.
-- `.claude/settings.local.json` (git-ignored) allows routine build/test/git commands and denies `git push`, `rm -rf`, `git reset --hard`, `sudo` (a compound command containing `rm -rf` is refused).
-- Testing hotkeys: synthetic `CGEvent` doesn't trigger Carbon hotkeys; use System Events `key code`. Driving the pointer: see the scratchpad `mouse` tool notes in the 2026-10-01/02 sessions (refuses to click unless an All Set window is topmost).
-
-## Machine quirks
-- The first `python3` on PATH is an empty file that prints nothing: use `/opt/homebrew/bin/python3`, or awk, grep or perl.
-- zsh doesn't split words: use arrays or `${=var}`.
-- Screenshot file names contain a narrow no-break space: use globs.
-- `sed` has no `\b`: use perl.
-- Perl `s{}{}` breaks on Swift code full of braces: use the Edit tool.
-- macOS has no `timeout` command.
-- M4 MacBook Air: fanless, screen 1470×956 pt (2940×1912 px), 16 GB.
-- Signing identity "All Set Development" is in the login keychain; `build-app.sh` uses it so permissions survive rebuilds.
-
 ## Build, test, verify
 | What | Command |
 |---|---|
 | Debug build (expect 0 warnings) | `swift build 2>&1 \| grep -c warning:` |
-| Tests (currently 442 in 103 suites) | `swift test` |
+| Tests (469 in 113 suites on 2026-10-18) | `swift test` |
 | Optimised build with DEBUG tools | `swift build -c release -Xswiftc -DDEBUG --build-path .build-probe` |
 | Everything, on GitHub | CI (`.github/workflows/ci.yml`, `macos-26`) on every push: `build-and-test` (fails on any warning), `screenshots` (`-renderPages`, published to the `ci-screenshots` branch) and `probe` (`-probe scroll`, `pages`, `galleryparts`, in the run summary). Cloud sessions without a Swift toolchain verify through CI only |
 
@@ -121,9 +89,8 @@ CI's `probe` job runs `scroll`, `pages` and `galleryparts` on every push (debug 
 
 **Design system (2026-09-30):** the main window is always dark. Tokens and shared components are in `Sources/AllSet/Design/` (`DS.Space`, `DS.Radius`, `DS.Ink`, `DS.Surface`, `.dsText(role)`, `.dsFormStyle()`, `PageScaffold`, `PageHeader`, `HeroSection`, `MediaCard`, `MediaRail`, `GlassPanel`, `.pill`/`.pillProminent`/`.floating`, `FilterPill`, `SearchField`, `EmptyState`, `FlowLayout`, `FormPage(eyebrow:title:subtitle:lead:content:)`). New or reworked pages use these instead of literals. **Backdrop (2026-10-01):** the window draws one `WindowBackdrop` (`Design/WindowBackdrop.swift`): a deep navy canvas and four blue glows drifting on Core Animation layers, frozen by `PerformancePolicy.pausesDecorativeMotion` and while the window is occluded. Pages don't paint a background over it (`AppBackground` is only an accent glow); keep page and list backgrounds transparent. Pages that lead with media use `BleedScrollPage` with `HeroSection(bleed:)`: the hero runs under the navigation and fades into the backdrop, and sets `UIState.mediaUnderNavigation` so the navigation drops its fade. Navigation is `CinemaNavigation` (`Design/CinemaDesign.swift`, ⌘1–⌘5 for the sections; `FloatingNav` was removed 2026-10-06) with `NavSection`/`NavItem` in `Design/AppNavigation.swift`: `NavSection.of(page)` maps every `AppPage` to one of five places, and `NavItem.items(in:)` lists each place's pages; a new page needs a case in both. The window has no visible title bar (`MainWindowController.dress`), so every page names itself with a `PageHeader` or `FormPage` title.
 
-**Scratchpad helpers** (session temp directory; they may be gone): `sheetL out.jpg cols files…` makes a contact sheet (sizes from the `CW`/`CH` environment variables); `load.sh` reads WindowServer load.
 
-**Profiling:** `xctrace record --template 'Time Profiler' --attach <pid> --time-limit 60s --output x.trace`, then `xctrace export --input x.trace --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]' > x.xml`, then aggregate with `/usr/bin/python3` (the Homebrew python lacks expat) using the scratchpad `perf/agg.py`, `stacks.py` and `main.py`. The "CPU Profiler" template records nothing on this Mac; use "Time Profiler". `xctrace --launch` can leave a copy stopped at dyld (state `T`): check `ps -o stat` and kill it. `leaks <pid>`, `heap <pid>` and `footprint <pid>` work without sudo; `powermetrics` needs sudo (not available).
+**Profiling:** `xctrace record --template 'Time Profiler' --attach <pid> --time-limit 60s --output x.trace`, then `xctrace export --input x.trace --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]' > x.xml`, then aggregate with `/usr/bin/python3` (the Homebrew python lacks expat) with a short script that sums main-thread samples per frame. The "CPU Profiler" template records nothing on this Mac; use "Time Profiler". `xctrace --launch` can leave a copy stopped at dyld (state `T`): check `ps -o stat` and kill it. `leaks <pid>`, `heap <pid>` and `footprint <pid>` work without sudo; `powermetrics` needs sudo (not available).
 
 **Measure honestly:** app CPU doesn't include Core Animation, which runs in WindowServer. The user is active while you measure, so compare interleaved A/B runs.
 
@@ -166,16 +133,15 @@ SwiftPM, macOS 14.2+, Swift 6. The targets are:
   - `TwinkleLayer`, `AuraLayer`, `FlameLayer` and `SpiralLayer`, in `MysticWidgets.swift`.
 
 **To add a widget kind:**
-1. `WidgetModels`: the case, category, title, symbol, summary, keywords, sizes, `isFreeform`, `paintsOwnBackground`, `defaultSize` and defaults switch.
+1. `WidgetModels`: the `WidgetKind` case; then its definition file `Sources/AllSetCore/Widgets/Kinds/<Kind>Kind.swift` (title, symbol, summary, keywords, sizes, default size, freeform/own-background flags, starting look) and a line in `WidgetKindDefinition.all`.
 2. An entry in `WidgetCatalog`.
 3. A view, plus a case in the `WidgetHostView` switch.
 4. `WidgetOptionsEditor`: its section and `showsStylePicker`.
 5. The `looks` list in `WidgetStudio`.
 
 **Search and photos**
-- `AllSetCore/Aesthetics/PhotoSearch.swift` searches Wallhaven and Openverse in parallel.
-- `Wallhaven.swift`: SFW only (`purity=100`), about 45 requests a minute, multi-word names in quotes.
-- `Search/WallpaperQuery.swift`: aliases, exclusions, pop-culture detection, and aesthetic → Wallhaven tag or Openverse only.
+- `AllSetCore/Aesthetics/PhotoSearch.swift` searches Openverse only, asking for and keeping CC0, PDM, CC BY and CC BY-SA (`allowedLicenses`).
+- `Search/WallpaperQuery.swift`: filler words, place nicknames, `-word` exclusions (filtered on titles), spelling fixes.
 - `Search/AestheticSearch.swift`: aesthetic vocabulary and spelling.
 - Openverse allows at most `page_size` 20 for anonymous requests; more returns a 401.
 - The UI is `Studio/LibraryPages.swift` (`WebPhotosPage`, `SearchFilters`, `RecentSearches`), reached only through `LibraryPicker`, the picture picker of Photo, Polaroid and VHS widgets. The Photos and My Photos pages are gone; the Wallpaper page embeds only `ArtLibraryPage`.
@@ -184,14 +150,14 @@ SwiftPM, macOS 14.2+, Swift 6. The targets are:
 - `WallpaperSource.library(id)`:
   - videos play from a copy in `originals/` (`--self-contained`); nothing needs the source folder at run time;
   - stills (`LibraryVideo.kind == .image`, a Wallpaper Engine scene's artwork) play from the Mac through `MovingStill` with the photo drift.
-- Catalog: `~/Library/Application Support/AllSet/Wallpaper/Library/catalog.json`, written by `scripts/wallpaper_library.py import <folder>` (needs Homebrew ffmpeg; run with `/usr/bin/python3`). The importer is idempotent, with IDs from SHA-256.
+- Catalog: `~/Library/Application Support/AllSet/Wallpaper/Library/catalog.json`, written by the importer, which now lives outside the repository (`../AllSet-personal/scripts/wallpaper_library.py`).
 - The library folder also holds:
   - `live/`: scene loops, made from the layers by `compose_live()`;
   - `stills/`: scene artwork;
   - `extracted/`: videos taken out of scenes;
   - `transcoded/`;
   - `thumbnails/`;
-  - `bin/wetex`: the texture decoder, compiled from `scripts/wetex.swift`;
+  - `bin/wetex`: the texture decoder (source in `../AllSet-personal/scripts/wetex.swift`);
   - `scenes.json`: the scene cache. Bump `SCENE_RENDERER` when compositing changes.
   
   3.4 GB in total.
@@ -201,7 +167,6 @@ SwiftPM, macOS 14.2+, Swift 6. The targets are:
   - All **QUARANTINED** (Workshop, no license). Personal use only; never bundle or commit them.
 - Scenes left out after review are listed by Workshop id in `SCENE_REVIEWED_SKIP`, each with its reason. To check new scenes, lay the thumbnails out on a contact sheet and look: the preview hash can't tell.
 
-**Lid Plane** (`AllSet/LidPlane/`, `AllSetCore/LidPlane/`; System → Lid Plane): Jhey's lid-fold effect, GPL-3.0-or-later (notices in `Documentation/third-party/`; **distributing All Set means distributing it under the GPL**, fine for personal use). Core: `LidSensor` (IOHID lid angle, read-only), `AutoAnchor`, `LidMotionFilter`, `AngleActivation`, `CaptureDemand`, `DisplaySafetyGate`, `LidPlaneSettings` (UserDefaults `lidplane.*`), tested in `LidPlaneTests`. App: `LidPlaneController` (while the fold is live: a `CADisplayLink` on the built-in screen, 60–120 Hz, hinge read ≤ ~80×/s; enabled at rest: 10 Hz timer; `LidTracker` tracks the hinge 1:1 like a touch (alpha-beta filter on the whole-degree readings + velocity-fed smoother; ~0.8° from the true lid on a normal close, flat by the time an opening lid passes the angle, so no resize when it hides); `CaptureWarmup` starts the stream within 15° above the activation angle, or 0.6 s ahead at the measured speed (≤ 60°), while the lid moves; `FoldIntro` eases the fold in from flat (smoothstep, 0.3–0.8 s by gap) only when capture was late; `OverlayVisibility` dissolves the overlay over the first 1.5° of fold both ways, so start and end are seamless; capture is native pixels (`CGDisplayCopyDisplayMode`, not `CGDisplayPixelsWide`, which is points) in Display P3 with the MTKView tagged to match; 5 Hz readout while the page is open; none otherwise), `LidPlaneRenderer` (Metal, shader inline; blur levels at ½–1/16 size, rebuilt only when the picture changes: 1.4 ms GPU per 2560×1600 frame, was 3.7), `LidPlaneCapture` (ScreenCaptureKit, 60 fps), `LidPlanePage`. Differences from upstream: the stream excludes only the overlay **window** (upstream excludes its whole app, which would drop All Set's own wallpaper and widgets), and the overlay stays ordered in at alpha 0 while a stream runs so it can be found; shortcuts use `HotKeyCenter` with a `lidplane` group (window snapping's `unregisterAll()` now only drops its own group). Preserve upstream's safety rules (never fall back to an external display, wait 0.5 s of stable display before restarting capture, raw angle above the limit always hides). `-renderLidPlane dir` renders previews and runs the renderer checks. **Not verified by me:** a live capture with the effect on (needs All Set's own Screen Recording approval and a physical lid).
 - **Keychain prompts:** never read Keychain at launch. `WallpaperStore.deleteServiceToken` now reads it only when a permanent delete runs; reading at launch asked for the login password after every rebuild (ad-hoc probe builds especially).
 
 **AI Screenshot shortcut** (`Screenshot/ScreenshotShortcutController.swift`, core `ScreenshotShortcut` + `SymbolicHotKeys`): a Carbon hotkey for ⌘⇧5 **also** lets macOS's own toolbar open (both fire), so the controller switches off symbolic hotkey 184 in `com.apple.symbolichotkeys` (CFPreferences + `activateSettings -u`), keeps a UserDefaults marker (`screenshot.systemShortcutOffByAllSet`) and restores it on quit, on another choice, and at the next launch after a crash. Never leave 184 off without the marker. **Testing hotkeys:** synthetic `CGEvent`s don't trigger Carbon hotkeys; use `osascript -e 'tell application "System Events" to key code 23 using {command down, shift down}'`, and a CLI test needs `NSApplication.shared.run()`, not `RunLoop.main.run()`.
@@ -239,51 +204,6 @@ SwiftPM, macOS 14.2+, Swift 6. The targets are:
 - **AppKit-backed containers ignore SwiftUI safe-area insets**: an `HSplitView` slid under the floating navigation. Use plain stacks under the navigation.
 - **Size heroes by their frame, not their media**: `Color.clear.overlay { media }`. A filling picture otherwise grows the stack and pushes the words out of view.
 - **Measuring on CI:** a nearly invisible probe window gets App Nap (hold it off with `ProcessInfo.beginActivity`), and a GPU-less VM's window server caps frame gaps near 80 ms on every page; compare CPU and the worst stall, not average frame time.
-
-## Latest review (2026-10-05): Five quick Themes passes
-- User requested five quick review passes, then their decision before a deeper round. No implementation edits in this round. Wallpaper work is deferred until Themes is complete.
-- Fresh results: 25 targeted tests / five suites and 30 native carousel/cache checks pass; all eight top/scrolled captures across four window sizes inspected. Scroll sample: 48.1–48.5% app CPU, p95 17.9–18.1 ms, zero >33 ms hitches. System-wide WindowServer 49.4%; no isolated GPU measurement or comparative improvement claim.
-- Visual match remains partial: softer cyan light/faint reflection, denser previews, Moodboards below the initial fold, caption collisions/placeholder artwork, and a slightly cropped last shelf card.
-- Live arrows, Football/All and Aurora pagination work. Matching typed search returns one result, but query replacement was inconsistent in automation. Window visibility/focus changed during the checks; treat search as unresolved verification, not a proven app defect. Clear search restored browsing.
-- Exact Dock bundle signature and executable code verified against release. Report and raw evidence: `Reports/2026-10-05-themes-five-pass-review.md`, `build/review/themes-five-pass/`. Side-by-side PNG: `reference-vs-current.png`; actual Dock capture: `live-dock-app.png`.
-- Current source checkpoint is the user's `80dae18`. No new commit/push. Preserve existing user edits and Wallpaper concepts.
-
-## Latest design request (2026-10-05): Wallpaper selected; Widgets previews
-- User explicitly chose **Immersive Cinema** for Wallpaper only. This is the sole selected Wallpaper direction: `design/wallpaper-concepts/2026-10-05-v2/03-immersive-cinema.png`. Durable selection notes: `design/wallpaper-concepts/SELECTED.md`.
-- Preserve the alpine twilight full-window preview, floating navigation, compact Aerial Videos / Art / My Videos selector/search, lower caption/actions and bottom filmstrip. Other Wallpaper concepts were not selected.
-- Current request is to generate a matching Widgets concept before designing/implementing the two frontends together later. Generate previews only at this checkpoint; no app source or Dock bundle changes requested.
-- Original Wallpaper previews and prompts: `design/wallpaper-concepts/2026-10-05/`; fresh variants and exact prompts: `design/wallpaper-concepts/2026-10-05-v2/`. Widgets selection is pending.
-
-## Current state (2026-10-05): Themes toolbar and smoothness
-- User asked to fix the odd nested filter bar and optimize Themes. A single 48 pt toolbar now uses plain inactive labels, one selected pill and integrated search. Narrow windows have a category overflow menu and edge fade; search and category access remain fixed above scrolling content.
-- Scroll layout is one eager stack with lazy horizontal rails; no pinned-header LazyVStack. Category/search mode changes reset the relevant content offset. Each preview has a separate observable entry; unrelated image arrivals no longer invalidate all cards. Only two adjacent desktops are prewarmed. Carousel remounting no longer steals search focus.
-- Latest verification: 312 tests / 85 suites, 30 native carousel/cache checks, warnings-as-errors builds, four window sizes with scrolling. Interleaved before/after/after/before: app CPU mean 47.2% → 43.1% (~9% lower), p95 20.6–25.1 → 18.2–20.2 ms, zero >33 ms hitches in both. WindowServer 39.2–39.6% → 40.5–40.8%, system-wide; no isolated GPU or WindowServer improvement claim.
-- Exact Dock bundle `build/AllSet.app` rebuilt, signed and relaunched on Themes. Installed code section matches release. Previous cinematic bundle backed up at `build/backups/AllSet-before-toolbar-refinement-2026-10-05.app`. Art remains bundled offline. Desktop apply/preview controls were not activated.
-- Read `Reports/2026-10-05-themes-toolbar-smoothness.md`; artifacts are in `build/review/themes-refinement/`. Earlier design implementation: `Reports/2026-10-05-themes-cinematic-design.md`. Existing 12-widget Midnight Aurora and cinematic carousel/shelves remain.
-- Local work only, no commit or push. Preserve the user's unrelated edits. Other tabs await the user's next frontend instruction; engineering review is separate.
-
-## Previous state (2026-10-05): Themes hero redesign, H0-H2 done
-- **Pushed** to `cloud` main and `perf-audit` (`d6c4512`): looping 3:4 carousel in a glass panel (search, category rail, indicator, arrows), pre-rendered card art and `CardHalo` halos, `ThemeAccent` per theme with fallback (theme accent, then wallpaper colour, then warm gold), A/B-crossfaded `ThemeAtmosphere` (static layers, blurred `.backdrop` previews), tighter shared nav (`FloatingNav`, 100 pt, solid scrim), `scripts/review-hero.sh` (`make review`) and `Documentation/UI-Spec.md` (every measurement). 313 tests, 0 warnings. Code lives in `Sources/AllSet/Studio/Themes/` and `AllSetCore/Themes/`.
-- **Plan** (the user's "v2" prompt, chat only): H3 card lighting (neon edge strip, ground glow, sheen, neighbour rims) · H4 glass borders, separate category pills, one grain tile · H5 composition (neighbour gap 8-12 pt, dim ~0.1/0.3, cards cut to title + 1 centre + 2 small, hand-pick all 8 with a contact sheet, replace watermarked Americana/Albiceleste wallpapers) · H6 motion, Reduce Motion, Instruments · H7 final match at 1400x900 + wide + narrow. One phase at a time; view `docs/reference/concept2-reference.png` first and regenerate `build/review/reference-vs-now.png` after each; stop at each gate.
-- **Open perf:** atmosphere costs ~5 points of scroll CPU (42-43% vs 37-38% on HEAD, p95 and hitches equal); warm Themes switch 96-137 ms vs 84-123. A `.drawingGroup()` flattening test was never run (the temp code is removed). Measure against a HEAD build (`-probe scroll|pageswitch`, `ONLY=themes`).
-- Not committed on purpose: `scripts/cloud/catalog_service.py` (404 fix), stray root PNGs, `hero theme.md`.
-
-## Previous state (2026-10-03)
-- **Shipped and pushed** to `cloud` main and `perf-audit` (`0191b97`): Home, Collections and Art tabs removed (Art lives on the Wallpaper page; `allset://page/art` opens it there); the logged runtime errors fixed; page builds deferred (`Deferred`); aerial, clipboard and My Photos thumbnails decoded off the main thread; theme previews no longer wiped by other builds. 293 tests, 0 warnings.
-- **Not taken:** the overnight redesign (`redesign/ui`, local only, unpushed). Its analysis and report are in `REDESIGN_REPORT.md` / `DECISIONS.md` on that branch.
-- **Open:** Gallery scroll hitches (p95 33–38 ms, 14–21 dropped frames a pass, live widget previews); Island and Gallery pages take ~100 ms to open; Island tab switches lose 15–38 ms (re-measure with the Dock app quit). See `Reports/2026-10-03-wrap-up.md`.
-- Git: push to `cloud`, not `origin` (dead URL): `git push cloud perf-audit:main perf-audit:perf-audit`.
-
-## Previous state (2026-10-02)
-- **In progress: a 7-step request** (in order): 1 widget snap grid, drag, right-click menu ✅; 2 every theme's widgets in the gallery + editable labels inside widgets and an optional caption below ✅; (extra, asked mid-way) Lid Plane tab ✅; 3 AI Screenshot on ⌘⇧5 ✅ (replaces the system shortcut, restored on quit); 4 analyse this Mac (hardware, sensors, permissions) and adapt; 5 measure and fix choppiness everywhere; 6 window UI toward the user's "Wallspace" reference (big featured hero, filmstrip, curated rows); 7 Island Notes tab: alarms, stopwatch, daily routines with notifications.
-- Done since: Lid Plane tab (`0626efc`), AI Screenshot ⌘⇧5 (`bf59f1f`). Remaining: 4, 5, 6, 7 above, in that order.
-- Step 1 verified in the real app (seeded layout tidied to the predicted slots, Arrange-mode drag landed in the predicted slot with the overlay showing, right-click menu, Remove). **Not yet seen working by a person:** dragging a gallery card onto the desktop, and dragging a widget straight off the desktop outside Arrange mode (the desktop was covered by the user's windows; synthetic clicks pass through the island panel, so don't drive the pointer near the notch).
-
-## Earlier state (2026-10-01)
-- `main` is at `e92ba9e`: the main-window redesign (design system, floating navigation, every page rebuilt), merged.
-- Branch **`claude/festive-brown-ks0f3c`** is 7+ commits ahead of `main`, not yet merged: the navy backdrop with drifting blue light, full-bleed heroes on Wallpaper/Themes/Art, theme previews waiting while scrolling, and the `scroll`/`galleryparts` probes with the CI `probe` job. CI green: 0 warnings, 239 tests.
-- Session logs: `Documentation/Reports/2026-10-01-ui-redesign.md` (this redesign), earlier ones beside it. The September performance audit is in `Documentation/perf-audit.md`.
-- **Not yet seen by a person on a real Mac:** the backdrop's motion (CI only captures stills), the Island page's interactive header (pills and try-it buttons inside a form section header), and the redesigned Library with real wallpapers (CI has no catalog).
 
 ## Backlog (not started unless the user asks)
 - Gallery cards take about 70 ms each to build in a debug build on CI, spread evenly over the widget preview, size picker, chips and button (`-probe galleryparts`): no single fix; a lighter card would be a design change.

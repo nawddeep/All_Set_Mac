@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 11
+**Current phase:** done (2026-10-18)
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -91,7 +91,7 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T10.6 (owner action) Git identity (owner action)
 
 ### Phase 11
-- [ ] Final verification, clean clone, report, HANDOFF
+- [x] Final verification, clean clone, report, HANDOFF
 
 ## Phase 7 measurements (2026-10-18, optimised `-c release -DDEBUG` build, M4 Air, interleaved with a build of 5e7f5ee)
 | Metric | Before (5e7f5ee) | Now | Target | Met? |
