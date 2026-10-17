@@ -47,7 +47,7 @@ _(latest local checkpoint: 2026-10-05, five quick Themes review passes; full log
 Previous checkpoints:
 
 ### 2026-10-05 (pushed to cloud main and perf-audit `d6c4512`, 313 tests, 0 warnings)
-- Themes hero redesign through H2 (see HANDOFF "Current state (2026-10-05)" and docs/UI-Spec.md). Next: H3 card lighting, on the user's go-ahead.
+- Themes hero redesign through H2 (see HANDOFF "Current state (2026-10-05)" and Documentation/UI-Spec.md). Next: H3 card lighting, on the user's go-ahead.
 - Open: atmosphere +5 points scroll CPU (42-43% vs 37-38%), flattening test not run.
 
 ### 2026-10-03 wrap-up (details in Reports/2026-10-03-wrap-up.md)

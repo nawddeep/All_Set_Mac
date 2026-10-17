@@ -1,4 +1,4 @@
-.PHONY: build run preview test app open review clean
+.PHONY: build run preview test app open clean
 
 build:
 	swift build

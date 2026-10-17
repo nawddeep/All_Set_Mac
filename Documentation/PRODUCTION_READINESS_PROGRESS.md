@@ -83,8 +83,8 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T9.5 (VoiceOver pass by a person still to do) Accessibility
 
 ### Phase 10: repo hygiene
-- [ ] T10.1 AI artefacts out
-- [ ] T10.2 One docs tree; no personal paths
+- [x] T10.1 AI artefacts out
+- [x] T10.2 One docs tree; no personal paths
 - [ ] T10.3 Counts from code
 - [ ] T10.4 gitignore, hygiene script, CONTRIBUTING, SECURITY
 - [ ] T10.5 228-file restructure

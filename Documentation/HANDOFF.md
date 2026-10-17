@@ -40,9 +40,9 @@ _Last updated: 2026-10-09 (public wallpaper library built and run locally. Read 
    open build/AllSet.app
    ```
 2. **Optimise at the core level** with every change: CPU, GPU and WindowServer cost. Measure it; don't assume.
-3. **Copyright:** themes are *original*, inspired by an era, genre or mood. No logos, album art, promo photos or trademarks. Real people's names may appear only in hidden search tags, never in UI text (a test enforces this). The user's player photos stay on their Mac, never in the repo.
+3. **Copyright:** themes are *original*, inspired by an era, genre or mood. No logos, album art, promo photos or trademarks. No real person, club or nation is named anywhere, hidden search tags and comments included (`RealPeopleDenylistTests` scans data and source). The user's player photos stay on their Mac, never in the repo.
 4. **Save tokens:** read this file and the latest report instead of re-reviewing the project. End every session by updating this file and writing a report.
-5. Commit or push only when asked (the user has approved commits at each verified checkpoint this session; never push without being asked). The remote is `cloud` → github.com/pratik-aep/all-set-mac-app (`origin` points at a repo that no longer exists).
+5. Commit or push only when asked (the user has approved commits at each verified checkpoint this session; never push without being asked). The current repository is remote `final` → github.com/nawddeep/All_Set_Mac, branch `final-main`; `cloud` (github.com/pratik-aep/all-set-mac-app) is the older one.
 
 ## Current Widgets and Wallpaper design
 - Widgets: `Studio/CinematicWidgets.swift`; Dark default; all 91 catalog entries and themed widgets remain available. Studio Originals contributes 260 individually usable presets, Desktop Edit contributes 227, and Monochrome Edit contributes 21 in separate groups. Widgets and Wallpaper share the cached Midnight Aurora Themes atmosphere via `StudioThemeStyle.swift`. Every page uses the same `CinemaNavigation`.
@@ -180,7 +180,7 @@ SwiftPM, macOS 14.2+, Swift 6. The targets are:
 - Openverse allows at most `page_size` 20 for anonymous requests; more returns a 401.
 - The UI is `Studio/LibraryPages.swift` (`WebPhotosPage`, `SearchFilters`, `RecentSearches`), reached only through `LibraryPicker`, the picture picker of Photo, Polaroid and VHS widgets. The Photos and My Photos pages are gone; the Wallpaper page embeds only `ArtLibraryPage`.
 
-**Wallpaper library** (docs/wallpaper-import.md)
+**Wallpaper library** (../AllSet-personal/docs/wallpaper-import.md)
 - `WallpaperSource.library(id)`:
   - videos play from a copy in `originals/` (`--self-contained`); nothing needs the source folder at run time;
   - stills (`LibraryVideo.kind == .image`, a Wallpaper Engine scene's artwork) play from the Mac through `MovingStill` with the photo drift.
@@ -263,7 +263,7 @@ SwiftPM, macOS 14.2+, Swift 6. The targets are:
 - Local work only, no commit or push. Preserve the user's unrelated edits. Other tabs await the user's next frontend instruction; engineering review is separate.
 
 ## Previous state (2026-10-05): Themes hero redesign, H0-H2 done
-- **Pushed** to `cloud` main and `perf-audit` (`d6c4512`): looping 3:4 carousel in a glass panel (search, category rail, indicator, arrows), pre-rendered card art and `CardHalo` halos, `ThemeAccent` per theme with fallback (theme accent, then wallpaper colour, then warm gold), A/B-crossfaded `ThemeAtmosphere` (static layers, blurred `.backdrop` previews), tighter shared nav (`FloatingNav`, 100 pt, solid scrim), `scripts/review-hero.sh` (`make review`) and `docs/UI-Spec.md` (every measurement). 313 tests, 0 warnings. Code lives in `Sources/AllSet/Studio/Themes/` and `AllSetCore/Themes/`.
+- **Pushed** to `cloud` main and `perf-audit` (`d6c4512`): looping 3:4 carousel in a glass panel (search, category rail, indicator, arrows), pre-rendered card art and `CardHalo` halos, `ThemeAccent` per theme with fallback (theme accent, then wallpaper colour, then warm gold), A/B-crossfaded `ThemeAtmosphere` (static layers, blurred `.backdrop` previews), tighter shared nav (`FloatingNav`, 100 pt, solid scrim), `scripts/review-hero.sh` (`make review`) and `Documentation/UI-Spec.md` (every measurement). 313 tests, 0 warnings. Code lives in `Sources/AllSet/Studio/Themes/` and `AllSetCore/Themes/`.
 - **Plan** (the user's "v2" prompt, chat only): H3 card lighting (neon edge strip, ground glow, sheen, neighbour rims) · H4 glass borders, separate category pills, one grain tile · H5 composition (neighbour gap 8-12 pt, dim ~0.1/0.3, cards cut to title + 1 centre + 2 small, hand-pick all 8 with a contact sheet, replace watermarked Americana/Albiceleste wallpapers) · H6 motion, Reduce Motion, Instruments · H7 final match at 1400x900 + wide + narrow. One phase at a time; view `docs/reference/concept2-reference.png` first and regenerate `build/review/reference-vs-now.png` after each; stop at each gate.
 - **Open perf:** atmosphere costs ~5 points of scroll CPU (42-43% vs 37-38% on HEAD, p95 and hitches equal); warm Themes switch 96-137 ms vs 84-123. A `.drawingGroup()` flattening test was never run (the temp code is removed). Measure against a HEAD build (`-probe scroll|pageswitch`, `ONLY=themes`).
 - Not committed on purpose: `scripts/cloud/catalog_service.py` (404 fix), stray root PNGs, `hero theme.md`.
@@ -282,15 +282,15 @@ SwiftPM, macOS 14.2+, Swift 6. The targets are:
 ## Earlier state (2026-10-01)
 - `main` is at `e92ba9e`: the main-window redesign (design system, floating navigation, every page rebuilt), merged.
 - Branch **`claude/festive-brown-ks0f3c`** is 7+ commits ahead of `main`, not yet merged: the navy backdrop with drifting blue light, full-bleed heroes on Wallpaper/Themes/Art, theme previews waiting while scrolling, and the `scroll`/`galleryparts` probes with the CI `probe` job. CI green: 0 warnings, 239 tests.
-- Session logs: `Documentation/Reports/2026-10-01-ui-redesign.md` (this redesign), earlier ones beside it. The September performance audit is in `docs/perf-audit.md`.
+- Session logs: `Documentation/Reports/2026-10-01-ui-redesign.md` (this redesign), earlier ones beside it. The September performance audit is in `Documentation/perf-audit.md`.
 - **Not yet seen by a person on a real Mac:** the backdrop's motion (CI only captures stills), the Island page's interactive header (pills and try-it buttons inside a form section header), and the redesigned Library with real wallpapers (CI has no catalog).
 
 ## Backlog (not started unless the user asks)
 - Gallery cards take about 70 ms each to build in a debug build on CI, spread evenly over the widget preview, size picker, chips and button (`-probe galleryparts`): no single fix; a lighter card would be a design change.
 - The first visit to Themes after an install or update can still stall once, on a preview already being drawn when scrolling starts.
 - **Needs the user's decision:** a seconds clock costs 9–12 % CPU while visible (F15 in the audit). Either move the rolling digits to Core Animation, or let the digits change without rolling.
-- Wallpaper library: fast-scroll hitches (33–43 ms) over 1,000 cards; GPU-drawn cards break the hover preview. See docs/wallpaper-import.md.
-- Audit recommendations not done: align decorative frame rates to {10, 15, 30}; lazy calendar store; see `docs/perf-audit.md`, Phase 5.
+- Wallpaper library: fast-scroll hitches (33–43 ms) over 1,000 cards; GPU-drawn cards break the hover preview. See ../AllSet-personal/docs/wallpaper-import.md.
+- Audit recommendations not done: align decorative frame rates to {10, 15, 30}; lazy calendar store; see `Documentation/perf-audit.md`, Phase 5.
 - Audit findings F1–F16 from the Phase 0 report are waiting for the user's "go".
 - Later waves: calendar in the notch, a brightness HUD, a menu-bar icon manager, Shortcuts/script live activities.
 - Optional: Unsplash, Pexels or Pixabay search, if the user gets an API key.

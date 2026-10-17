@@ -34,14 +34,14 @@ Every file in `Sources/AllSet` moves, because the target gets the `App/ Design/ 
 | SwiftPM / swift-driver | Two files with the same name in one target fail to compile | Checked by script: no target has a duplicate file name after the moves. |
 | `scripts/build-app.sh:37,63` | Copies `Documentation/third-party/*` and `Sources/AllSetCore/Resources/ThemeArt` into the app | Neither path moves. |
 | `scripts/review-hero.sh:7,39` | `docs/reference/concept2-reference.png` | Updated in the same commit as the docs merge. |
-| `scripts/wallpaper_library.py:460,1342` | Comments that cite `docs/wallpaper-import.md` | Comment updated in Phase 3. No Python import changes. |
+| `scripts/wallpaper_library.py:460,1342` | Comments that cite `../AllSet-personal/docs/wallpaper-import.md` | Comment updated in Phase 3. No Python import changes. |
 | `scripts/cloud/migrations/0001_initial.sql:4` | Comment citing `Sources/AllSetCore/Wallpaper/WallpaperLibrary.swift` | That file doesn't move, so the migration isn't touched. |
 | `scripts/probe-budgets.json` | Text mentions `Documentation/HANDOFF.md` | `HANDOFF.md` stays. |
 | `scripts/check-repo-hygiene.sh` | Tracked build output, `*.env`, `.DS_Store`, files over 5 MB | Moves can't change any of these. |
 | `.github/workflows/ci.yml`, `release.yml`, `Makefile`, `.vscode/*` | No source or doc paths, only `scripts/*` and `.build/debug/AllSet` | No change needed. |
 | `design/widgets-concepts/2026-10-05/asset-manifest.json:3-4` | Repo-relative `design/...` paths | Updated with the docs merge. Later lines hold absolute paths from another machine; those are historical and left alone. |
 | `README.md`, `Documentation/HANDOFF.md`, `CONTENT.md`, `docs/*` | Source and doc paths in prose | Updated in Phase 3. |
-| `Documentation/Reports/*` | Links to `/Users/nawdddep/Downloads/all-set-mac-app-main/...` | Already dead (another checkout). These are dated snapshots and are **not edited**. |
+| `Documentation/Reports/*` | Links to `<home>/Downloads/all-set-mac-app-main/...` | Already dead (another checkout). These are dated snapshots and are **not edited**. |
 | App code | Any runtime string pointing at `Documentation/`, `docs/` or `design/` | None found. |
 
 `scripts/` and `Resources/` **do not move**: the build, CI, release and Python tests depend on them, and moving them gains nothing.
@@ -81,7 +81,7 @@ Mixed files go where most of their lines belong (table below). The real fix, one
 
 Putting the five mixed files in a folder would misfile most of their suites. Splitting them is proposed in `rename-proposals.md`. `Tests/Support/` stays flat: nine files don't need six subfolders.
 
-**D10. Wallpaper-library docs get a subfolder: `Documentation/wallpaper-library/`.** `spec.md`, `architecture.md`, `report.md`, `operations.md`, `scene-renderer-diagnosis.md` and `docs/wallpaper-import.md` are all about the wallpaper library; the first three even say so in their titles. Moving `architecture.md` there keeps its content and history, and frees `Documentation/architecture.md` to become the app-wide map the prompt asks for, instead of overwriting the wallpaper design record. Three things stay put:
+**D10. Wallpaper-library docs get a subfolder: `Documentation/wallpaper-library/`.** `spec.md`, `architecture.md`, `report.md`, `operations.md`, `scene-renderer-diagnosis.md` and `../AllSet-personal/docs/wallpaper-import.md` are all about the wallpaper library; the first three even say so in their titles. Moving `architecture.md` there keeps its content and history, and frees `Documentation/architecture.md` to become the app-wide map the prompt asks for, instead of overwriting the wallpaper design record. Three things stay put:
 - `HANDOFF.md` stays at the root, because `probe-budgets.json` cites it.
 - `third-party/` stays, because `build-app.sh` copies it.
 - The root `design/` folder moves to `Documentation/design/`.
@@ -457,9 +457,9 @@ Generated from the move map that the Phase 2 script also uses, so the table and 
 
 | Current | Target |
 |---|---|
-| `docs/UI-Spec.md` | `Documentation/UI-Spec.md` |
-| `docs/perf-audit.md` | `Documentation/perf-audit.md` |
-| `docs/wallpaper-import.md` | `Documentation/wallpaper-library/import.md` |
+| `Documentation/UI-Spec.md` | `Documentation/UI-Spec.md` |
+| `Documentation/perf-audit.md` | `Documentation/perf-audit.md` |
+| `../AllSet-personal/docs/wallpaper-import.md` | `Documentation/wallpaper-library/import.md` |
 | `Documentation/spec.md` | `Documentation/wallpaper-library/spec.md` |
 | `Documentation/architecture.md` | `Documentation/wallpaper-library/architecture.md` |
 | `Documentation/report.md` | `Documentation/wallpaper-library/report.md` |
