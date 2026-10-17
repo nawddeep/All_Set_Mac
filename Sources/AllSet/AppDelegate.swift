@@ -74,6 +74,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             return
         }
+        // `-smokeTest /folder` with CFFIXED_USER_HOME set: the app walked through end to end (SmokeTest).
+        if let folder = UserDefaults.standard.string(forKey: "smokeTest") {
+            services.start()
+            Task { await SmokeTest.run(to: URL(fileURLWithPath: folder), services: services) }
+            return
+        }
         if let folder = UserDefaults.standard.string(forKey: "renderOnboarding") {
             NSApp.setActivationPolicy(.accessory)
             Task {

@@ -7,6 +7,7 @@ name: CI
 #
 #   hygiene         nothing tracked that shouldn't be (build output, *.env, big files)
 #   build-and-test  zero-warning debug build and the Swift tests
+#   smoke           the app walked through end to end, on throwaway data
 #   minimum-os      a release build targeting exactly arm64-apple-macos14.2
 #   package         the release app built and packaged exactly as a release is
 #   screenshots     every page rendered, for review
@@ -65,6 +66,23 @@ jobs:
 
       - name: Test
         run: swift test
+
+  smoke:
+    # The app walked through end to end (-smokeTest): onboarding, every page, a
+    # widget added, moved, resized and removed, a theme applied and undone, a
+    # built-in wallpaper, every extra off and on, macOS's ⌘⇧5 taken and given back.
+    # Its data lives in a throwaway home (CFFIXED_USER_HOME), which it insists on.
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build
+        run: swift build
+      - name: Smoke test
+        run: |
+          mkdir -p "$RUNNER_TEMP/home" "$RUNNER_TEMP/smoke"
+          CFFIXED_USER_HOME="$RUNNER_TEMP/home" .build/debug/AllSet -smokeTest "$RUNNER_TEMP/smoke" -skip wallpaper,widgets,notch -AppleLanguages '(en)'
+          cat "$RUNNER_TEMP/smoke/smoke-report.json" >> "$GITHUB_STEP_SUMMARY"
 
   minimum-os:
     # The app says it runs on macOS 14.2 (Package.swift, LSMinimumSystemVersion):

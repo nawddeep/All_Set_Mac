@@ -76,8 +76,8 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T8.7 Dead code
 
 ### Phase 9: testing
-- [ ] T9.1 Logic into AllSetCore
-- [ ] T9.2 Smoke test harness
+- [x] T9.1 Logic into AllSetCore
+- [x] T9.2 Smoke test harness
 - [ ] T9.3 De-flake
 - [ ] T9.4 Release checklist
 - [ ] T9.5 Accessibility
