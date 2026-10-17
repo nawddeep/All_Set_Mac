@@ -95,7 +95,7 @@ def prepare(theme, source_folder, preview):
         for extra in widget.get("also", []):
             clear(image, extra, rng)
     picture = Image.fromarray(image).resize(OUT, Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=1.4, percent=55, threshold=2))
-    picture.save(os.path.join(ART, f"edit-supplied-{theme['id']}.jpg"), quality=88, optimize=True, progressive=True)
+    picture.save(os.path.join(ART, f"edit-supplied-{theme['id']}.jpg"), quality=80, optimize=True, progressive=True)
     if preview:
         sketch = Image.fromarray(image)
         draw = ImageDraw.Draw(sketch)
