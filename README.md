@@ -29,6 +29,15 @@ On screens without a notch, All Set draws a virtual one in the menu bar.
 ## Core and Extras
 All Set is four things: the **Dynamic Island**, **desktop widgets**, **themes** and **wallpaper**. Everything else is an **Extra**, switched on and off in Extras › Manage: Window Snapping, Workspaces, Clipboard History, Shelf, Sound Mixer, TapTap (knocks), AI Screenshot and System Monitor. An extra that is off starts no controller, keeps no timer, holds no keyboard shortcut and asks for no permission, and its page leaves the navigation. A new install starts with every extra off; an install from before extras existed (2026-10-17) keeps them all on.
 
+## Install
+Download `AllSet-<version>.dmg` from the repository's Releases, open it and drag All Set to Applications.
+
+A release signed with a Developer ID and notarized by Apple opens normally. Until the project has a Developer ID (see `Documentation/OWNER_ACTIONS.md`), releases are signed ad hoc and macOS blocks the first open:
+- **macOS 15 and later:** open All Set once (it's blocked), then System Settings › Privacy & Security › Security › **Open Anyway** next to All Set, and confirm with your password.
+- **macOS 14:** right-click All Set in Applications › Open › Open.
+
+Ad-hoc builds also lose Accessibility and other permissions on every update, because macOS ties them to the signature; a Developer ID build keeps them.
+
 ## Requirements
 - macOS 14.2 or later (developed on macOS 26, Apple Silicon)
 - Xcode, for the Swift 6 toolchain and SDK

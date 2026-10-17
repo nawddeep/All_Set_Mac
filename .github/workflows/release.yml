@@ -11,9 +11,10 @@ name: Release
 # workflow) for a tag that already exists.
 #
 # Signing. With no secrets set, the app is signed ad hoc: it runs, but macOS
-# Gatekeeper warns on first open (right-click › Open, once), and the release
-# notes say so. Add these repository secrets to sign with a Developer ID and
-# notarize instead (both steps then run, and the notes say so):
+# Gatekeeper blocks the first open (on macOS 15 and later: System Settings ›
+# Privacy & Security › Open Anyway), and the release notes say so. Add these
+# repository secrets to sign with a Developer ID and notarize instead
+# (scripts/notarize.sh then runs, and the notes say so):
 #
 #   DEVELOPER_ID_CERT_P12        base64 of a "Developer ID Application" .p12
 #   DEVELOPER_ID_CERT_PASSWORD   its password
@@ -141,10 +142,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-        run: |
-          ditto -c -k --keepParent dist/AllSet.app "$RUNNER_TEMP/notarize.zip"
-          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
-          xcrun stapler staple dist/AllSet.app
+        run: scripts/notarize.sh app dist/AllSet.app
 
       - name: Package and check
         run: scripts/package-release.sh dist/AllSet.app dist "${{ steps.version.outputs.version }}"
@@ -157,8 +155,7 @@ jobs:
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          xcrun notarytool submit "dist/AllSet-$VERSION.dmg" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
-          xcrun stapler staple "dist/AllSet-$VERSION.dmg"
+          scripts/notarize.sh dmg "dist/AllSet-$VERSION.dmg"
           # Stapling changed the disk image: its checksum is taken again.
           (cd dist && shasum -a 256 "AllSet-$VERSION.zip" "AllSet-$VERSION.dmg" > SHA256SUMS.txt)
 
@@ -178,9 +175,17 @@ jobs:
             if [ "$NOTARIZED" = "true" ]; then
               echo "Signed with a Developer ID and notarized by Apple."
             elif [ "$IDENTITY" != "-" ]; then
-              echo "Signed with a Developer ID, **not notarized**: macOS may warn the first time. Right-click All Set › Open, once."
+              echo "Signed with a Developer ID, **not notarized**: macOS blocks the first open."
+              echo
+              echo "**macOS 15 and later:** open All Set once (it's blocked), then go to System Settings › Privacy & Security, scroll to Security, click **Open Anyway** next to All Set, and confirm with your password."
+              echo
+              echo "**macOS 14:** right-click All Set in Applications › Open › Open."
             else
-              echo "**Not signed by an identified developer.** macOS will say it can't check All Set for malicious software. The first time, right-click All Set in Applications › Open › Open. After that it opens normally."
+              echo "**Not signed by an identified developer.** macOS says it can't check All Set for malicious software and blocks the first open."
+              echo
+              echo "**macOS 15 and later:** open All Set once (it's blocked), then go to System Settings › Privacy & Security, scroll to Security, click **Open Anyway** next to All Set, and confirm with your password. After that it opens normally."
+              echo
+              echo "**macOS 14:** right-click All Set in Applications › Open › Open."
             fi
             echo
             echo "Check a download: \`shasum -a 256 -c SHA256SUMS.txt\`"
