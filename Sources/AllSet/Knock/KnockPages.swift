@@ -15,6 +15,19 @@ struct KnockPage: View {
         let store = knocks.store
         FormPage(eyebrow: "Tools", title: "TapTap",
                  subtitle: "Knock on your Mac to run something: one, two or three knocks, each its own action.") {
+            if store.removedShellCommands > 0 {
+                Section {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "exclamationmark.shield").foregroundStyle(.orange)
+                        Text(store.removedShellCommands == 1
+                             ? "A knock was set to run a shell command. All Set no longer runs shell commands, so that slot is now empty. To automate something, choose Run Shortcut instead."
+                             : "\(store.removedShellCommands) knocks were set to run shell commands. All Set no longer runs shell commands, so those slots are now empty. To automate something, choose Run Shortcut instead.")
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                        Button("OK") { store.acknowledgeRemovedShellCommands() }
+                    }
+                }
+            }
             Section {
                 KnockHeader(knocks: knocks, isEnabled: binding(\.isEnabled))
             }
@@ -427,7 +440,6 @@ struct KnockActionPicker: View {
     @State private var query = ""
     @State private var apps: [InstalledApp]?
     @State private var shortcuts: [String] = []
-    @State private var command = ""
 
     var body: some View {
         VStack(spacing: 12) {
@@ -524,17 +536,6 @@ struct KnockActionPicker: View {
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
-                    }
-                }
-            }
-            if needle.isEmpty {
-                Section("Shell Command") {
-                    HStack {
-                        TextField("open ~/Downloads", text: $command)
-                            .textFieldStyle(.roundedBorder)
-                            .font(.system(.body, design: .monospaced))
-                        Button("Use") { choose(.shellCommand(command.trimmingCharacters(in: .whitespaces))) }
-                            .disabled(command.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
             }

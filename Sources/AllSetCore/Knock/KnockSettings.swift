@@ -56,7 +56,8 @@ public struct KnockRule: Codable, Equatable, Identifiable, Sendable {
 }
 
 public struct KnockSettings: Codable, Equatable, Sendable {
-    public var isEnabled = true
+    /// Off until someone turns knocks on: the sensor isn't read, nothing fires.
+    public var isEnabled = false
     /// Single knocks are the easiest to set off by accident, so they start empty.
     public var single: KnockAction?
     public var double: KnockAction? = .toggleIsland
@@ -74,6 +75,9 @@ public struct KnockSettings: Codable, Equatable, Sendable {
     public var showInIsland = true
     public var playSound = false
     public var rules: [KnockRule] = []
+    /// Shell-command actions found in a file saved before All Set stopped
+    /// running shell commands (2026-10-17). Their slots load empty. Not saved.
+    public var removedShellCommands = 0
 
     public init() {}
 
@@ -148,6 +152,15 @@ public struct KnockSettings: Codable, Equatable, Sendable {
         showInIsland = value(.showInIsland, defaults.showInIsland)
         playSound = value(.playSound, defaults.playSound)
         rules = value(.rules, defaults.rules)
+
+        struct Kind: Decodable { var kind: String }
+        struct RuleKinds: Decodable { var single, double, triple: Kind? }
+        func isShell(_ kind: Kind??) -> Bool { kind??.kind == "shellCommand" }
+        let slots = [CodingKeys.single, .double, .triple].filter { isShell(try? container.decodeIfPresent(Kind.self, forKey: $0)) }
+        let ruleKinds = (try? container.decodeIfPresent([RuleKinds].self, forKey: .rules)) ?? nil
+        removedShellCommands = slots.count + (ruleKinds ?? []).reduce(0) { count, rule in
+            count + [rule.single, rule.double, rule.triple].filter { $0?.kind == "shellCommand" }.count
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -179,11 +192,32 @@ public final class KnockStore {
     @ObservationIgnored private var pendingSave: Task<Void, Never>?
     @ObservationIgnored private let log = Logger(subsystem: "com.pratik.allset", category: "knock")
 
-    public init(fileURL: URL? = nil) {
+    /// How many shell-command actions were removed from the saved settings,
+    /// until the Knocks page has said so once (`acknowledgeRemovedShellCommands`).
+    public private(set) var removedShellCommands: Int
+
+    @ObservationIgnored private let defaults: UserDefaults
+    static let removedShellCommandsKey = "knock.removedShellCommands"
+
+    public init(fileURL: URL? = nil, defaults: UserDefaults = .standard) {
         self.fileURL = fileURL ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("AllSet/knocks.json")
-        settings = StoreFile.load(KnockSettings.self, from: self.fileURL)
-            ?? KnockSettings()
+        self.defaults = defaults
+        let loaded = StoreFile.load(KnockSettings.self, from: self.fileURL)
+        settings = loaded ?? KnockSettings()
+        removedShellCommands = defaults.integer(forKey: Self.removedShellCommandsKey)
+        if let found = loaded?.removedShellCommands, found > 0 {
+            // Written again at once without them, so they're never read back; the notice waits until it's seen.
+            removedShellCommands += found
+            defaults.set(removedShellCommands, forKey: Self.removedShellCommandsKey)
+            settings.removedShellCommands = 0
+            save()
+        }
+    }
+
+    public func acknowledgeRemovedShellCommands() {
+        removedShellCommands = 0
+        defaults.removeObject(forKey: Self.removedShellCommandsKey)
     }
 
     private func scheduleSave() {

@@ -245,7 +245,7 @@ private struct SyntheticStream {
         let actions: [KnockAction] = KnockAction.simple + [
             .openIsland(.sound), .applyWorkspace(id: UUID(), name: "Coding"), .moveWindow(.leftHalf),
             .openApp(bundleID: "com.apple.Music", name: "Music"), .runShortcut(name: "Morning"),
-            .shellCommand("open ~/Downloads"), .playSound(name: "Glass"),
+            .playSound(name: "Glass"),
         ]
         let decoded = try JSONDecoder().decode([KnockAction].self, from: JSONEncoder().encode(actions))
         #expect(decoded == actions)
@@ -268,7 +268,7 @@ private struct SyntheticStream {
         #expect(read.triple == nil && read.double == nil)
         #expect(read.sensitivity == .firm)
         #expect(read.tapWindow == 0.7)
-        #expect(read.isEnabled && read.showInIsland)
+        #expect(!read.isEnabled && read.showInIsland)
         #expect(try JSONDecoder().decode(KnockSettings.self, from: Data("{}".utf8)) == KnockSettings())
     }
 
@@ -286,6 +286,35 @@ private struct SyntheticStream {
         settings.ignoreWhileTyping = false
         #expect(settings.detectorConfiguration.typingSuppression == 0)
         #expect(settings.detectorConfiguration.assignedCounts == [2, 3])
+    }
+
+    @Test func knocksAreOffForNewInstalls() {
+        #expect(!KnockSettings().isEnabled)
+        // The default actions are there, ready for when knocks are turned on.
+        #expect(KnockSettings().double == .toggleIsland)
+    }
+
+    @Test @MainActor func shellCommandsFromOldFilesLoadEmptyAndAreReportedOnce() throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent("AllSetKnocks-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: file) }
+        let suite = "knock-shell-\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let old = #"{"isEnabled": true, "single": {"kind": "shellCommand", "value": "rm -rf ~"}, "double": {"kind": "playPause"}, "#
+            + #""rules": [{"bundleID": "com.apple.Safari", "appName": "Safari", "triple": {"kind": "shellCommand", "value": "x"}}]}"#
+        try Data(old.utf8).write(to: file)
+        let decoded = try JSONDecoder().decode(KnockSettings.self, from: Data(old.utf8))
+        #expect(decoded.single == nil && decoded.double == .playPause && decoded.removedShellCommands == 2)
+        #expect(decoded.rules.first?.triple == nil)
+
+        let store = KnockStore(fileURL: file, defaults: defaults)
+        #expect(store.settings.isEnabled && store.settings.single == nil)
+        #expect(store.removedShellCommands == 2)
+        // The file no longer holds them; the notice stays until it has been seen.
+        #expect(try !String(contentsOf: file, encoding: .utf8).contains("shellCommand"))
+        #expect(KnockStore(fileURL: file, defaults: defaults).removedShellCommands == 2)
+        store.acknowledgeRemovedShellCommands()
+        #expect(KnockStore(fileURL: file, defaults: defaults).removedShellCommands == 0)
     }
 
     @Test @MainActor func storeRemembersSettings() throws {

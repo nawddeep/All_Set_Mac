@@ -38,7 +38,6 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
     // Apps and automation
     case openApp(bundleID: String, name: String)
     case runShortcut(name: String)
-    case shellCommand(String)
     // Fun
     case screenFlash, ripple
     case playSound(name: String)
@@ -106,7 +105,6 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
         case .previousTab: "Previous Tab"
         case .openApp(_, let name): "Open \(name)"
         case .runShortcut(let name): "Run \u{201C}\(name)\u{201D}"
-        case .shellCommand: "Shell Command"
         case .screenFlash: "Screen Flash"
         case .ripple: "Ripple"
         case .playSound(let name): "Play \u{201C}\(name)\u{201D}"
@@ -151,7 +149,6 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
         case .previousTab: "arrow.left.to.line"
         case .openApp: "app.badge.fill"
         case .runShortcut: "square.2.layers.3d.fill"
-        case .shellCommand: "terminal.fill"
         case .screenFlash: "bolt.fill"
         case .ripple: "circle.circle"
         case .playSound: "music.note"
@@ -167,7 +164,7 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
         case .lockScreen, .screenshot, .aiScreenshot, .missionControl, .nextDesktop, .previousDesktop, .showDesktop: .system
         case .copy, .paste, .undo, .closeWindow, .nextTab, .previousTab: .editing
         case .openApp: .apps
-        case .runShortcut, .shellCommand: .automation
+        case .runShortcut: .automation
         case .screenFlash, .ripple, .playSound: .fun
         }
     }
@@ -227,7 +224,6 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
         case .previousTab: "previousTab"
         case .openApp: "openApp"
         case .runShortcut: "runShortcut"
-        case .shellCommand: "shellCommand"
         case .screenFlash: "screenFlash"
         case .ripple: "ripple"
         case .playSound: "playSound"
@@ -241,7 +237,6 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
         case .moveWindow(let action): action.rawValue
         case .openApp(let bundleID, _): bundleID
         case .runShortcut(let name), .playSound(let name): name
-        case .shellCommand(let command): command
         default: nil
         }
     }
@@ -272,7 +267,6 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
             self = .moveWindow(action)
         case "openApp": self = .openApp(bundleID: parameter, name: label ?? parameter)
         case "runShortcut": self = .runShortcut(name: parameter)
-        case "shellCommand": self = .shellCommand(parameter)
         case "playSound": self = .playSound(name: parameter)
         default: return nil
         }

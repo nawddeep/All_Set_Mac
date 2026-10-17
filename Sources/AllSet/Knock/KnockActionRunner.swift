@@ -74,10 +74,6 @@ enum KnockActionRunner {
             }
         case .runShortcut(let name):
             return await CommandRunner.run("/usr/bin/shortcuts", ["run", name], timeout: 60)
-        case .shellCommand(let command):
-            guard !command.trimmingCharacters(in: .whitespaces).isEmpty else { return "No command set" }
-            // The login shell, so the command sees the usual PATH.
-            return await CommandRunner.run("/bin/zsh", ["-lc", command], timeout: 30)
 
         case .screenFlash: ScreenOverlay.flash()
         case .ripple: ScreenOverlay.ripple()
