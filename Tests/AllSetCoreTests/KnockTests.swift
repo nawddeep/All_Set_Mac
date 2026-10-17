@@ -350,3 +350,20 @@ private final class Readings: @unchecked Sendable {
     func append(_ value: Double) { lock.withLock { stored.append(value) } }
     var values: [Double] { lock.withLock { stored } }
 }
+
+@Suite struct KnockActionValidationTests {
+    private func decode(_ json: String) -> KnockAction? {
+        try? JSONDecoder().decode(KnockAction.self, from: Data(json.utf8))
+    }
+
+    @Test func launchTargetsAreCheckedWhenRead() {
+        #expect(decode(#"{"kind": "openApp", "value": "com.apple.Music", "label": "Music"}"#) == .openApp(bundleID: "com.apple.Music", name: "Music"))
+        #expect(decode(#"{"kind": "openApp", "value": "/Applications/Evil.app"}"#) == nil)
+        #expect(decode(#"{"kind": "openApp", "value": "com.apple.Music; rm"}"#) == nil)
+        #expect(decode(#"{"kind": "openApp", "value": "music"}"#) == nil)
+        #expect(decode(#"{"kind": "runShortcut", "value": "Morning Routine"}"#) == .runShortcut(name: "Morning Routine"))
+        #expect(decode(#"{"kind": "runShortcut", "value": "../../tmp/x"}"#) == nil)
+        #expect(decode(#"{"kind": "runShortcut", "value": "--input-path"}"#) == nil)
+        #expect(decode(#"{"kind": "runShortcut", "value": "a\nb"}"#) == nil)
+    }
+}

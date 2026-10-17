@@ -265,8 +265,12 @@ public enum KnockAction: Hashable, Identifiable, Sendable {
         case "moveWindow":
             guard let action = WindowAction(rawValue: parameter) else { return nil }
             self = .moveWindow(action)
-        case "openApp": self = .openApp(bundleID: parameter, name: label ?? parameter)
-        case "runShortcut": self = .runShortcut(name: parameter)
+        case "openApp":
+            guard Self.isBundleID(parameter) else { return nil }
+            self = .openApp(bundleID: parameter, name: label ?? parameter)
+        case "runShortcut":
+            guard Self.isShortcutName(parameter) else { return nil }
+            self = .runShortcut(name: parameter)
         case "playSound": self = .playSound(name: parameter)
         default: return nil
         }
@@ -295,5 +299,22 @@ extension KnockAction: Codable {
         try container.encode(kind, forKey: .kind)
         try container.encodeIfPresent(parameter, forKey: .value)
         try container.encodeIfPresent(label, forKey: .label)
+    }
+}
+
+// knocks.json is a plain file any app running as you can edit, so what it
+// asks to launch is checked as it's read: a slot that fails loads empty.
+extension KnockAction {
+    /// Reverse-DNS, like `com.apple.Music`: letters, digits, dots and dashes.
+    static func isBundleID(_ text: String) -> Bool {
+        let parts = text.split(separator: ".", omittingEmptySubsequences: false)
+        return (3...255).contains(text.count) && parts.count >= 2
+            && parts.allSatisfy { !$0.isEmpty && $0.allSatisfy { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-") } }
+    }
+
+    /// A Shortcut's name as Shortcuts shows it: plain text, no path, nothing hidden.
+    static func isShortcutName(_ text: String) -> Bool {
+        (1...100).contains(text.count) && !text.contains("/") && !text.hasPrefix("-") && !text.hasPrefix(".")
+            && text.unicodeScalars.allSatisfy { !CharacterSet.controlCharacters.contains($0) }
     }
 }

@@ -83,9 +83,15 @@ enum ShortcutLauncher {
     static func open(_ target: String) {
         let target = target.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !target.isEmpty else { return }
+        // widgets.json is a plain file another app could edit: a tile opens
+        // apps, folders and links, never a script or other file that would run.
         if target.hasPrefix("/") || target.hasPrefix("~") {
-            NSWorkspace.shared.open(URL(fileURLWithPath: (target as NSString).expandingTildeInPath))
-        } else if target.contains(":"), let url = URL(string: target) {
+            let file = URL(fileURLWithPath: (target as NSString).expandingTildeInPath)
+            var isFolder: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: file.path, isDirectory: &isFolder),
+                  file.pathExtension == "app" || isFolder.boolValue else { NSSound.beep(); return }
+            NSWorkspace.shared.open(file)
+        } else if target.contains(":"), let url = URL(string: target), url.scheme?.lowercased() != "file" {
             NSWorkspace.shared.open(url)
         } else if let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: target) {
             NSWorkspace.shared.openApplication(at: app, configuration: NSWorkspace.OpenConfiguration())
