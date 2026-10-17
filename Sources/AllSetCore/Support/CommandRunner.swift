@@ -146,6 +146,7 @@ public enum CommandRunner {
 
     /// What the wait ended on, shared between the waiting thread, the thread
     /// that reaps the command and the task's cancellation handler.
+    // Sendable because: all state is behind `condition` (an NSCondition).
     private final class RunState: @unchecked Sendable {
         enum Outcome { case exited(Int32), timedOut, cancelled }
 
@@ -195,6 +196,7 @@ public enum CommandRunner {
         }
     }
 
+    // Sendable because: `stored` and `stopped` are only touched under `lock`.
     private final class ErrorOutput: @unchecked Sendable {
         private let lock = NSLock()
         private var stored = Data()

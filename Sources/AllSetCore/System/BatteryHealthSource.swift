@@ -6,6 +6,7 @@ import OSLog
 /// capacities don't reproduce Apple's percentage), so the one source is
 /// `system_profiler`. It takes about a second, so it runs off to the side at most
 /// every six hours; until it has answered the figures are simply unknown.
+// Sendable because: every stored var is read and written under `lock`.
 final class BatteryHealthSource: @unchecked Sendable {
     static let shared = BatteryHealthSource()
 

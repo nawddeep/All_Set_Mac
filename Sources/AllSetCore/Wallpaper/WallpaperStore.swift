@@ -258,6 +258,7 @@ public final class WallpaperStore {
 
 /// A download that can be cancelled from any thread, including before it
 /// has started.
+// Sendable because: `task` and `cancelled` are only touched under `lock`.
 final class DownloadHandle: @unchecked Sendable {
     let lock = NSLock()
     var task: URLSessionDownloadTask?

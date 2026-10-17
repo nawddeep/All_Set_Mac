@@ -119,9 +119,11 @@ struct Grain: View {
     /// (BGRA, sRGB), so tiling it never converts a pixel.
     @MainActor private static let tile: NSImage = {
         let side = 128
-        let context = CGContext(data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: side * 4,
-                                space: CGColorSpace(name: CGColorSpace.sRGB)!,
-                                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)!
+        // Without a context (out of memory), no grain: a plain transparent tile.
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(data: nil, width: side, height: side, bitsPerComponent: 8, bytesPerRow: side * 4, space: space,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue)
+        else { return NSImage(size: NSSize(width: side, height: side)) }
         var seed: UInt64 = 0x9E37_79B9_7F4A_7C15
         if let pixels = context.data?.bindMemory(to: UInt8.self, capacity: side * side * 4) {
             for index in 0..<(side * side) {
@@ -133,7 +135,7 @@ struct Grain: View {
                 pixels[index * 4 + 3] = 255
             }
         }
-        let image = context.makeImage()!
+        guard let image = context.makeImage() else { return NSImage(size: NSSize(width: side, height: side)) }
         return NSImage(cgImage: image, size: NSSize(width: side, height: side))
     }()
 }

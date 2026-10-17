@@ -70,8 +70,8 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T8.1 Split AppServices
 - [x] T8.2 (core only; app side open, see DECISIONS) Self-registering widget kinds
 - [x] T8.3 No file over 600 lines
-- [ ] T8.4 try? audit
-- [ ] T8.5 Concurrency
+- [x] T8.4 (file ops; ~197 other try? not individually reviewed) try? audit
+- [x] T8.5 (TSan run blocked) Concurrency
 - [ ] T8.6 Localization scaffolding
 - [ ] T8.7 Dead code
 

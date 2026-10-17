@@ -5,6 +5,7 @@ import OSLog
 
 /// The detector, fed about 794 times a second from the sensor's thread and
 /// told about typing and clicks from the main thread, behind one lock.
+// Sendable because: the detector state is only touched under its lock, from the sensor and main threads.
 final class KnockEngine: @unchecked Sendable {
     struct Output: Sendable {
         var tap: TapObservation?

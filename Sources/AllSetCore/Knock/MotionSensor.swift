@@ -16,6 +16,7 @@ import OSLog
 ///
 /// Reports arrive on a thread of the sensor's own, so the main thread never
 /// sees the firehose; `onSample` is called there.
+// Sendable because: the thread handle is set and cleared by the caller's thread; shared stop state is under `lock`.
 public final class MotionSensor: @unchecked Sendable {
     public enum Failure: Error, CustomStringConvertible {
         case notFound
@@ -229,6 +230,7 @@ private final class ReportSink {
     }
 }
 
+// Sendable because: written by the sensor thread before it signals the semaphore, read only after a successful wait.
 private final class OpenOutcome: @unchecked Sendable {
     var failure: MotionSensor.Failure?
 }

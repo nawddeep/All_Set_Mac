@@ -302,6 +302,7 @@ public struct LibrarySync: Sendable {
 
 /// Bytes a sync has received so far, across the downloads under way and the
 /// ones that ended: for a progress line.
+// Sendable because: every stored var is under `lock`.
 public final class LibrarySyncProgress: @unchecked Sendable {
     private let lock = NSLock()
     private var ended: Int64 = 0
@@ -324,6 +325,7 @@ public final class LibrarySyncProgress: @unchecked Sendable {
 }
 
 /// The download a cancelled `LibrarySync.download(_:)` has to stop.
+// Sendable because: `held` is only read and written under `lock`.
 private final class TaskHandle: @unchecked Sendable {
     private let lock = NSLock()
     private var held: URLSessionDownloadTask?

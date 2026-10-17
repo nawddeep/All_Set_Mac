@@ -21,6 +21,7 @@ public struct AudioRoutingError: Error, CustomStringConvertible {
 }
 
 /// One app's gain, shared with the audio thread.
+// Sendable because: the target gain is an atomic UInt32; the ramp state belongs to the audio thread alone.
 public final class GainBox: @unchecked Sendable {
     /// Written by the app, read by the audio thread once per buffer: the Float's
     /// bits, through atomic load/store (lock-free, so the audio thread never waits).
@@ -251,6 +252,7 @@ final class AppAudioTap {
 /// Keeps one `AppAudioTap` for each app whose volume isn't 100%. Core Audio
 /// takes a moment to build and tear down devices, so that happens on a queue
 /// of its own and the interface never waits for it.
+// Sendable because: all mutable state is only touched on the serial `queue`.
 public final class AppAudioRouter: @unchecked Sendable {
     public struct Request: Equatable, Sendable {
         /// The app's bundle ID.
