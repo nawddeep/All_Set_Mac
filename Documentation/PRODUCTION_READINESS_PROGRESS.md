@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 5
+**Current phase:** 6
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -48,11 +48,11 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T4.6 Version in About; CHANGELOG
 
 ### Phase 5: server
-- [ ] T5.1 No SQL interpolation
-- [ ] T5.2 Catalog cache + pagination order
-- [ ] T5.3 Truth in docs
-- [ ] T5.4 Public backend plan document
-- [ ] T5.5 Portable server tests
+- [x] T5.1 No SQL interpolation
+- [x] T5.2 Catalog cache + pagination order
+- [x] T5.3 Truth in docs
+- [x] T5.4 Public backend plan document
+- [x] T5.5 Portable server tests
 
 ### Phase 6: platform fragility
 - [ ] T6.1 Capabilities layer

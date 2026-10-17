@@ -1,7 +1,9 @@
-"""Uploads the wallpaper catalog's metadata to the cloud Postgres (Neon).
+"""Uploads the wallpaper catalog's metadata to the library server's Postgres
+(the owner's own Mac, reached through scripts/cloud/tunnel.sh, or a database
+on this Mac started by scripts/cloud/server.sh).
 
 Metadata only — this does not touch the actual video/still/thumbnail files
-(those go to object storage separately, once R2 is wired up). Safe to run
+(load_library.py copies those into the server's storage folder). Safe to run
 again: loads into a staging table, then upserts by id, so a rerun updates
 rows instead of duplicating them. It never changes a row's storage keys:
 new rows start without them, and keys an upload filled in are kept.
@@ -102,7 +104,7 @@ def row_for(item):
         item["id"], item.get("title", "Untitled"), item.get("kind", "video"),
         item.get("category", "abstract"), pg_array(item.get("tags", [])),
         item.get("root"), item.get("file"),
-        None, None, None,  # storage keys: filled in once files are uploaded to R2
+        None, None, None,  # storage keys: filled in when load_library.py puts the files in storage
         item.get("duration"), item.get("width"), item.get("height"), item.get("fps"),
         item.get("size"), item.get("status", "quarantined"), item.get("statusReason"),
         json.dumps(provenance) if provenance else None,

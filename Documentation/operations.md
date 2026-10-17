@@ -2,6 +2,10 @@
 
 This describes the one deployment that exists: a personal home server reached over Tailscale. It records what the scripts in `scripts/cloud/` do, how to set the server up with them, and what is still missing. Nothing here is needed to use All Set without a server.
 
+**What this is, plainly:** a personal server on the owner's own Mac, for the owner and a few people they share a key with. Inside Tailscale it serves plain HTTP; it is not exposed to the internet and must not be ("never forward the port"). It runs on Python's standard-library HTTP server and psql, which suit a handful of users, not the public. The "public library" pieces (`publish_catalog.py`, `Caddyfile.public`) are built and tested locally but not deployed, and publish only licence-cleared rows: today zero. The app works fully without any server (36 built-in wallpapers). A plan for real public content is in `public-content-backend.md`.
+
+**2026-10-17:** every SQL value now travels as a psql variable or COPY data (`pgsql.py`); `/catalog` is cached for 30 s and counts only rows with a file before paging.
+
 Last checked against the scripts on 2026-10-06.
 
 **Written and tested, not yet run on the server.** The supervision, backup, restore drill and migration tools below were added on 2026-10-06. They pass their tests against a throwaway Postgres and temporary folders. Nobody has run them on the real server yet. The "First-time setup" section is the list of commands that does that.

@@ -1,6 +1,7 @@
--- All Set — cloud catalog schema (Neon Postgres).
--- Metadata only. Actual files (video/still/thumbnail) live in object storage
--- (Cloudflare R2); this table holds a storage key pointing at each one.
+-- All Set — wallpaper catalog schema (the library server's Postgres).
+-- Metadata only. Actual files (video/still/thumbnail) live in the server's
+-- storage folder; this table holds a storage key (a relative path) for each one.
+-- (Comments only were edited on 2026-10-17; migrate.py keys migrations by file name.)
 -- Mirrors Sources/AllSetCore/Wallpaper/WallpaperLibrary.swift's LibraryVideo —
 -- keep the two in sync by hand; there's no codegen between them.
 
@@ -16,8 +17,8 @@ create table if not exists wallpapers (
     origin_root     text,
     origin_file     text,
 
-    -- Object storage keys (R2), one per rendered asset. Null until that
-    -- asset has actually been uploaded.
+    -- Storage keys (paths under the storage folder), one per rendered asset.
+    -- Null until that asset is in storage.
     playback_key    text,
     still_key       text,
     thumbnail_key   text,
@@ -39,7 +40,7 @@ create table if not exists wallpapers (
     added_at        timestamptz,
 
     -- Bookkeeping for this sync, not part of LibraryVideo.
-    uploaded_at     timestamptz,              -- when playback_key etc. were last confirmed in R2
+    uploaded_at     timestamptz,              -- when playback_key etc. were last confirmed in storage
     synced_at       timestamptz not null default now()
 );
 

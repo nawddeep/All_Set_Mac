@@ -59,8 +59,10 @@ class PublicLaunchAgentTests(unittest.TestCase):
         self.assertEqual(written, sorted(label + ".plist" for label in install_public_server.LABELS))
         for name in written:
             path = os.path.join(self.folder, name)
-            lint = subprocess.run(["/usr/bin/plutil", "-lint", path], capture_output=True, text=True)
-            self.assertEqual(lint.returncode, 0, lint.stdout)
+            # macOS's own check where it exists; plistlib below parses it everywhere.
+            if os.path.exists("/usr/bin/plutil"):
+                lint = subprocess.run(["/usr/bin/plutil", "-lint", path], capture_output=True, text=True)
+                self.assertEqual(lint.returncode, 0, lint.stdout)
             with open(path, "rb") as handle:
                 self.assertEqual(plistlib.load(handle)["Label"] + ".plist", name)
         after = sorted(os.listdir(installed)) if os.path.isdir(installed) else []
