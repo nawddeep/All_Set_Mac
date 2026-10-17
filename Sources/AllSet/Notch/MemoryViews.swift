@@ -2,7 +2,7 @@ import AllSetCore
 import AppKit
 import SwiftUI
 
-/// Freeing memory: quitting the apps that use most, and clearing cached files.
+/// Freeing memory: quitting the apps that use most.
 @MainActor
 enum MemoryActions {
     /// Apps can be quit; loose processes and All Set itself can't from here.
@@ -16,21 +16,6 @@ enum MemoryActions {
             running.terminate()
         }
     }
-
-    /// Empties the disk cache with `purge`, which needs an administrator
-    /// password. macOS refills the cache as files are read again, so this
-    /// helps most just before opening something large. Returns what happened.
-    static func clearCachedFiles() async -> String {
-        let before = MemoryUsage.current()
-        let failure = await CommandRunner.run(
-            "/usr/bin/osascript", ["-e", #"do shell script "/usr/sbin/purge" with administrator privileges"#], timeout: 120)
-        if let failure {
-            return failure.localizedCaseInsensitiveContains("cancel") ? "Cancelled" : failure
-        }
-        let after = MemoryUsage.current()
-        let freed = before.cached > after.cached ? before.cached - after.cached : 0
-        return freed > 0 ? "Freed \(Format.memory(freed))" : "Nothing to clear"
-    }
 }
 
 /// The island's heaviest apps, by energy or by memory.
@@ -42,8 +27,6 @@ struct TopAppsCard: View {
     }
 
     @State private var mode = Mode.energy
-    @State private var status: String?
-    @State private var isClearing = false
 
     var body: some View {
         let snapshot = services.monitor.snapshot
@@ -60,33 +43,6 @@ struct TopAppsCard: View {
             case .memory:
                 MemoryAppsList(apps: snapshot.memoryApps)
                     .frame(maxHeight: .infinity, alignment: .top)
-                HStack(spacing: 6) {
-                    Button {
-                        isClearing = true
-                        Task {
-                            let result = await MemoryActions.clearCachedFiles()
-                            isClearing = false
-                            withMotion(Motion.standard) { status = result }
-                            try? await Task.sleep(for: .seconds(4))
-                            withMotion(Motion.standard) { status = nil }
-                        }
-                    } label: {
-                        Label(isClearing ? "Clearing…" : "Clear Cache", systemImage: "wind")
-                            .font(.system(size: 10, weight: .semibold))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Capsule().fill(.white.opacity(0.12)))
-                    }
-                    .buttonStyle(NotchIconButtonStyle())
-                    .disabled(isClearing)
-                    .help("Empty the disk cache (asks for your password). macOS refills it as needed; it helps most before opening something big.")
-                    if let status {
-                        Text(status)
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundStyle(Theme.charging)
-                            .lineLimit(1)
-                    }
-                }
             }
         }
         .padding(11)

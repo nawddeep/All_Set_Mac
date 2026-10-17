@@ -36,7 +36,7 @@ Five tabs, each with its own Core Animation–driven open/close/tab-switch motio
 2. **Tray** — files parked on the shelf (drop any file on the island) and what was copied recently.
 3. **Mixer** — per-app volume sliders, output device switch.
 4. **Notes** — a quick note-taking pane (keyboard-focusable).
-5. **System** — CPU, GPU, memory, network, disk, battery cards, plus a Top Apps panel (Energy / Memory modes with a "Clear Cache" action).
+5. **System** — CPU, GPU, memory, network, disk, battery cards, plus a Top Apps panel (Energy / Memory modes; hover an app to quit it).
 
 Also: live activities (volume HUD, audio-device switch, battery/charging events, low-battery warning, knock feedback), hover-to-swell, click-to-expand, Reduce Motion fallback (short dissolve instead of springs).
 
@@ -222,7 +222,7 @@ The Monitor page shows a tile per resource with its recent history, the heaviest
 - **Network** — download/upload rates with history.
 - **Disk** — read/write rates, free/total space, SSD temperature.
 - **Battery** — percent, charging state, health, cycle count, power draw, temperature, Low Power Mode flag.
-- **Top Apps** — by Energy (watts/CPU%) or Memory, with a one-click **Clear Cache** (disk cache purge).
+- **Top Apps** — by Energy (watts/CPU%) or Memory; hover an app to quit it.
 - Optional CPU % next to the menu-bar icon.
 
 ---
