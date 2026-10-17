@@ -45,3 +45,20 @@ import Testing
         #expect(AppSettings(defaults: defaults).screenshotShortcut == .off)
     }
 }
+
+@Suite struct SystemShortcutPlanTests {
+    @Test func takesOnlyWhatItIsAskedToAndGivesBackOnlyWhatItTook() {
+        // Asked to take it while macOS has it: switch off, and remember we did.
+        #expect(SystemShortcutPlan.decide(wanted: true, marked: false, systemOn: true) == (.switchOff, true))
+        // Asked, but the person had switched it off themselves: leave it theirs.
+        #expect(SystemShortcutPlan.decide(wanted: true, marked: false, systemOn: false) == (.leave, false))
+        // Asked again after a relaunch: still ours.
+        #expect(SystemShortcutPlan.decide(wanted: true, marked: true, systemOn: false) == (.leave, true))
+        // Not wanted any more (another choice, quit, extra off, after a crash): give it back.
+        #expect(SystemShortcutPlan.decide(wanted: false, marked: true, systemOn: false) == (.switchOn, false))
+        // Someone already turned it back on: nothing to do, forget the marker.
+        #expect(SystemShortcutPlan.decide(wanted: false, marked: true, systemOn: true) == (.leave, false))
+        // Never ours: never touched.
+        #expect(SystemShortcutPlan.decide(wanted: false, marked: false, systemOn: false) == (.leave, false))
+    }
+}

@@ -89,8 +89,10 @@ final class ScreenshotShortcutController {
             return
         }
         let current = hotKeys()
-        guard SymbolicHotKeys.isEnabled(SymbolicHotKeys.screenshotOptions, in: current) else { return }
-        UserDefaults.standard.set(true, forKey: Self.marker)
+        let decision = SystemShortcutPlan.decide(wanted: true, marked: UserDefaults.standard.bool(forKey: Self.marker),
+                                                 systemOn: SymbolicHotKeys.isEnabled(SymbolicHotKeys.screenshotOptions, in: current))
+        UserDefaults.standard.set(decision.marked, forKey: Self.marker)
+        guard decision.plan == .switchOff else { return }
         write(SymbolicHotKeys.setting(SymbolicHotKeys.screenshotOptions, enabled: false, in: current,
                                       defaultEntry: SymbolicHotKeys.screenshotOptionsEntry))
         // Read back: if macOS kept the shortcut on, the format changed under us.
@@ -103,10 +105,13 @@ final class ScreenshotShortcutController {
     }
 
     func restoreSystemShortcut() {
-        guard UserDefaults.standard.bool(forKey: Self.marker) else { return }
-        UserDefaults.standard.removeObject(forKey: Self.marker)
+        let marked = UserDefaults.standard.bool(forKey: Self.marker)
+        guard marked else { return }
         let current = hotKeys()
-        guard !SymbolicHotKeys.isEnabled(SymbolicHotKeys.screenshotOptions, in: current) else { return }
+        let decision = SystemShortcutPlan.decide(wanted: false, marked: marked,
+                                                 systemOn: SymbolicHotKeys.isEnabled(SymbolicHotKeys.screenshotOptions, in: current))
+        if !decision.marked { UserDefaults.standard.removeObject(forKey: Self.marker) }
+        guard decision.plan == .switchOn else { return }
         write(SymbolicHotKeys.setting(SymbolicHotKeys.screenshotOptions, enabled: true, in: current,
                                       defaultEntry: SymbolicHotKeys.screenshotOptionsEntry))
     }

@@ -61,3 +61,26 @@ public enum SymbolicHotKeys {
         ]
     }
 }
+
+/// Whether to switch macOS's ⌘⇧5 off, back on, or leave it, and whether All
+/// Set then owns the change (the marker that lets it put it back after a
+/// crash, and never touch a shortcut the person switched off themselves).
+public enum SystemShortcutPlan: Equatable, Sendable {
+    case leave
+    case switchOff
+    case switchOn
+
+    /// - `wanted`: All Set wants ⌘⇧5 now (the chosen shortcut takes it and the extra is on).
+    /// - `marked`: All Set switched it off earlier and hasn't put it back.
+    /// - `systemOn`: macOS's shortcut is on right now.
+    /// Returns what to do and whether the marker is set afterwards.
+    public static func decide(wanted: Bool, marked: Bool, systemOn: Bool) -> (plan: SystemShortcutPlan, marked: Bool) {
+        if wanted {
+            // Already off: if we did it, keep owning it; if the person did, leave it theirs.
+            return systemOn ? (.switchOff, true) : (.leave, marked)
+        }
+        // Not wanted: give back only what we took.
+        guard marked else { return (.leave, false) }
+        return (systemOn ? .leave : .switchOn, false)
+    }
+}

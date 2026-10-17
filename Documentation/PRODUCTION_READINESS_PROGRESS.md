@@ -6,7 +6,7 @@ Owner's choices for this run (2026-10-17): snapshot first; remove Lid Plane and 
 
 On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.md`, this file; resume at the first `[ ]`.
 
-**Current phase:** 8
+**Current phase:** 9
 
 ## Baseline (2026-10-17, before any change)
 | Check | Result |
@@ -73,7 +73,7 @@ On a context reset: re-read the mission prompt (in the conversation), `HANDOFF.m
 - [x] T8.4 (file ops; ~197 other try? not individually reviewed) try? audit
 - [x] T8.5 (TSan run blocked) Concurrency
 - [x] T8.6 Localization scaffolding
-- [ ] T8.7 Dead code
+- [x] T8.7 Dead code
 
 ### Phase 9: testing
 - [ ] T9.1 Logic into AllSetCore
