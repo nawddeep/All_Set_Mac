@@ -9,8 +9,12 @@ import OSLog
 /// accepted a key (`AccessGate`). Until then the key window is all there is:
 /// no main window, menu bar item, wallpaper, widgets, island or downloads.
 ///
-/// `ALLSET_ACCESS_GATE=0` (in the environment, or given to build-app.sh,
-/// which writes `AllSetAccessGate` into Info.plist) skips it while the
+/// The owner's Mac skips it with a setting kept on that Mac only, never in
+/// the app, so a copy sent to anyone still asks:
+///
+///     defaults write com.pratik.allset accessGateOff -bool YES
+///
+/// `ALLSET_ACCESS_GATE=0` in the process's environment skips it too, while the
 /// server's side isn't live. A debug build without a built-in library has
 /// nothing to check a key against and skips it too.
 @Observable @MainActor
@@ -45,7 +49,7 @@ final class AccessController {
 
     static var isSwitchedOff: Bool {
         if ProcessInfo.processInfo.environment["ALLSET_ACCESS_GATE"] == "0" { return true }
-        if (Bundle.main.object(forInfoDictionaryKey: "AllSetAccessGate") as? Bool) == false { return true }
+        if UserDefaults.standard.bool(forKey: "accessGateOff") { return true }
         #if DEBUG
         if publicLibrary == nil { return true }
         #endif

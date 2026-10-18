@@ -219,7 +219,7 @@ How the app behaves:
 - Launch with a saved token: `/api/me`. A 401 re-activates quietly with the saved key; only a 401 to that locks the app (Keychain cleared, key screen). No answer: a token whose `expiresAt` hasn't passed unlocks in offline mode, checked again when the network returns and every 5 minutes.
 - A 401 from a library file renews the token the same way, at most once a minute. If the key turns out revoked while the app runs, it restarts at the key screen.
 - The key and the token live in the Keychain (service `com.pratik.allset.access`), never in UserDefaults or `wallpaper.json`. Settings › General › Access › "Remove access key" clears both and restarts at the key screen.
-- `ALLSET_ACCESS_GATE=0` skips the gate: in the environment of the process, or given to `scripts/build-app.sh` (writes `AllSetAccessGate = false` into Info.plist; the script prints a warning). Never send a copy built that way to anyone. A debug build without a built-in library skips it too, so tests, probes and CI are unchanged.
+- Every build has the gate. The owner's Mac skips it with `defaults write com.pratik.allset accessGateOff -bool YES` (kept on that Mac, not in the app, so any copy sent to someone still asks; `defaults delete com.pratik.allset accessGateOff` brings it back). `ALLSET_ACCESS_GATE=0` in the process's environment also skips it. A debug build without a built-in library skips it too, so tests, probes and CI are unchanged. Once library files need a token, a Mac that skips the gate has none: enter a key there too.
 - The private-server command `AllSet library <key>` still runs without the gate (it never opens the app).
 
 Checking a key against the live server once it's up, with the gated app:
