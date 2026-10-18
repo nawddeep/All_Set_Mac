@@ -55,8 +55,11 @@ def check(lines, budgets, measured=None):
         elif match := PAGE.match(line):
             seen.add("page")
             measured.append(f"page {match['name']}: {match['cpu']}% CPU idle")
-            if over(float(match["cpu"]), budgets, "page_cpu_percent"):
-                problems.append(f"page {match['name']}: {match['cpu']}% CPU idle > {budgets['page_cpu_percent']}%")
+            # A page may have its own ceiling (`page_cpu_percent_by_page`): on the GPU-less runner the
+            # Themes page draws its soft light in software, which the Mac does in 1%.
+            ceiling = budgets.get("page_cpu_percent_by_page", {}).get(match["name"].strip(), budgets.get("page_cpu_percent"))
+            if ceiling is not None and float(match["cpu"]) > ceiling:
+                problems.append(f"page {match['name']}: {match['cpu']}% CPU idle > {ceiling}%")
     for kind in budgets.get("required", []):
         if kind not in seen:
             problems.append(f"no {kind} measurements in the probe output")

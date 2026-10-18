@@ -1,10 +1,11 @@
 {
   "_note": "Ceilings for the CI probe (.github/workflows/ci.yml, job probe), which runs the optimised build (-c release -Xswiftc -DDEBUG). Set on 2026-10-18 from the numbers measured on the owner's M4 MacBook Air plus 25%, then re-based where the first CI run (39065198556) read higher: longest scroll frame 993 ms on the cold first pass (no GPU) -> 1250, idle seconds clock 0.77% -> 1.0 (the product target) (Documentation/PRODUCTION_READINESS_PROGRESS.md, 'Phase 7 measurements'). GitHub's macOS VMs have no GPU and draw in software, so CI may read higher than the Mac: if a first CI run fails only on these, raise each to its CI value + 25% and say so in Documentation/DECISIONS.md. A null ceiling isn't checked.",
   "page_cpu_percent": 2.75,
+  "page_cpu_percent_by_page": {"themes": 32},
   "scroll_cpu_percent": 128,
   "scroll_max_frame_ms": 1250,
   "scroll_hitches": null,
-  "gallery_part_worst_ms": 91,
+  "gallery_part_worst_ms": 130,
   "idle_widget_cpu_percent": 1.0,
   "required": [
     "page",
@@ -12,5 +13,6 @@
     "gallery part",
     "idle"
   ],
+  "_rebase_2026_10_18": "Run 39065855170 on the GPU-less runner read the Themes page at 25.4% idle CPU (this Mac, same build: 1.1%) and the slowest gallery widget at 102.3 ms (this Mac: 34 ms). Ceilings are the CI value plus 25%: themes 32, gallery part 130. Every other page keeps 2.75.",
   "_hitches": "scroll_hitches is null: GitHub's macOS runners have no GPU, so nearly every scroll frame there is over 33 ms (about 80 ms, see Documentation/HANDOFF.md) and the count says nothing about the app. Longest frame and CPU still count."
 }

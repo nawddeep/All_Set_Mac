@@ -66,7 +66,13 @@ jobs:
 
       - name: Test
         # Suites tagged .hardware read this Mac's own sensors; the VM has none. SwiftPM's CLI has no tag filter, so they are skipped by name.
-        run: swift test --skip "LiveSystemTests|MediaHelperTests"
+        run: |
+          set -o pipefail
+          swift test --skip "LiveSystemTests|MediaHelperTests" 2>&1 | tee test.log || {
+            # A failing run names its failures where they can be read without the log.
+            grep -E "✘|error:" test.log | sort -u | head -30 | while read -r line; do echo "::error::$line"; done
+            exit 1
+          }
 
   smoke:
     # The app walked through end to end (-smokeTest): onboarding, every page, a

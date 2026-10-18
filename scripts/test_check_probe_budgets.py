@@ -59,6 +59,15 @@ class ProbeBudgetTests(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "probe-budgets.json")) as handle:
             self.assertEqual(probe.check(GOOD, json.load(handle)), [])
 
+    def test_a_page_with_its_own_ceiling_uses_it_and_others_keep_the_general_one(self):
+        budgets = dict(BUDGETS, page_cpu_percent=2.75, page_cpu_percent_by_page={"themes": 32})
+        # Themes at 25% passes on its own ceiling; the same reading on another page does not.
+        self.assertEqual(probe.check(["themes   25.4% CPU ( 0.8% kernel)    0 GPU frames/s"] + GOOD[1:], budgets), [])
+        problems = probe.check(["wallpaper   25.4% CPU ( 0.8% kernel)    0 GPU frames/s"] + GOOD[1:], budgets)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("2.75%", problems[0])
+        # Past its own ceiling, Themes fails too.
+        self.assertEqual(len(probe.check(["themes   40.0% CPU ( 0.8% kernel)    0 GPU frames/s"] + GOOD[1:], budgets)), 1)
 
     def test_an_idle_clock_that_costs_too_much_fails(self):
         problems = probe.check(GOOD + ["clock covered: 3.5% CPU"], BUDGETS)
