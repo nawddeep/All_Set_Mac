@@ -51,15 +51,18 @@ struct AccessKeyView: View {
 
     let controller: AccessController
     @State private var typed = ""
-    @FocusState private var isFieldFocused: Bool
+    /// The key the message is about; typing something else hides it.
+    @State private var messageKey: String?
+    /// Bumped to put the cursor in the field (when the window opens, after a refusal).
+    @State private var focusRequests = 0
 
     private var state: AccessState? { controller.gate?.state }
     private var isChecking: Bool { state == .checking }
 
     private var message: String? {
         if let problem = controller.buildProblem { return problem }
-        if case .locked(let message) = state { return message }
-        return nil
+        guard case .locked(let message) = state, messageKey == nil || messageKey == typed else { return nil }
+        return message
     }
 
     private var canContinue: Bool {
@@ -73,22 +76,23 @@ struct AccessKeyView: View {
             Text("Enter your access key to start").dsText(.body).foregroundStyle(DS.Ink.secondary)
             field
                 .padding(.top, DS.Space.xs)
+            // The same size checking or not: the spinner takes the label's place.
             Button(action: submit) {
-                HStack(spacing: DS.Space.xs) {
-                    if isChecking { ProgressView().controlSize(.small) }
-                    Text(isChecking ? "Checking\u{2026}" : "Continue")
-                }
-                .frame(minWidth: 120)
+                Text("Continue")
+                    .opacity(isChecking ? 0 : 1)
+                    .overlay { if isChecking { ProgressView().controlSize(.small) } }
+                    .frame(width: 120)
             }
             .buttonStyle(.pillProminent)
             .keyboardShortcut(.defaultAction)
             .disabled(!canContinue)
-            Text(message ?? " ")
+            // Room for two lines whether or not there's a message, so nothing moves.
+            Text(message ?? "")
                 .dsText(.meta)
                 .foregroundStyle(.red)
                 .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .opacity(message == nil ? 0 : 1)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30, alignment: .top)
                 .accessibilityHidden(message == nil)
             Spacer(minLength: 0)
             Text("Don\u{2019}t have a key? Ask the person who shared All Set with you.")
@@ -104,20 +108,17 @@ struct AccessKeyView: View {
         .task {
             // After the window has become key, or the focus doesn't take.
             try? await Task.sleep(for: .milliseconds(150))
-            isFieldFocused = true
+            focusRequests += 1
+        }
+        // Back in the field after a key is turned down, to fix it and try again.
+        .onChange(of: isChecking) { _, checking in
+            if !checking { focusRequests += 1 }
         }
     }
 
     private var field: some View {
-        TextField("ALLSET-XXXX-XXXX-XXXX", text: $typed)
-            .textFieldStyle(.plain)
-            .font(.system(size: 14, weight: .medium, design: .monospaced))
-            .foregroundStyle(DS.Ink.primary)
-            .multilineTextAlignment(.center)
-            .autocorrectionDisabled()
-            .focused($isFieldFocused)
-            .onSubmit(submit)
-            .disabled(isChecking || controller.gate == nil)
+        KeyField(text: $typed, placeholder: "ALLSET-XXXX-XXXX-XXXX", focusRequests: focusRequests,
+                 isEnabled: controller.gate != nil, onSubmit: submit)
             .padding(.horizontal, DS.Space.s)
             .frame(height: 38)
             .background(RoundedRectangle(cornerRadius: DS.Radius.control).fill(DS.Surface.raised))
@@ -127,6 +128,75 @@ struct AccessKeyView: View {
 
     private func submit() {
         guard canContinue else { return }
+        messageKey = typed
         controller.submit(typed)
+    }
+}
+
+/// The key field: AppKit's single-line field, centred both ways. SwiftUI's
+/// plain field dropped its text to another line once typing began.
+private struct KeyField: NSViewRepresentable {
+    @Binding var text: String
+    let placeholder: String
+    let focusRequests: Int
+    let isEnabled: Bool
+    let onSubmit: () -> Void
+
+    private static let font = NSFont.monospacedSystemFont(ofSize: 14, weight: .medium)
+
+    func makeNSView(context: Context) -> NSTextField {
+        let field = NSTextField()
+        field.isBordered = false
+        field.drawsBackground = false
+        field.focusRingType = .none
+        field.font = Self.font
+        field.textColor = NSColor.white.withAlphaComponent(0.95)
+        field.alignment = .center
+        field.usesSingleLineMode = true
+        field.maximumNumberOfLines = 1
+        field.lineBreakMode = .byClipping
+        field.cell?.wraps = false
+        field.cell?.isScrollable = true
+        let centred = NSMutableParagraphStyle()
+        centred.alignment = .center
+        field.placeholderAttributedString = NSAttributedString(string: placeholder, attributes: [
+            .font: Self.font,
+            .foregroundColor: NSColor.white.withAlphaComponent(0.40),
+            .paragraphStyle: centred,
+        ])
+        field.delegate = context.coordinator
+        field.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        return field
+    }
+
+    func updateNSView(_ field: NSTextField, context: Context) {
+        context.coordinator.parent = self
+        if field.stringValue != text { field.stringValue = text }
+        field.isEnabled = isEnabled
+        if context.coordinator.focusRequests != focusRequests {
+            context.coordinator.focusRequests = focusRequests
+            field.window?.makeFirstResponder(field)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(parent: self) }
+
+    @MainActor
+    final class Coordinator: NSObject, NSTextFieldDelegate {
+        var parent: KeyField
+        var focusRequests = 0
+
+        init(parent: KeyField) { self.parent = parent }
+
+        func controlTextDidChange(_ notification: Notification) {
+            guard let field = notification.object as? NSTextField else { return }
+            parent.text = field.stringValue
+        }
+
+        func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+            guard selector == #selector(NSResponder.insertNewline(_:)) else { return false }
+            parent.onSubmit()
+            return true
+        }
     }
 }
