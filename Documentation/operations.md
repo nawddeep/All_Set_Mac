@@ -203,7 +203,7 @@ The command checks the key with the server, saves it in the Keychain, writes the
 
 On a Mac with its own imported library the command only saves the key; `catalog.json` there is never replaced.
 
-## Access keys (app side built 2026-10-18; server side not live yet)
+## Access keys (app and server built 2026-10-18; library lock off until switched on)
 
 Nothing in the app starts until the public library (`AllSetPublicLibraryURL`, e.g. https://wallpapers.oddmunks.com) accepts an access key. App code: `Sources/AllSetCore/Access/` (state machine, Keychain, the one place the token is added to library requests) and `Sources/AllSet/Access/` (the gate around launch, the key window).
 
@@ -233,3 +233,20 @@ curl -s https://wallpapers.oddmunks.com/api/me -H "Authorization: Bearer <token>
 ```
 
 To start again from the key screen without the Settings button: `security delete-generic-password -s com.pratik.allset.access -a session; security delete-generic-password -s com.pratik.allset.access -a access-key`.
+
+### The server side
+
+`catalog_service.py` answers the two calls (`server.sh api`, launch agent `com.allset.public-api`, on 127.0.0.1:8083). Caddy (`Caddyfile.public`) passes it `/api/activate` and `/api/me` and no other path of it, and answers the root with an empty 200 (the app's "is the server up" check).
+
+```sh
+scripts/cloud/server.sh key create "Name"   # one key per person, printed once; only its SHA-256 hash is stored
+scripts/cloud/server.sh key list            # active or revoked, devices using it, last used
+scripts/cloud/server.sh key revoke "Name"   # that key and every device's token stop at once
+scripts/cloud/server.sh key delete "Name"   # forgotten, so the name can be given a new key
+```
+
+- A key is 12 characters from an alphabet without 0/O or 1/I/L (about 59 bits). Each activation is a new 90-day token for that device (`access_keys`, `access_tokens`: migration `0003_access_keys.sql`).
+- Ten wrong keys from one address in 15 minutes: 429 for that address. The address is Cloudflare's `CF-Connecting-IP`, which Caddy trusts only from this Mac (the tunnel's connector) and passes on as `X-Allset-Client`.
+- Once the library is locked, Caddy asks `/me` before every file. An accepted token is answered from memory for 60 s, so a gallery of thumbnails is one database check. `key revoke` and `key delete` touch `~/.allset_access_changed`, which empties that memory: a revoked key stops at once.
+- **The lock.** `ALLSET_LIBRARY_LOCK=on` in the server folder's `server.env`, then `launchctl kickstart -k gui/$(id -u)/com.allset.public-web`. Off (the default), files need no token, and a gated app still works. Any other value stops Caddy from starting, so a typo never leaves the library open by mistake.
+- Library responses are `Cache-Control: private`, so Cloudflare never keeps a copy one person fetched for someone without a key. Copies it kept from before (when they were `public`) stay until they expire: purge Cloudflare's cache once when the lock goes on (dashboard › Caching › Configuration › Purge Everything).

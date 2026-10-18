@@ -4,7 +4,9 @@
 """
 import datetime
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -105,6 +107,105 @@ class AccountFlowTests(unittest.TestCase):
         with self.assertRaises(accounts.AccountError):
             self.accounts.set_disabled("nobody@example.com", True)
         self.assertIsNone(self.accounts.who(""))
+
+
+class KeyFormatTests(unittest.TestCase):
+    def test_new_keys_are_readable_and_distinct(self):
+        first, second = accounts.new_key(), accounts.new_key()
+        self.assertRegex(first, r"^ALLSET(-[A-HJKMNP-Z2-9]{4}){3}$")
+        self.assertNotEqual(first, second)
+
+    def test_a_pasted_key_is_tidied_to_its_one_form(self):
+        key = accounts.new_key()
+        for typed in (key, key.lower(), "  " + key + "\n", key.replace("-", ""), key[len("ALLSET-"):],
+                      key.replace("-", " ")):
+            self.assertEqual(accounts.canonical_key(typed), key, msg=typed)
+        for bad in ("", None, "ALLSET-AAAA-AAAA", "ALLSET-AAAA-AAAA-AAA0", "ALLSET-AAAA-AAAA-AAAAA", "ALLSET-AAAA-AAAA-AAA'"):
+            self.assertEqual(accounts.canonical_key(bad), "", msg=bad)
+
+    def test_names_are_checked(self):
+        self.assertEqual(accounts.check_name("  AadityaSir "), "AadityaSir")
+        for bad in ("", " ", "o'brien", "-dash-first", "x" * 65):
+            with self.assertRaises(accounts.AccountError, msg=bad):
+                accounts.check_name(bad)
+
+    def test_no_key_value_is_written_into_sql(self):
+        seen = []
+        fake = accounts.AccessKeys(lambda sql, variables=None: seen.append((sql, variables)) or "[]")
+        self.assertIsNone(fake.activate("ALLSET-AAAA-BBBB-CCCC"))
+        self.assertIsNone(fake.who("token' or 1=1 --"))
+        for sql, variables in seen:
+            self.assertNotIn("or 1=1", sql)
+            self.assertNotIn("AAAA", sql)
+        self.assertTrue(all(variables for _, variables in seen))
+
+
+@unittest.skipUnless(pgtest.AVAILABLE, "needs a local Postgres")
+class AccessKeyFlowTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import catalog_service
+        cls.pg = pgtest.Postgres()
+        catalog_service.DATABASE_URL = cls.pg.url
+        catalog_service.PSQL = pgtest.PSQL
+        cls.keys = accounts.AccessKeys(catalog_service.query)
+        cls.marker = tempfile.mkdtemp(prefix="allset-access-test-")
+        cls.real_marker = accounts.ACCESS_CHANGED
+        accounts.ACCESS_CHANGED = os.path.join(cls.marker, "changed")
+
+    @classmethod
+    def tearDownClass(cls):
+        accounts.ACCESS_CHANGED = cls.real_marker
+        shutil.rmtree(cls.marker, ignore_errors=True)
+        cls.pg.stop()
+
+    def test_a_key_is_stored_only_as_a_hash_and_activates(self):
+        key = self.keys.create("navdeep")
+        stored = self.keys.run("select key_hash from access_keys where name = 'navdeep'")
+        self.assertNotIn(key, stored)
+        token, name, expires = self.keys.activate(key.lower().replace("-", " "))
+        self.assertEqual(name, "navdeep")
+        self.assertRegex(expires, r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+        self.assertEqual(self.keys.who(token), ("navdeep", expires))
+        self.assertNotIn(token, self.keys.run("select string_agg(token_hash, ',') from access_tokens"))
+        self.assertIsNone(self.keys.activate("ALLSET-AAAA-AAAA-AAAA"))
+        self.assertIsNone(self.keys.who("not-a-token"))
+        self.assertIsNone(self.keys.who(""))
+
+    def test_each_device_gets_its_own_token(self):
+        key = self.keys.create("two macs")
+        first, second = self.keys.activate(key)[0], self.keys.activate(key)[0]
+        self.assertNotEqual(first, second)
+        self.assertIsNotNone(self.keys.who(first))
+        self.assertIsNotNone(self.keys.who(second))
+        self.assertEqual([row["devices"] for row in self.keys.list() if row["name"] == "two macs"], [2])
+
+    def test_revoking_ends_the_key_and_its_tokens_and_tells_the_service(self):
+        key = self.keys.create("leaver")
+        token = self.keys.activate(key)[0]
+        before = os.path.getmtime(accounts.ACCESS_CHANGED) if os.path.exists(accounts.ACCESS_CHANGED) else None
+        self.assertEqual(self.keys.revoke("LEAVER"), "leaver")
+        self.assertNotEqual(os.path.getmtime(accounts.ACCESS_CHANGED), before)
+        self.assertIsNone(self.keys.who(token))
+        self.assertIsNone(self.keys.activate(key))
+        with self.assertRaises(accounts.AccountError):
+            self.keys.create("Leaver")  # one key per name, whatever its case, until deleted
+        self.keys.delete("leaver")
+        self.assertIsNotNone(self.keys.activate(self.keys.create("leaver")))
+
+    def test_a_token_ends_after_its_time(self):
+        token = self.keys.activate(self.keys.create("old token"))[0]
+        self.keys.run("update access_tokens set expires_at = now() - interval '1 minute' where token_hash = :'token'",
+                      {"token": accounts.token_hash(token)})
+        self.assertIsNone(self.keys.who(token))
+
+    def test_unknown_names_are_plain_errors(self):
+        with self.assertRaises(accounts.AccountError):
+            self.keys.revoke("nobody")
+        with self.assertRaises(accounts.AccountError):
+            self.keys.delete("nobody")
+        with self.assertRaises(accounts.AccountError):
+            self.keys.create("o'brien")
 
 
 if __name__ == "__main__":

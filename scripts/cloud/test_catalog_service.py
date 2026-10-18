@@ -49,6 +49,10 @@ class CatalogServiceTests(unittest.TestCase):
         cls.token = cls.accounts.change_password(session, "a-long-enough-password")
         cls.storage = tempfile.mkdtemp(prefix="allset-catalog-test-")
         catalog_service.STORAGE = cls.storage
+        cls.keys = accounts.AccessKeys(catalog_service.query)
+        catalog_service.Handler.access = cls.keys
+        cls.real_marker = accounts.ACCESS_CHANGED
+        accounts.ACCESS_CHANGED = os.path.join(cls.storage, ".access-changed")
         cls.server = ThreadingHTTPServer(("127.0.0.1", 0), catalog_service.Handler)
         cls.port = cls.server.server_address[1]
         threading.Thread(target=cls.server.serve_forever, daemon=True).start()
@@ -64,6 +68,7 @@ class CatalogServiceTests(unittest.TestCase):
         cls.server.shutdown()
         cls.server.server_close()
         cls.pg.stop()
+        accounts.ACCESS_CHANGED = cls.real_marker
         shutil.rmtree(cls.storage, ignore_errors=True)
 
     def setUp(self):
@@ -71,6 +76,8 @@ class CatalogServiceTests(unittest.TestCase):
         # These tests change rows straight in the database, not through sync_catalog,
         # so nothing touches the changed marker: start each from an empty cache.
         catalog_service.CACHE.clear()
+        catalog_service.MEMORY.clear()
+        catalog_service.Handler.failures.clear()
 
     def get(self, path, headers=None, token=None):
         connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
@@ -244,9 +251,9 @@ class CatalogServiceTests(unittest.TestCase):
         self.assertEqual(self.get("/catalog")[0], 200)
 
 
-    def post(self, path, body, token=None):
+    def post(self, path, body, token=None, headers=None):
         connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", **(headers or {})}
         if token:
             headers["Authorization"] = f"Bearer {token}"
         connection.request("POST", path, body=json.dumps(body), headers=headers)
@@ -299,6 +306,95 @@ class CatalogServiceTests(unittest.TestCase):
         self.accounts.set_disabled("gone@example.com", True)
         self.assertEqual(self.get("/catalog", token=session)[0], 401)
         self.assertIsNone(self.accounts.sign_in("gone@example.com", "a-long-enough-password"))
+
+    def test_a_key_is_exchanged_for_a_token_the_way_the_app_expects(self):
+        key = self.keys.create("app check")
+        status, body = self.post("/activate", {"key": "  " + key.lower().replace("-", " ") + " "})
+        self.assertEqual(status, 200)
+        self.assertEqual(sorted(body), ["expiresAt", "name", "token"])
+        self.assertEqual(body["name"], "app check")
+        self.assertRegex(body["expiresAt"], r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
+        held = {"name": "app check", "expiresAt": body["expiresAt"]}
+        status, _, me = self.get("/me", token=body["token"])
+        self.assertEqual((status, json.loads(me)), (200, held))
+        catalog_service.MEMORY.clear()  # the same from the database as from memory
+        self.assertEqual(json.loads(self.get("/me", token=body["token"])[2]), held)
+
+        self.assertEqual(self.post("/activate", {"key": "ALLSET-AAAA-AAAA-AAAA"}), (401, {"error": "This key isn't valid."}))
+        self.assertEqual(self.post("/activate", {"key": ""})[0], 401)
+        self.assertEqual(self.post("/activate", {})[0], 401)
+        self.assertEqual(self.post("/activate", "not an object")[0], 400)
+        self.assertEqual(self.get("/me", token="not-a-token")[0], 401)
+        self.assertEqual(self.get("/me", token="")[0], 401)
+        # A token opens the key screen's calls, not the tester API.
+        self.assertEqual(self.get("/catalog", token=body["token"])[0], 401)
+
+    def test_a_key_sent_in_chunks_is_read_the_same(self):
+        key = self.keys.create("chunked")
+        for pieces, status in (([b'{"key": "', key.encode(), b'"}'], 200), ([b'{"key": "', b"x" * 5000, b'"}'], 400)):
+            connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+            connection.request("POST", "/activate", body=iter(pieces), encode_chunked=True,
+                               headers={"Content-Type": "application/json", "Transfer-Encoding": "chunked"})
+            response = connection.getresponse()
+            self.assertEqual(response.status, status)
+            response.read()
+            connection.close()
+
+    def test_too_many_wrong_keys_from_one_address_are_refused_for_a_while(self):
+        key = self.keys.create("patient")
+        guesser = {catalog_service.CLIENT_HEADER: "203.0.113.7"}
+        for _ in range(catalog_service.LOGIN_LIMIT):
+            self.assertEqual(self.post("/activate", {"key": "ALLSET-AAAA-AAAA-AAAA"}, headers=guesser)[0], 401)
+        self.assertEqual(self.post("/activate", {"key": key}, headers=guesser),
+                         (429, {"error": "Too many attempts. Try again in a few minutes."}))
+        # Someone at another address isn't held up by it.
+        self.assertEqual(self.post("/activate", {"key": key}, headers={catalog_service.CLIENT_HEADER: "198.51.100.2"})[0], 200)
+
+    def test_a_revoked_key_stops_at_once_though_its_token_is_remembered(self):
+        key = self.keys.create("revoked soon")
+        token = self.post("/activate", {"key": key})[1]["token"]
+        self.assertEqual(self.get("/me", token=token)[0], 200)
+        self.keys.revoke("revoked soon")  # touches the marker, as `accounts.py key revoke` does
+        self.assertEqual(self.get("/me", token=token)[0], 401)
+        self.assertEqual(self.post("/activate", {"key": key})[0], 401)
+
+    def test_an_accepted_token_is_remembered_for_a_short_while(self):
+        token = self.post("/activate", {"key": self.keys.create("remembered")})[1]["token"]
+        # Gone from the database behind the service's back, no marker touched:
+        self.pg.sql(f"delete from access_tokens where token_hash = '{accounts.token_hash(token)}'")
+        self.assertEqual(self.get("/me", token=token)[0], 200, "answered from memory")
+        remembered = catalog_service.TOKEN_MEMORY
+        catalog_service.TOKEN_MEMORY = 0
+        try:
+            self.assertEqual(self.get("/me", token=token)[0], 401)
+        finally:
+            catalog_service.TOKEN_MEMORY = remembered
+
+    def test_a_burst_of_first_checks_waits_for_a_slot_instead_of_failing(self):
+        """Caddy asks /me once per file: a gallery's thumbnails arrive together."""
+        token = self.post("/activate", {"key": self.keys.create("burst")})[1]["token"]
+        catalog_service.MEMORY.clear()
+        full = catalog_service.Handler.slots
+        catalog_service.Handler.slots = threading.BoundedSemaphore(1)
+        try:
+            answers = []
+            checks = [threading.Thread(target=lambda: answers.append(self.get("/me", token=token)[0])) for _ in range(12)]
+            for check in checks:
+                check.start()
+            for check in checks:
+                check.join()
+            self.assertEqual(answers, [200] * 12)
+        finally:
+            catalog_service.Handler.slots = full
+
+    def test_me_without_the_database_is_a_503_not_a_crash(self):
+        good = catalog_service.DATABASE_URL
+        catalog_service.DATABASE_URL = f"postgres://allset@127.0.0.1:{pgtest.free_port()}/postgres"
+        try:
+            self.assertEqual(self.get("/me", token="any-token")[0], 503)
+        finally:
+            catalog_service.DATABASE_URL = good
+
 
 if __name__ == "__main__":
     unittest.main()

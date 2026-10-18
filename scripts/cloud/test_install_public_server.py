@@ -24,11 +24,12 @@ class PublicLaunchAgentTests(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.folder, ignore_errors=True)
 
-    def test_the_database_and_web_server_are_kept_running_and_the_backup_is_nightly(self):
+    def test_the_database_web_server_and_key_service_are_kept_running_and_the_backup_is_nightly(self):
         made = install_public_server.agents(SERVER, "/Users/server/allSetServer")
         self.assertEqual(sorted(made), sorted(install_public_server.LABELS))
-        for label in install_public_server.LABELS[:2]:
+        for label in ("com.allset.public-postgres", "com.allset.public-web", "com.allset.public-api"):
             self.assertTrue(made[label]["KeepAlive"] and made[label]["RunAtLoad"])
+        self.assertEqual(made["com.allset.public-api"]["ProgramArguments"][2], "api")
         nightly = made["com.allset.public-backup"]
         self.assertEqual(nightly["StartCalendarInterval"], {"Hour": 3, "Minute": 30})
         self.assertNotIn("KeepAlive", nightly)

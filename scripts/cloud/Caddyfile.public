@@ -1,16 +1,22 @@
 # The public wallpaper library: the folder publish_catalog.py builds, and
-# nothing else. No Tailscale, no key, no database: whoever has the address can
-# read catalog.json and the files it lists, and that is all this serves.
+# nothing else, plus the two calls of the app's key screen. No Tailscale, no
+# database here: catalog_service.py (`server.sh api`) answers the key calls.
+# Until the library is locked, whoever has the address can read catalog.json
+# and the files it lists; once it is, each file needs an access key's token.
 #
-# Three settings, from the environment:
-#   ALLSET_PUBLIC_DIR   the public folder (required)
-#   ALLSET_PUBLIC_BIND  the interface to listen on. Default 127.0.0.1: only
-#                       programs on this Mac (a tunnel's connector included)
-#                       can connect. 0.0.0.0 when the router forwards to it.
-#   ALLSET_PUBLIC_SITE  the address. Default http://127.0.0.1:8090, this Mac
-#                       only. On the real server it is the public name, e.g.
-#                       library.example.com, and Caddy gets its HTTPS
-#                       certificate by itself.
+# Settings, from the environment (server.sh reads them from server.env):
+#   ALLSET_PUBLIC_DIR    the public folder (required)
+#   ALLSET_PUBLIC_BIND   the interface to listen on. Default 127.0.0.1: only
+#                        programs on this Mac (a tunnel's connector included)
+#                        can connect. 0.0.0.0 when the router forwards to it.
+#   ALLSET_PUBLIC_SITE   the address. Default http://127.0.0.1:8090, this Mac
+#                        only. On the real server it is the public name, e.g.
+#                        library.example.com, and Caddy gets its HTTPS
+#                        certificate by itself.
+#   ALLSET_LIBRARY_LOCK  on: every library file needs `Authorization: Bearer
+#                        <token>` from /api/activate, checked with /api/me.
+#                        off (the default): no key needed.
+#   ALLSET_API_PORT      where catalog_service.py listens (`server.sh api`), default 8083
 #
 #   scripts/cloud/server.sh serve          # this Mac only
 #   caddy validate --config scripts/cloud/Caddyfile.public --adapter caddyfile
@@ -27,30 +33,70 @@
 			read_header 10s
 			idle 2m
 		}
+		# Behind the tunnel every request comes from cloudflared on this Mac, and
+		# the visitor's own address is in Cloudflare's CF-Connecting-IP. Trusted
+		# only from here: anyone else's header is ignored.
+		trusted_proxies static 127.0.0.1/32 ::1/128
+		client_ip_headers CF-Connecting-IP
 	}
+}
+
+# The lock: Caddy asks catalog_service.py whose the request's token is before
+# it serves a file. A 2xx serves it; a 401 goes back to the app as it is.
+(lock-on) {
+	forward_auth 127.0.0.1:{$ALLSET_API_PORT:8083} {
+		uri /me
+	}
+}
+(lock-off) {
 }
 
 {$ALLSET_PUBLIC_SITE:http://127.0.0.1:8090} {
 	bind {$ALLSET_PUBLIC_BIND:127.0.0.1}
-	root * {$ALLSET_PUBLIC_DIR}
-
-	# Read-only.
-	@write not method GET HEAD
-	respond @write 405
-
-	# Dot files, and a file publish_catalog.py is still putting in place.
-	@hidden path_regexp (^|/)\.|\.publishing$
-	respond @hidden 404
-
-	# The list changes when a publish changes it: checked again after a minute.
-	# A wallpaper's file can be re-rendered under the same name: a day.
-	@catalog path /catalog.json
-	header @catalog Cache-Control "public, max-age=60"
-	@files not path /catalog.json
-	header @files Cache-Control "public, max-age=86400"
 	header X-Content-Type-Options nosniff
-
 	encode zstd gzip
-	# No folder listings: a folder's address answers 404.
-	file_server
+
+	# The app's key screen: a key for a token, and whether a token still holds.
+	# Nothing else of catalog_service.py is reachable from here.
+	handle /api/* {
+		@gate path /api/activate /api/me
+		handle @gate {
+			uri strip_prefix /api
+			reverse_proxy 127.0.0.1:{$ALLSET_API_PORT:8083} {
+				# Its rate limit counts per visitor; set here, so a visitor can't pick it.
+				header_up X-Allset-Client {client_ip}
+			}
+		}
+		respond 404
+	}
+
+	# The app asks the root whether the server is up: no key needed, nothing in it.
+	handle / {
+		respond 200
+	}
+
+	handle {
+		root * {$ALLSET_PUBLIC_DIR}
+		import lock-{$ALLSET_LIBRARY_LOCK:off}
+
+		# Read-only.
+		@write not method GET HEAD
+		respond @write 405
+
+		# Dot files, and a file publish_catalog.py is still putting in place.
+		@hidden path_regexp (^|/)\.|\.publishing$
+		respond @hidden 404
+
+		# The list changes when a publish changes it: checked again after a minute.
+		# A wallpaper's file can be re-rendered under the same name: a day. Private,
+		# so a shared cache (Cloudflare) never hands one person's copy to someone
+		# without a key; the app's own cache still keeps it.
+		@catalog path /catalog.json
+		header @catalog Cache-Control "private, max-age=60"
+		@files not path /catalog.json
+		header @files Cache-Control "private, max-age=86400"
+
+		# No folder listings: a folder's address answers 404.
+		file_server
+	}
 }

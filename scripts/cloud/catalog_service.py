@@ -8,11 +8,17 @@
   GET /file/<id>   -> that wallpaper's playback file. Supports `Range: bytes=`
                       so an interrupted download can resume.
 
+  POST /activate   -> body {"key": "ALLSET-XXXX-XXXX-XXXX"} from the app's key screen
+                      (accounts.py key create); returns {"token", "name", "expiresAt"}.
+                      A wrong or revoked key: 401 {"error": "This key isn't valid."};
+                      too many from one address: 429.
   POST /login      -> body {"email", "password"}; returns {"token", "must_change"}
                       for an invited person (accounts.py). Wrong details: 401.
-  GET /me          -> {"email"} for the signed-in person: 200 when the session is good,
-                      401 when it isn't, 403 while a temporary password is still in use.
-                      Caddy asks this before serving any wallpaper file (see Caddyfile.example).
+  GET /me          -> 200 {"name", "expiresAt"} for an access key's token, {"email",
+                      "name", "must_change"} for a session or the API key; 401 when the
+                      token is no good, 403 while a temporary password is still in use.
+                      Caddy asks this before serving any wallpaper file (Caddyfile.public
+                      once the library is locked, Caddyfile.example on the old home server).
   POST /password   -> body {"password"}; sets a new password (required at first
                       sign-in when must_change is true). Returns a new token.
   POST /logout     -> ends this session.
@@ -35,10 +41,13 @@ The same rule applies to /catalog and /file.
 
 Listens on this machine's Tailscale address only (100.64.0.0/10), found at
 startup; it refuses to start without one unless --host says where to listen.
-Never forward the port to the internet.
+Never forward the port to the internet. On the single-Mac server it is
+`server.sh api`: 127.0.0.1:8083, with Caddy (Caddyfile.public) passing it
+/api/activate and /api/me and nothing else.
 
 Usage (on the server):
     /usr/bin/python3 scripts/cloud/catalog_service.py [--port 8082] [--host ADDRESS] [--include-quarantined]
+    DATABASE_URL in the environment says which database (default: the home server's).
 Tests:
     /usr/bin/python3 -m unittest scripts/cloud/test_catalog_service.py
 """
@@ -66,9 +75,22 @@ from accounts import AccountError  # noqa: E402
 MAX_PAGE = 500
 MAX_CONCURRENT = 8
 MAX_BODY = 4096
-# Wrong passwords for one email: LOGIN_LIMIT in LOGIN_WINDOW seconds, then a wait.
+# Wrong passwords for one email, or wrong keys from one address: LOGIN_LIMIT
+# in LOGIN_WINDOW seconds, then a wait.
 LOGIN_LIMIT = 10
 LOGIN_WINDOW = 15 * 60
+# Past this many emails and addresses with failures, the old ones are dropped.
+MAX_FAILURE_KEYS = 10_000
+# An access token /me accepted is trusted from memory this long (TokenMemory).
+TOKEN_MEMORY = 60
+MAX_REMEMBERED = 10_000
+# How long a /me check waits for a slot before it's told to come back.
+SLOT_WAIT = 10
+# Set by Caddy (Caddyfile.public) to the visitor's address, Cloudflare's
+# CF-Connecting-IP behind the tunnel; it replaces any the visitor sends.
+CLIENT_HEADER = "X-Allset-Client"
+INVALID_KEY = "This key isn't valid."
+TOO_MANY_KEYS = "Too many attempts. Try again in a few minutes."
 
 STORAGE = os.path.expanduser("~/AllSetStorage/wallpapers")
 KEY_PATH = os.path.expanduser("~/.allset_catalog_token")
@@ -77,7 +99,8 @@ KEY_HOLDER = "api-key"
 # The one library folder a receiving Mac's catalog names.
 LIBRARY_ROOT = "server"
 PSQL = "/opt/homebrew/bin/psql" if os.path.exists("/opt/homebrew/bin/psql") else "psql"
-DATABASE_URL = "postgres://allset@localhost/allset"
+# server.sh sets DATABASE_URL to the single-Mac server's own Postgres (port 5433).
+DATABASE_URL = os.environ.get("DATABASE_URL") or "postgres://allset@localhost/allset"
 COLUMNS = "id, title, kind, category, tags, duration, width, height, size_bytes"
 ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 DATABASE_TIMEOUT = 20
@@ -159,6 +182,61 @@ class CatalogCache:
 CACHE = CatalogCache()
 
 
+class TokenMemory:
+    """Access tokens /me accepted in the last TOKEN_MEMORY seconds, by hash.
+    Caddy asks /me before every library file once the library is locked, so a
+    gallery of thumbnails costs one database check, not one each. Revoking or
+    deleting a key touches accounts.ACCESS_CHANGED, and everything remembered
+    is forgotten at the next request: a revoked key stops at once."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.entries = {}
+        self.seen = None
+
+    @staticmethod
+    def stamp():
+        try:
+            return os.path.getmtime(accounts.ACCESS_CHANGED)
+        except OSError:
+            return 0
+
+    def _current(self, stamp):
+        if stamp != self.seen:
+            self.entries.clear()
+            self.seen = stamp
+
+    def get(self, token, now=None):
+        if not token:
+            return None
+        now = time.monotonic() if now is None else now
+        stamp = self.stamp()
+        with self.lock:
+            self._current(stamp)
+            entry = self.entries.get(accounts.token_hash(token))
+            return entry[1] if entry and now - entry[0] < TOKEN_MEMORY else None
+
+    def keep(self, token, answer, since, now=None):
+        """Remembers an answer looked up while the marker read `since`; not when
+        a key was revoked meanwhile, or the answer could outlive the key."""
+        now = time.monotonic() if now is None else now
+        stamp = self.stamp()
+        with self.lock:
+            if stamp != since:
+                return
+            self._current(stamp)
+            if len(self.entries) >= MAX_REMEMBERED:
+                self.entries.clear()
+            self.entries[accounts.token_hash(token)] = (now, answer)
+
+    def clear(self):
+        with self.lock:
+            self.entries.clear()
+
+
+MEMORY = TokenMemory()
+
+
 def parse_range(header, size):
     """(start, end) inclusive for a single `bytes=` range, None for none/unsupported,
     or "invalid" for one that can't be satisfied."""
@@ -208,13 +286,15 @@ class Handler(BaseHTTPRequestHandler):
     include_quarantined = False
     timeout = 30  # seconds a client may stall sending its request
     accounts = None  # accounts.Accounts, set in main()
+    access = None  # accounts.AccessKeys, set in main()
     key = ""  # the permanent API key, set in main()
 
     # Requests served at once, across every connection.
     slots = threading.BoundedSemaphore(MAX_CONCURRENT)
 
-    # Failed sign-ins per email, in the last LOGIN_WINDOW seconds: the same
-    # answer to a wrong password, and a wait once there are too many.
+    # Failed sign-ins per email, and failed keys per ("activate", address), in
+    # the last LOGIN_WINDOW seconds: the same answer to a wrong password or
+    # key, and a wait once there are too many.
     failures = {}
     failures_lock = threading.Lock()
 
@@ -228,29 +308,58 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _bearer(self):
+        header = self.headers.get("Authorization", "")
+        return header[len("Bearer "):] if header.startswith("Bearer ") else ""
+
     def _session(self):
         """(email, must_change) for the bearer token, or None."""
-        header = self.headers.get("Authorization", "")
-        token = header[len("Bearer "):] if header.startswith("Bearer ") else ""
+        token = self._bearer()
         if self.key and hmac.compare_digest(token.encode(), self.key.encode()):
             return KEY_HOLDER, False
         return self.accounts.who(token)
 
     def _body(self):
-        """The JSON object sent with a POST, or None if it isn't one."""
-        try:
-            length = int(self.headers.get("Content-Length", "0"))
-        except ValueError:
+        """The JSON object sent with a POST, or None if it isn't one. A chunked
+        body too: a proxy on the way may forward it like that."""
+        if self.headers.get("Transfer-Encoding", "").strip().lower() == "chunked":
+            raw = self._chunked()
+        else:
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                return None
+            raw = self.rfile.read(length) if 0 < length <= MAX_BODY else None
+        if not raw:
             return None
-        if not 0 < length <= MAX_BODY:
-            return None
         try:
-            data = json.loads(self.rfile.read(length))
+            data = json.loads(raw)
         except ValueError:
             return None
         return data if isinstance(data, dict) else None
 
+    def _chunked(self):
+        """A chunked request body, or None when it's malformed or over MAX_BODY."""
+        raw = b""
+        while True:
+            try:
+                size = int(self.rfile.readline(64).split(b";")[0].strip(), 16)
+            except ValueError:
+                return None
+            if size == 0:
+                break
+            if len(raw) + size > MAX_BODY:
+                return None
+            raw += self.rfile.read(size)
+            self.rfile.readline(8)  # the line end after each chunk
+        for _ in range(32):  # trailers, up to the blank line
+            if not self.rfile.readline(1024).strip():
+                break
+        return raw
+
     def do_GET(self):
+        if urllib.parse.urlsplit(self.path).path == "/me":
+            return self._me()
         self._serve(self._route_get)
 
     def do_POST(self):
@@ -272,14 +381,51 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             self.slots.release()
 
-    def _route_get(self, url):
-        if url.path == "/me":
-            who = self._session()
-            if not who:
+    def _me(self):
+        """Whose the bearer token is. Caddy asks this before every library file
+        once the library is locked, so an access token it accepted is answered
+        from memory (TokenMemory), and a burst of first checks waits for a slot
+        instead of being turned away."""
+        try:
+            token = self._bearer()
+            answer = MEMORY.get(token)
+            if answer is None:
+                if not self.slots.acquire(timeout=SLOT_WAIT):
+                    return self._json(503, {"error": "busy; try again shortly"}, {"Retry-After": "1"})
+                try:
+                    answer = MEMORY.get(token) or self._look_up(token)
+                finally:
+                    self.slots.release()
+            if not answer:
                 return self._json(401, {"error": "sign in"})
-            if who[1]:
+            if answer.get("must_change"):
                 return self._json(403, {"error": "set a new password first"})
-            return self._json(200, {"email": who[0], "must_change": False})
+            self._json(200, answer)
+        except DatabaseError as error:
+            print(f"/me: database error: {error}", file=sys.stderr)
+            self._json(503, {"error": "catalog database unavailable"})
+        except (BrokenPipeError, ConnectionResetError):
+            return
+
+    def _look_up(self, token):
+        """/me's answer for a token, from the API key or the database, or None.
+        Only access tokens are remembered: a disabled account loses access at once."""
+        if not token:
+            return None
+        if self.key and hmac.compare_digest(token.encode(), self.key.encode()):
+            return {"email": KEY_HOLDER, "name": KEY_HOLDER, "must_change": False}
+        since = MEMORY.stamp()
+        held = self.access.who(token) if self.access else None
+        if held:
+            answer = {"name": held[0], "expiresAt": held[1]}
+            MEMORY.keep(token, answer, since)
+            return answer
+        session = self.accounts.who(token)
+        if session:
+            return {"email": session[0], "name": session[0], "must_change": session[1]}
+        return None
+
+    def _route_get(self, url):
         if url.path not in ("/catalog", "/library") and not url.path.startswith("/file/"):
             return self._json(404, {"error": "not found"})
         who = self._session()
@@ -294,6 +440,8 @@ class Handler(BaseHTTPRequestHandler):
         return self._file(url.path[len("/file/"):])
 
     def _route_post(self, url):
+        if url.path == "/activate":
+            return self._activate()
         if url.path == "/login":
             return self._login()
         if url.path == "/logout":
@@ -317,6 +465,24 @@ class Handler(BaseHTTPRequestHandler):
         token, must_change = result
         self._json(200, {"token": token, "must_change": must_change})
 
+    def _activate(self):
+        """The app's key screen: a key (accounts.AccessKeys) for a token."""
+        body = self._body()
+        if body is None:
+            return self._json(400, {"error": "Send {\"key\": \"ALLSET-XXXX-XXXX-XXXX\"}."})
+        client = ("activate", self.headers.get(CLIENT_HEADER) or self.client_address[0])
+        if self._too_many_failures(client):
+            return self._json(429, {"error": TOO_MANY_KEYS}, {"Retry-After": "600"})
+        since = MEMORY.stamp()
+        granted = self.access.activate(str(body.get("key", "")))
+        if not granted:
+            self._record_failure(client)
+            return self._json(401, {"error": INVALID_KEY})
+        token, name, expires = granted
+        answer = {"name": name, "expiresAt": expires}
+        MEMORY.keep(token, answer, since)
+        self._json(200, {"token": token, **answer})
+
     def _set_password(self):
         body = self._body()
         token = self.headers.get("Authorization", "")[len("Bearer "):]
@@ -338,6 +504,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def _record_failure(self, email):
         with self.failures_lock:
+            if len(self.failures) >= MAX_FAILURE_KEYS:
+                cutoff = time.time() - LOGIN_WINDOW
+                for stale in [name for name, times in self.failures.items() if not any(t > cutoff for t in times)]:
+                    del self.failures[stale]
             self.failures.setdefault(email, []).append(time.time())
 
     def _catalog(self, parameters):
@@ -447,6 +617,7 @@ def main():
     if not host:
         sys.exit("No Tailscale address found on this machine. Start Tailscale, or pass --host to choose where to listen.")
     Handler.accounts = accounts.Accounts(query)
+    Handler.access = accounts.AccessKeys(query)
     Handler.key = load_key()
     Handler.include_quarantined = args.include_quarantined
     shared = "published + quarantined (your own tester only)" if args.include_quarantined else "published only"

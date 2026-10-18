@@ -13,7 +13,10 @@
 #   scripts/cloud/server.sh publish [--dry-run]     # build public/ (publish_catalog.py)
 #   scripts/cloud/server.sh serve     # serve public/ (Caddyfile.public), until ctrl-C
 #   scripts/cloud/server.sh backup    # a backup into backups/, restored and checked (backup.py)
-#   scripts/cloud/server.sh install   # start Postgres and the web server at login, back up nightly
+#   scripts/cloud/server.sh backup-db # only the database, a small pg_dump file into backups/db/ (keeps the last 14)
+#   scripts/cloud/server.sh key create|revoke|delete|list [name]   # access keys for the app's key screen
+#   scripts/cloud/server.sh api       # the key screen's service (catalog_service.py), until ctrl-C
+#   scripts/cloud/server.sh install   # start Postgres, the web server and the key service at login, back up nightly
 #   scripts/cloud/server.sh uninstall
 #
 # The folder is $ALLSET_SERVER_DIR (default ~/Downloads/allSetServer):
@@ -23,8 +26,9 @@
 #   public/              the only folder the web server serves
 #   backups/  logs/
 #   database.env         DATABASE_URL with the generated password (chmod 600)
-#   server.env           optional: ALLSET_PUBLIC_SITE and ALLSET_PUBLIC_BIND for
-#                        the web server (Caddyfile.public says what they mean)
+#   server.env           optional: ALLSET_PUBLIC_SITE, ALLSET_PUBLIC_BIND,
+#                        ALLSET_LIBRARY_LOCK and ALLSET_API_PORT for the web
+#                        server (Caddyfile.public says what they mean)
 #
 # To move the server to another Mac: `stop` (and `uninstall`) here, copy the
 # whole folder across, install postgresql@17 and caddy there, then `start`.
@@ -114,7 +118,7 @@ start() {
 web_settings() {
     if [[ -f "$ROOT/server.env" ]]; then
         local name value
-        for name in ALLSET_PUBLIC_SITE ALLSET_PUBLIC_BIND; do
+        for name in ALLSET_PUBLIC_SITE ALLSET_PUBLIC_BIND ALLSET_LIBRARY_LOCK ALLSET_API_PORT; do
             value=$(sed -n "s/^$name=//p" "$ROOT/server.env" | tr -d '"' | head -1)
             if [[ -n "$value" ]]; then export "$name=$value"; fi
         done
@@ -166,8 +170,22 @@ case "${1:-}" in
     serve)
         command -v caddy >/dev/null || { echo "Caddy isn't installed: brew install caddy" >&2; exit 1; }
         web_settings
-        echo "Serving $ROOT/public at ${ALLSET_PUBLIC_SITE:-http://127.0.0.1:8090} (ctrl-C to stop)"
+        echo "Serving $ROOT/public at ${ALLSET_PUBLIC_SITE:-http://127.0.0.1:8090}, library lock ${ALLSET_LIBRARY_LOCK:-off} (ctrl-C to stop)"
         exec caddy run --config "$HERE/Caddyfile.public" --adapter caddyfile
+        ;;
+    api)
+        # In the foreground, for launchd (`install`). This Mac only: Caddy passes
+        # it /api/activate and /api/me, and asks /me about each file once the
+        # library is locked. Postgres needn't be up yet: until it is, it answers 503.
+        web_settings
+        DATABASE_URL="$(database_url)"
+        export DATABASE_URL
+        exec /usr/bin/python3 "$HERE/catalog_service.py" --host 127.0.0.1 --port "${ALLSET_API_PORT:-8083}"
+        ;;
+    key)
+        need_running
+        shift
+        DATABASE_URL="$(database_url)" /usr/bin/python3 "$HERE/accounts.py" key "$@"
         ;;
     postgres)
         # In the foreground, for launchd (`install`): it restarts it if it stops.
@@ -182,6 +200,19 @@ case "${1:-}" in
         # Postgres 17's own pg_dump and psql, whatever else is installed.
         ALLSET_PG_BIN="$BIN" /usr/bin/python3 "$HERE/backup.py" backup "$ROOT/backups" --drill \
             --database-url "$(database_url)" --storage "$ROOT/storage/wallpapers"
+        ;;
+    backup-db)
+        need_running
+        dest="${ALLSET_DB_BACKUP_DIR:-$ROOT/backups/db}"
+        mkdir -p "$dest"
+        stamp=$(date -u +%Y%m%dT%H%M%SZ)
+        "$BIN/pg_dump" "$(database_url)" -Fc -f "$dest/allset-$stamp.dump.partial"
+        mv "$dest/allset-$stamp.dump.partial" "$dest/allset-$stamp.dump"
+        # Proves it reads: the dump's table of contents must list the wallpapers table.
+        "$BIN/pg_restore" -l "$dest/allset-$stamp.dump" | grep -q 'TABLE DATA public wallpapers' \
+            || { echo "Backup $dest/allset-$stamp.dump doesn't list the wallpapers table." >&2; exit 1; }
+        ls -1t "$dest"/allset-*.dump | tail -n +15 | while read -r old; do rm -f "$old"; done
+        echo "Database backed up: $dest/allset-$stamp.dump ($(du -h "$dest/allset-$stamp.dump" | cut -f1))"
         ;;
     install)
         [[ -f "$DATA/PG_VERSION" ]] || { echo "No database yet: run '$0 start' first." >&2; exit 1; }
@@ -205,7 +236,7 @@ case "${1:-}" in
         /usr/bin/python3 "$HERE/install_public_server.py" --uninstall
         ;;
     *)
-        sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
+        sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
         exit 2
         ;;
 esac

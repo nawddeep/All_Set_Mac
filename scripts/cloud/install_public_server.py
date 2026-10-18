@@ -5,13 +5,15 @@ comes back if it stops. Run through the server script, which knows the folder:
     scripts/cloud/server.sh uninstall
     /usr/bin/python3 scripts/cloud/install_public_server.py --print DIR --server PATH --root DIR   # write the files; install nothing
 
-Three launch agents, each a `server.sh` command:
+Four launch agents, each a `server.sh` command:
 
   com.allset.public-postgres   `server.sh postgres`: the database, restarted whenever it exits
   com.allset.public-web        `server.sh serve`: Caddy on the public folder, the same
   com.allset.public-backup     `server.sh backup`, every night at 03:30: a backup
                                into the folder's backups/, then a restore of it
                                into scratch copies to prove it restores
+  com.allset.public-api        `server.sh api`: the key screen's service, kept running
+                               like the database
 
 Their output goes to <folder>/logs/<name>.log. No password is in these files:
 the commands read it from the folder's database.env.
@@ -29,8 +31,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from install_services import launchctl, write  # noqa: E402
 
-LABELS = ("com.allset.public-postgres", "com.allset.public-web", "com.allset.public-backup")
-COMMANDS = ("postgres", "serve", "backup")
+LABELS = ("com.allset.public-postgres", "com.allset.public-web", "com.allset.public-backup", "com.allset.public-api")
+COMMANDS = ("postgres", "serve", "backup", "api")
 
 
 def agents(server, root, backup_hour=3, backup_minute=30):
@@ -50,6 +52,7 @@ def agents(server, root, backup_hour=3, backup_minute=30):
         LABELS[0]: agent(LABELS[0], COMMANDS[0], **kept),
         LABELS[1]: agent(LABELS[1], COMMANDS[1], **kept),
         LABELS[2]: agent(LABELS[2], COMMANDS[2], StartCalendarInterval={"Hour": backup_hour, "Minute": backup_minute}),
+        LABELS[3]: agent(LABELS[3], COMMANDS[3], **kept),
     }
 
 
