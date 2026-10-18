@@ -280,7 +280,8 @@ class AccessKeys:
         return name
 
     def list(self):
-        return rows("select k.name, k.created_at, k.revoked_at, k.last_used_at, "
+        # Times as text in the server's own time zone, the way `key list` shows them.
+        return rows("select k.name, k.created_at, k.revoked_at, to_char(k.last_used_at, 'YYYY-MM-DD HH24:MI TZ') as last_used_at, "
                     "(select count(*) from access_tokens t where t.key_name = k.name and t.expires_at > now()) as devices "
                     "from access_keys k order by lower(k.name)", self.run)
 
@@ -319,8 +320,7 @@ def key_command(keys, action, name):
     if action == "list":
         for row in keys.list():
             state = "revoked" if row["revoked_at"] else "active"
-            used = (row["last_used_at"] or "never")[:16].replace("T", " ")
-            print(f"{row['name']}\t{state}\tdevices: {row['devices']}\tlast used: {used}{'' if used == 'never' else ' UTC'}")
+            print(f"{row['name']}\t{state}\tdevices: {row['devices']}\tlast used: {row['last_used_at'] or 'never'}")
         return
     if not name:
         raise AccountError(f"key {action} needs a name.")
