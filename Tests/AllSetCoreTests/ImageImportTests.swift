@@ -69,7 +69,9 @@ import UniformTypeIdentifiers
         defer { try? FileManager.default.removeItem(at: root) }
         let source = root.appendingPathComponent("source")
         try FileManager.default.createDirectory(at: source, withIntermediateDirectories: true)
-        try await writePictures(60, side: 900, in: source)
+        // Enough, and big enough, that a fast machine hasn't finished by the time the
+        // cancel lands (60 small pictures were all in on a CI runner).
+        try await writePictures(200, side: 1400, in: source)
         let images = library(root)
 
         let task = Task { await images.importImages(from: [source]) }
@@ -77,7 +79,7 @@ import UniformTypeIdentifiers
         images.cancelImports()
         let names = await task.value
 
-        #expect(!names.isEmpty && names.count < 60)
+        #expect(!names.isEmpty && names.count < 200)
         // Nothing half-written or orphaned: exactly the returned files are there.
         let onDisk = try FileManager.default.contentsOfDirectory(atPath: root.appendingPathComponent("Images").path)
         #expect(Set(onDisk) == Set(names))

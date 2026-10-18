@@ -99,7 +99,9 @@ import Testing
 
     private func settled(_ source: BatteryHealthSource, now: Date, until done: (BatteryHealthSource.Reading) -> Bool) -> BatteryHealthSource.Reading {
         var reading = source.current(now: now)
-        for _ in 0..<200 where !done(reading) {
+        // Up to 20 s: it returns the moment the answer is in, but a CI runner running
+        // suites in parallel can starve the .utility queue the answer comes from for seconds.
+        for _ in 0..<2000 where !done(reading) {
             Thread.sleep(forTimeInterval: 0.01)
             reading = source.current(now: now)
         }
@@ -121,7 +123,7 @@ import Testing
         #expect(runs.count == 1)
         // Past it: one more, and the old reading stays meanwhile.
         #expect(source.current(now: start.addingTimeInterval(4000)).maximumCapacity == 0.96)
-        for _ in 0..<200 where runs.count < 2 { Thread.sleep(forTimeInterval: 0.01) }
+        for _ in 0..<2000 where runs.count < 2 { Thread.sleep(forTimeInterval: 0.01) }
         #expect(runs.count == 2)
     }
 
