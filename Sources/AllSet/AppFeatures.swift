@@ -151,15 +151,29 @@ final class WallpaperFeature: AppFeature {
     /// (`WallpaperStore`). A Mac with a library of its own keeps it, and its
     /// wallpapers keep coming from wherever they did.
     private func startPublicLibrary(_ server: URL) {
+        // Downloads come from here unless this Mac saved a server of its own;
+        // the retired Tailscale address is replaced, whatever library this Mac keeps.
+        let address = WallpaperConfig.libraryAddress(saved: store.config.libraryServerURL, publicLibrary: server)
+        if store.config.libraryServerURL != address { store.config.libraryServerURL = address }
         let sync = LibrarySync(server: server, key: nil, directory: store.libraryDirectory)
         guard !sync.hasOwnLibrary else { return }
         // The library's key, if this Mac has one, belongs to another server:
-        // nothing sent to this one carries it.
+        // nothing sent to this one carries it (the access token goes instead,
+        // `LibraryAuthorization`).
         store.libraryBearer = nil
         store.config.libraryServerURL = server.absoluteString
         publicLibraryUpdates = Task { [weak self] in
+            var retriedSoon = false
             while !Task.isCancelled {
-                if (try? await sync.update()) != nil { self?.store.reloadLibrary() }
+                do {
+                    if try await sync.update() != nil { self?.store.reloadLibrary() }
+                    retriedSoon = false
+                } catch LibrarySync.Failure.refused(401) where !retriedSoon {
+                    // The token was turned down and is being renewed: once soon, not in six hours.
+                    retriedSoon = true
+                    try? await Task.sleep(for: .seconds(90))
+                    continue
+                } catch {}
                 try? await Task.sleep(for: .seconds(6 * 60 * 60))
             }
         }

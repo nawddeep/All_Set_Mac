@@ -118,7 +118,8 @@ extension WallpaperStore {
         serverCheckInFlight = true
         Task {
             defer { serverCheckInFlight = false }
-            let request = libraryRequest(url, method: "HEAD", bearer: libraryBearer?())
+            // The server's root, not a library file: its answer never renews the token.
+            let request = libraryRequest(url, method: "HEAD", bearer: libraryBearer?(), authorization: libraryAuthorization)
             let reachable: Bool
             if let (_, response) = try? await fetchSession.data(for: request),
                let code = (response as? HTTPURLResponse)?.statusCode {
@@ -252,9 +253,12 @@ extension WallpaperStore {
         fetching.insert(relative)
         defer { fetches[relative] = nil; fetching.remove(relative) }
         let handle = DownloadHandle()
+        let authorization = libraryAuthorization
         try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-                let task = fetchSession.downloadTask(with: libraryRequest(remote, bearer: libraryBearer?())) { temporary, response, error in
+                let request = libraryRequest(remote, bearer: libraryBearer?(), authorization: authorization)
+                let task = fetchSession.downloadTask(with: request) { temporary, response, error in
+                    authorization.check(response)
                     // The temporary file is gone once this returns, so move it now.
                     if let error {
                         continuation.resume(throwing: error)
@@ -295,4 +299,17 @@ extension WallpaperStore {
         return destination
     }
 
+}
+
+extension WallpaperConfig {
+    /// Where wallpapers download from on a copy with a public library built in:
+    /// that library when nothing is saved, and in place of a saved address on
+    /// the retired Tailscale server (`100.x.x.x:8080`), which no longer answers.
+    /// Any other saved address (a library server of this Mac's own) stays.
+    public static func libraryAddress(saved: String?, publicLibrary: URL) -> String {
+        guard let saved = saved?.trimmingCharacters(in: .whitespacesAndNewlines), !saved.isEmpty,
+              let url = URL(string: saved), let host = url.host else { return publicLibrary.absoluteString }
+        let isRetiredTailscale = host.split(separator: ".").first == "100" && url.port == 8080
+        return isRetiredTailscale ? publicLibrary.absoluteString : saved
+    }
 }

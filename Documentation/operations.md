@@ -202,3 +202,34 @@ On that Mac, once the app is in Applications:
 The command checks the key with the server, saves it in the Keychain, writes the server's list as `Library/catalog.json`, downloads the pictures, then the wallpapers smallest first, leaving 10 GB free. `--list-only` stops after the pictures. Run again, it downloads only what is missing. The running app reads the list again as files land, and fetches any wallpaper that isn't there when it is picked.
 
 On a Mac with its own imported library the command only saves the key; `catalog.json` there is never replaced.
+
+## Access keys (app side built 2026-10-18; server side not live yet)
+
+Nothing in the app starts until the public library (`AllSetPublicLibraryURL`, e.g. https://wallpapers.oddmunks.com) accepts an access key. App code: `Sources/AllSetCore/Access/` (state machine, Keychain, the one place the token is added to library requests) and `Sources/AllSet/Access/` (the gate around launch, the key window).
+
+The contract the server implements:
+
+| Request | Answers |
+|---|---|
+| `POST /api/activate` `{"key": "ALLSET-XXXX-XXXX-XXXX"}` (the app strips spaces and uppercases) | 200 `{"token", "name", "expiresAt"}` (ISO 8601); 401 `{"error": "This key isn't valid."}`; 429 `{"error": "Too many attempts. Try again in a few minutes."}` |
+| `GET /api/me` with `Authorization: Bearer <token>` | 200 `{"name", "expiresAt"}`; 401 when the token expired or its key was revoked |
+| Every library file (`catalog.json`, `live/`, `stills/`, `thumbnails/`) | needs `Authorization: Bearer <token>`; 401 without it or with a bad one |
+
+How the app behaves:
+- Launch with a saved token: `/api/me`. A 401 re-activates quietly with the saved key; only a 401 to that locks the app (Keychain cleared, key screen). No answer: a token whose `expiresAt` hasn't passed unlocks in offline mode, checked again when the network returns and every 5 minutes.
+- A 401 from a library file renews the token the same way, at most once a minute. If the key turns out revoked while the app runs, it restarts at the key screen.
+- The key and the token live in the Keychain (service `com.pratik.allset.access`), never in UserDefaults or `wallpaper.json`. Settings › General › Access › "Remove access key" clears both and restarts at the key screen.
+- `ALLSET_ACCESS_GATE=0` skips the gate: in the environment of the process, or given to `scripts/build-app.sh` (writes `AllSetAccessGate = false` into Info.plist; the script prints a warning). Never send a copy built that way to anyone. A debug build without a built-in library skips it too, so tests, probes and CI are unchanged.
+- The private-server command `AllSet library <key>` still runs without the gate (it never opens the app).
+
+Checking a key against the live server once it's up, with the gated app:
+
+```sh
+ALLSET_PUBLIC_LIBRARY_URL=https://wallpapers.oddmunks.com ./scripts/build-app.sh
+osascript -e 'tell application id "com.pratik.allset" to quit'; open build/AllSet.app
+# or from Terminal, without the app:
+curl -s -X POST https://wallpapers.oddmunks.com/api/activate -H 'Content-Type: application/json' -d '{"key":"ALLSET-…"}'
+curl -s https://wallpapers.oddmunks.com/api/me -H "Authorization: Bearer <token>"
+```
+
+To start again from the key screen without the Settings button: `security delete-generic-password -s com.pratik.allset.access -a session; security delete-generic-password -s com.pratik.allset.access -a access-key`.

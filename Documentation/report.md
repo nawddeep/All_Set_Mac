@@ -5,6 +5,9 @@ log; it never needs reading in full.
 
 ---
 
+### 2026-10-18 — access key gate (branch feat/access-gate, not pushed)
+Nothing starts until https://wallpapers.oddmunks.com accepts an access key (`api/activate`, `api/me`); token on every library request from one place (`LibraryAuthorization`); Keychain only; offline mode while the token is valid; Settings › General › Access › Remove access key. Fresh installs and the dead `100.x.x.x:8080` address now download from the public library. Server side not live yet (`/api/me` 404, `/api/activate` 405 on 2026-10-18), so the Dock app is built with `ALLSET_ACCESS_GATE=0`. 490 tests, 0 warnings. Details: `Reports/2026-10-18-access-gate.md`, `operations.md` "Access keys".
+
 ### 2026-10-18 — production-readiness run (branch fix/production-readiness, not pushed)
 The October review's 37 findings addressed in 45 local commits: Lid Plane (GPL), Wallhaven, knock shell commands and the purge button gone; themes name no real person or club; 36 built-in wallpapers; Extras off by default for new installs; honest privacy with a generated network list; onboarding, permission rows, restore-macOS and uninstall; hardened runtime, notarization script, Sparkle (off until keyed), local diagnostics; server SQL never interpolated; Capabilities with kill switches; AppServices split; widget kinds one file each; no file over 600 lines; smoke test in CI. 469 Swift tests, 117 server, smoke 44/44, 0 warnings, clean clone builds and tests. Open: scroll CPU far above the 20% target, TSan blocked on this Mac, the restructure (stale plan), everything needing an Apple Developer ID. Full table: `PRODUCTION_READINESS_REPORT.md`.
 

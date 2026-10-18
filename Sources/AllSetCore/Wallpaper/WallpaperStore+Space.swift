@@ -73,6 +73,7 @@ extension WallpaperStore {
         let session = fetchSession
         let directory = libraryDirectory
         let bearer = libraryBearer?()
+        let authorization = libraryAuthorization
         offloadProgress = (0, candidates.count)
         defer { offloadProgress = nil }
         var confirmed: [OffloadCandidate] = []
@@ -82,13 +83,15 @@ extension WallpaperStore {
             var pending = candidates.makeIterator()
             for _ in 0..<8 {
                 guard let next = pending.next() else { break }
-                group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory, bearer: bearer)) }
+                group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory,
+                                                           bearer: bearer, authorization: authorization)) }
             }
             while let (candidate, held) = await group.next() {
                 if held { confirmed.append(candidate) } else { result.kept.append(candidate.relative) }
                 offloadProgress = ((offloadProgress?.done ?? 0) + 1, candidates.count)
                 if let next = pending.next() {
-                    group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory, bearer: bearer)) }
+                    group.addTask { (next, await Self.serverHolds(next, root: root, session: session, directory: directory,
+                                                           bearer: bearer, authorization: authorization)) }
                 }
             }
         }
@@ -150,14 +153,16 @@ extension WallpaperStore {
     /// Whether the server's copy of a file is the same as this Mac's: same size
     /// (a cheap HEAD first), then the same SHA-256 over its downloaded bytes.
     private nonisolated static func serverHolds(_ candidate: OffloadCandidate, root: URL, session: URLSession,
-                                                directory: URL, bearer: String?) async -> Bool {
+                                                directory: URL, bearer: String?, authorization: LibraryAuthorization) async -> Bool {
         let remote = root.appendingPathComponent(candidate.relative)
-        let head = libraryRequest(remote, method: "HEAD", bearer: bearer)
-        guard let (_, response) = try? await session.data(for: head),
+        let head = libraryRequest(remote, method: "HEAD", bearer: bearer, authorization: authorization)
+        let answer = try? await session.data(for: head)
+        authorization.check(answer?.1)
+        guard let (_, response) = answer,
               let http = response as? HTTPURLResponse, http.statusCode == 200,
               let length = http.value(forHTTPHeaderField: "Content-Length").flatMap(Int64.init),
               length == candidate.size else { return false }
-        guard let (downloaded, getResponse) = try? await session.download(for: libraryRequest(remote, bearer: bearer)) else { return false }
+        guard let (downloaded, getResponse) = try? await session.download(for: libraryRequest(remote, bearer: bearer, authorization: authorization)) else { return false }
         defer { try? FileManager.default.removeItem(at: downloaded) }  // Best effort: a cache or temporary file; failing only means doing it again.
         guard (getResponse as? HTTPURLResponse)?.statusCode == 200,
               let theirs = FileDigest.sha256(of: downloaded),

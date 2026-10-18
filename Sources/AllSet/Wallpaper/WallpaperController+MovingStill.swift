@@ -115,7 +115,7 @@ enum SharedVideoPlayers {
         let entry = Entry()
         entry.player.isMuted = true
         entry.player.preventsDisplaySleepDuringVideoPlayback = false
-        entry.looper = AVPlayerLooper(player: entry.player, templateItem: AVPlayerItem(url: url))
+        entry.looper = AVPlayerLooper(player: entry.player, templateItem: AVPlayerItem(asset: AVURLAsset.library(url)))
         entries[url] = entry
         return entry.player
     }

@@ -128,7 +128,7 @@ enum AppData {
     }
 
     /// Quits, and opens the app again when it was started from its bundle.
-    private static func restart() {
+    static func restart() {
         let bundle = Bundle.main.bundlePath
         if bundle.hasSuffix(".app") {
             let reopen = Process()

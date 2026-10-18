@@ -69,13 +69,17 @@ public struct LibrarySync: Sendable {
     public let progress = LibrarySyncProgress()
     private let key: String?
     private let session: URLSession
+    private let authorization: LibraryAuthorization
 
     /// `server` is the library's address (its files; the account API is under
-    /// `api/`), `directory` the app's library folder. No `key`: a public library.
-    public init(server: URL, key: String?, directory: URL, session: URLSession? = nil) {
+    /// `api/`), `directory` the app's library folder. No `key`: a public
+    /// library, whose requests carry the access token (`authorization`).
+    public init(server: URL, key: String?, directory: URL, session: URLSession? = nil,
+                authorization: LibraryAuthorization = .shared) {
         self.server = server
         self.key = key
         self.directory = directory
+        self.authorization = authorization
         if let session {
             self.session = session
         } else {
@@ -126,6 +130,7 @@ public struct LibrarySync: Sendable {
         }
         guard let (data, response) = try? await session.data(for: request),
               let http = response as? HTTPURLResponse else { throw Failure.unreachable }
+        authorization.check(http)
         switch http.statusCode {
         case 200: break
         case 304: return nil
@@ -233,6 +238,7 @@ public struct LibrarySync: Sendable {
                     // The temporary file is gone once this returns, so move it now.
                     let size = temporary.flatMap { (try? FileManager.default.attributesOfItem(atPath: $0.path))?[.size] as? Int64 } ?? 0
                     handle.task.map { progress.ended($0, bytes: size) }
+                    authorization.check(response)
                     guard let temporary, let http = response as? HTTPURLResponse else {
                         continuation.resume(throwing: error ?? Failure.unreachable)
                         return
@@ -295,7 +301,11 @@ public struct LibrarySync: Sendable {
 
     private func request(_ url: URL) -> URLRequest {
         var request = URLRequest(url: url)
-        if let key { request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization") }
+        if let key {
+            request.setValue("Bearer \(key)", forHTTPHeaderField: "Authorization")
+        } else {
+            authorization.authorize(&request)
+        }
         return request
     }
 }

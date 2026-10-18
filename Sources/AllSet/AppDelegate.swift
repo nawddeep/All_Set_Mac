@@ -15,6 +15,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var widgets: DesktopWidgetController?
     private var wallpaper: WallpaperController?
     private var windowManager: WindowManager?
+    /// Everything below the access key screen is running.
+    private var hasStarted = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Writing to the media helper after it exits should fail with an error
@@ -214,6 +216,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
 
+        // Nothing else starts until the library server accepts a key.
+        AccessController.shared.begin { [weak self] in self?.startEverything() }
+    }
+
+    /// The island, widgets, wallpaper, menu bar and window: what launching
+    /// starts once `AccessController` is open.
+    private func startEverything() {
+        hasStarted = true
         applyDockVisibility()
         AllSet.observe({ [services] in services.settings.showInDock }) { [weak self] _ in self?.applyDockVisibility() }
 
@@ -301,6 +311,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Clicking the Dock icon (or opening the app again) brings up the window.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        // Locked, the main window shows the key screen instead (`openWindow`).
         services.openWindow()
         return false
     }
@@ -311,11 +322,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        guard hasStarted else { return }
         services.stop()
     }
 
     /// `allset://` links from Shortcuts, scripts, the browser or other apps.
     func application(_ application: NSApplication, open urls: [URL]) {
+        guard hasStarted else {
+            Logger(subsystem: "com.pratik.allset", category: "links").notice("Ignored a link: no access key yet")
+            return
+        }
         for url in urls {
             guard let link = DeepLink(url) else {
                 Logger(subsystem: "com.pratik.allset", category: "links").notice("Ignored an unknown or malformed link")

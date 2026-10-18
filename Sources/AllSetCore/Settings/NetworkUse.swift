@@ -38,7 +38,7 @@ public enum NetworkUse: String, CaseIterable, Identifiable, Sendable {
         case .statusChecks: "While a Status widget is on your desktop, for the addresses in it."
         case .anthropic: "Only when you send a screenshot to Claude in AI Screenshot, with your own API key."
         case .openAI: "Only when you send a screenshot to OpenAI in AI Screenshot, with your own API key."
-        case .libraryServer: "Only if you set up a wallpaper library server of your own."
+        case .libraryServer: "At launch, to check your access key; then for the wallpaper list a few times a day, and each wallpaper you pick."
         }
     }
 
@@ -53,7 +53,7 @@ public enum NetworkUse: String, CaseIterable, Identifiable, Sendable {
         case .github: "The GitHub user name or repository you entered. Your public contribution calendar is read from github.com."
         case .statusChecks: "A plain request to each address, to see if it answers."
         case .anthropic, .openAI: "The screenshot, your question and your API key. Nothing is sent until you press Send."
-        case .libraryServer: "Requests for the wallpaper list and files, with the key you gave the server."
+        case .libraryServer: "Your access key when it's checked, then the token the server gave for it with every request for the wallpaper list and files."
         }
     }
 

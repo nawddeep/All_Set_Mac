@@ -351,7 +351,7 @@ struct VideoTile: View {
         }
         .onHover { isHovering = $0 }
         .task(id: url) {
-            let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
+            let generator = AVAssetImageGenerator(asset: AVURLAsset.library(url))
             generator.appliesPreferredTrackTransform = true
             generator.maximumSize = CGSize(width: 600, height: 600)
             if let (image, _) = try? await generator.image(at: CMTime(seconds: 1, preferredTimescale: 600)) {

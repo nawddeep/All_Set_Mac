@@ -53,7 +53,7 @@ if [ -z "${ALLSET_PUBLIC_LIBRARY_URL:-}" ] && [ -f scripts/local.env ]; then
 fi
 if [ -n "${ALLSET_PUBLIC_LIBRARY_URL:-}" ]; then
   /usr/libexec/PlistBuddy -c "Add :AllSetPublicLibraryURL string $ALLSET_PUBLIC_LIBRARY_URL" "$APP_DIR/Contents/Info.plist"
-  echo "Public wallpaper library: $ALLSET_PUBLIC_LIBRARY_URL built into the app (no key needed)"
+  echo "Public wallpaper library: $ALLSET_PUBLIC_LIBRARY_URL built into the app (it also checks access keys)"
   ALLSET_LIBRARY_SERVER_URL=""
   ALLSET_LIBRARY_SERVER_HOST=""
   # HTTPS needs nothing more. A plain-HTTP address (a rehearsal against this
@@ -90,6 +90,15 @@ if [ -n "${ALLSET_LIBRARY_SERVER_URL:-}" ]; then
   /usr/libexec/PlistBuddy -c "Delete :AllSetLibraryServerURL" "$APP_DIR/Contents/Info.plist" 2>/dev/null || true
   /usr/libexec/PlistBuddy -c "Add :AllSetLibraryServerURL string $ALLSET_LIBRARY_SERVER_URL" "$APP_DIR/Contents/Info.plist"
   echo "Wallpaper library: $ALLSET_LIBRARY_SERVER_URL built into the app"
+fi
+# The access key screen (AccessController) is on unless ALLSET_ACCESS_GATE=0,
+# a stopgap for testing while the server's key check isn't live. A copy built
+# that way opens for anyone: never send it to someone.
+if [ "${ALLSET_ACCESS_GATE:-1}" = "0" ]; then
+  /usr/libexec/PlistBuddy -c "Add :AllSetAccessGate bool false" "$APP_DIR/Contents/Info.plist"
+  echo "WARNING: access gate OFF in this build (ALLSET_ACCESS_GATE=0): no key is asked for"
+else
+  echo "Access gate: on (a key is needed to start)"
 fi
 # Updates: Sparkle stays switched off (no checks, no network) until the
 # owner's EdDSA public key replaces the placeholder in Info.plist, or arrives

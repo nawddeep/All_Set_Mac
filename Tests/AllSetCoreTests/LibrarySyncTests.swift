@@ -50,14 +50,15 @@ private final class LibraryServerStub: URLProtocol, @unchecked Sendable {
 @Suite(.serialized) struct LibrarySyncTests {
     private static let key = "the-permanent-key"
 
-    private func makeSync(key: String? = LibrarySyncTests.key) throws -> LibrarySync {
+    private func makeSync(key: String? = LibrarySyncTests.key,
+                          authorization: LibraryAuthorization = LibraryAuthorization()) throws -> LibrarySync {
         LibraryServerStub.reset()
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("allset-sync-\(UUID().uuidString)/Library")
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [LibraryServerStub.self]
         return LibrarySync(server: URL(string: "http://library.test:8080")!, key: key, directory: directory,
-                           session: URLSession(configuration: configuration))
+                           session: URLSession(configuration: configuration), authorization: authorization)
     }
 
     private func video(_ id: String, size: Int64, kind: LibraryVideo.Kind = .video) -> LibraryVideo {
@@ -229,6 +230,27 @@ private final class LibraryServerStub: URLProtocol, @unchecked Sendable {
         #expect(summary == LibrarySync.Summary(downloaded: 2, failed: 0, leftForLater: 0))
     }
 
+    @Test func aPublicLibrarysListAndFilesCarryTheAccessTokenAndReportA401() async throws {
+        let authorization = LibraryAuthorization(host: "library.test", token: "access-token")
+        let rejected = Rejections()
+        authorization.onRejected { rejected.add() }
+        let sync = try makeSync(key: nil, authorization: authorization)
+        let list = try JSONEncoder().encode(WallpaperLibraryCatalog(roots: [], items: [video("a", size: 10)]))
+        LibraryServerStub.handler = { request in
+            guard request.value(forHTTPHeaderField: "Authorization") == "Bearer access-token" else { return (401, nil) }
+            let path = request.url?.path ?? ""
+            return (200, path == "/catalog.json" ? list : Data(path.utf8))
+        }
+        let catalog = try #require(try await sync.update())
+        #expect(await sync.download(catalog).downloaded == 1)
+        #expect(rejected.count == 0)
+        // A token the server no longer takes: refused, and the gate hears of it.
+        authorization.token = "stale"
+        try FileManager.default.removeItem(at: sync.directory.appendingPathComponent("catalog.json"))
+        await #expect(throws: LibrarySync.Failure.refused(401)) { try await sync.update() }
+        #expect(rejected.count == 1)
+    }
+
     @Test func aSavedListThatWentMissingIsFetchedAgainWhateverTheTagSays() async throws {
         let sync = try makeSync(key: nil)
         try servePublicly([video("a", size: 10)], tag: "\"one\"")
@@ -338,4 +360,12 @@ private final class Order: @unchecked Sendable {
     func add(_ line: String) {
         lock.withLock { lines.append(line) }
     }
+}
+
+// Sendable because: `seen` is only read and written under `lock`.
+private final class Rejections: @unchecked Sendable {
+    private let lock = NSLock()
+    private var seen = 0
+    var count: Int { lock.withLock { seen } }
+    func add() { lock.withLock { seen += 1 } }
 }

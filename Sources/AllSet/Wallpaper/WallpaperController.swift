@@ -310,7 +310,7 @@ final class WallpaperController {
 
     /// A frame from a video, a moment in, written as a PNG.
     private func videoStill(_ url: URL, to file: URL) async -> URL? {
-        let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
+        let generator = AVAssetImageGenerator(asset: AVURLAsset.library(url))
         generator.appliesPreferredTrackTransform = true
         // A moment in, past any fade from black.
         generator.requestedTimeToleranceAfter = CMTime(seconds: 2, preferredTimescale: 600)

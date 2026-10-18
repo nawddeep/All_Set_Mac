@@ -372,6 +372,7 @@ struct MainView: View {
         case .general:
             FormPage(eyebrow: "System", title: "General", subtitle: "Startup, the Dock, the menu bar, and your data.") {
                 GeneralSettings(settings: services.settings)
+                AccessSettings()
                 DataPrivacySettings(services: services)
                 PermissionSettings(services: services)
                 CompatibilitySettings()

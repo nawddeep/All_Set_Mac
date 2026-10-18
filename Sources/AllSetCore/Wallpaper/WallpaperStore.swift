@@ -181,6 +181,8 @@ public final class WallpaperStore {
     /// The library server's API key (`LibraryKey`), read when a request starts.
     /// Nil when this Mac has none; the request then goes without one.
     @ObservationIgnored public var libraryBearer: (@MainActor () -> String?)?
+    /// The access token for the public library's host, and where its 401s go.
+    @ObservationIgnored public var libraryAuthorization = LibraryAuthorization.shared
 
     @ObservationIgnored let fileURL: URL
     @ObservationIgnored public let directory: URL
@@ -282,12 +284,16 @@ final class DownloadHandle: @unchecked Sendable {
     }
 }
 
-/// A request to the library server, carrying its API key when this Mac has one.
-func libraryRequest(_ url: URL, method: String? = nil, bearer: String?) -> URLRequest {
+/// A request to the library server, carrying its API key when this Mac has
+/// one, else the access token when it's for the public library's host.
+func libraryRequest(_ url: URL, method: String? = nil, bearer: String?,
+                    authorization: LibraryAuthorization) -> URLRequest {
     var request = URLRequest(url: url)
     if let method { request.httpMethod = method }
     if let bearer {
         request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization")
+    } else {
+        authorization.authorize(&request)
     }
     return request
 }

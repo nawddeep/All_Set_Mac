@@ -224,6 +224,11 @@ final class AppServices {
 
     /// Brings up the main window, optionally on a given page.
     func openWindow(_ page: AppPage? = nil) {
+        // Every way into the window comes here; without an access key it's the key screen.
+        guard AccessController.shared.isUnlocked else {
+            AccessKeyWindow.shared.show(controller: AccessController.shared)
+            return
+        }
         if let page { ui.page = page }
         MainWindowController.shared.show(services: self)
     }
