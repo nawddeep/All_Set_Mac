@@ -80,11 +80,9 @@ final class AccessController {
             await gate.start()
             changed(to: gate.state)
         }
-        // A quick answer unlocks without the window ever showing; a slow one shows it, checking.
-        Task {
-            try? await Task.sleep(for: .seconds(1))
-            if !isUnlocked { AccessKeyWindow.shared.show(controller: self) }
-        }
+        // A key entered before is checked out of sight: the window shows only
+        // if it fails. A first launch shows it now.
+        if !gate.hasSavedKey { AccessKeyWindow.shared.show(controller: self) }
     }
 
     /// The key screen's Continue.
