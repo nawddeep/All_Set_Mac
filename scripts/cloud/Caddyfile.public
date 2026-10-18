@@ -43,12 +43,24 @@
 
 # The lock: Caddy asks catalog_service.py whose the request's token is before
 # it serves a file. A 2xx serves it; a 401 goes back to the app as it is.
+# Locked, every response is private, so a shared cache (Cloudflare) never hands
+# one person's copy to someone without a key. Open, they're public, so Cloudflare
+# keeps a copy and serves repeat downloads itself instead of this Mac's upload.
+# Copies it kept while open stay until they expire: purge its cache when locking.
+# The list changes when a publish changes it: checked again after a minute. A
+# wallpaper's file can be re-rendered under the same name: a day.
 (lock-on) {
 	forward_auth 127.0.0.1:{$ALLSET_API_PORT:8083} {
 		uri /me
 	}
+	header /catalog.json Cache-Control "private, max-age=60"
+	@private_files not path /catalog.json
+	header @private_files Cache-Control "private, max-age=86400"
 }
 (lock-off) {
+	header /catalog.json Cache-Control "public, max-age=60"
+	@public_files not path /catalog.json
+	header @public_files Cache-Control "public, max-age=86400"
 }
 
 {$ALLSET_PUBLIC_SITE:http://127.0.0.1:8090} {
@@ -86,15 +98,6 @@
 		# Dot files, and a file publish_catalog.py is still putting in place.
 		@hidden path_regexp (^|/)\.|\.publishing$
 		respond @hidden 404
-
-		# The list changes when a publish changes it: checked again after a minute.
-		# A wallpaper's file can be re-rendered under the same name: a day. Private,
-		# so a shared cache (Cloudflare) never hands one person's copy to someone
-		# without a key; the app's own cache still keeps it.
-		@catalog path /catalog.json
-		header @catalog Cache-Control "private, max-age=60"
-		@files not path /catalog.json
-		header @files Cache-Control "private, max-age=86400"
 
 		# No folder listings: a folder's address answers 404.
 		file_server
