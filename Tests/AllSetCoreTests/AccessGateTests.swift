@@ -281,7 +281,7 @@ private final class MemoryVault: AccessVault {
         let library = URL(string: "https://wallpapers.example.com")!
         #expect(WallpaperConfig.libraryAddress(saved: nil, publicLibrary: library) == "https://wallpapers.example.com")
         #expect(WallpaperConfig.libraryAddress(saved: " ", publicLibrary: library) == "https://wallpapers.example.com")
-        #expect(WallpaperConfig.libraryAddress(saved: "http://100.71.191.101:8080", publicLibrary: library) == "https://wallpapers.example.com")
+        #expect(WallpaperConfig.libraryAddress(saved: "http://100.80.12.34:8080", publicLibrary: library) == "https://wallpapers.example.com")
         #expect(WallpaperConfig.libraryAddress(saved: "http://100.64.0.9:8080/", publicLibrary: library) == "https://wallpapers.example.com")
         // A server of this Mac's own stays.
         #expect(WallpaperConfig.libraryAddress(saved: "http://192.168.1.20:8080", publicLibrary: library) == "http://192.168.1.20:8080")
