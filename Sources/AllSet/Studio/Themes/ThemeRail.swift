@@ -1,7 +1,8 @@
 import AllSetCore
 import SwiftUI
 
-/// Responsive shelves of cached desktops with arrow and trackpad navigation.
+/// A shelf of cached desktops, wrapped into rows: every theme in it is
+/// reached by scrolling the page, as in the wallpaper library.
 struct ThemeRail: View {
     let title: String
     let sets: [ThemeSet]
@@ -10,70 +11,58 @@ struct ThemeRail: View {
     var viewportHeight: CGFloat = 800
     @State private var previewsVisible = false
     @State private var activation: Task<Void, Never>?
-    var seeAll: (@MainActor () -> Void)?
-    @State private var visibleID: String?
+
+    private var columns: Int { availableWidth >= 1200 ? 6 : availableWidth >= 900 ? 5 : 4 }
 
     private var cardWidth: CGFloat {
-        let columns: CGFloat = availableWidth >= 1200 ? 5 : availableWidth >= 900 ? 4 : 3
-        return max(190, (availableWidth - (columns - 1) * DS.Space.s) / columns)
+        let count = CGFloat(columns)
+        return max(140, ((availableWidth - (count - 1) * DS.Space.s) / count).rounded(.down))
     }
 
     var body: some View {
         if !sets.isEmpty {
-            ScrollViewReader { scroller in
-                VStack(alignment: .leading, spacing: DS.Space.s) {
-                    HStack(spacing: DS.Space.s) {
-                        Image(systemName: symbol).font(.system(size: 17, weight: .semibold))
-                            .foregroundStyle(title == "Recommended themes" ? Color.pink : Color.white.opacity(0.8))
-                            .frame(width: 30, height: 30)
-                            .background(DS.Surface.raised, in: RoundedRectangle(cornerRadius: DS.Radius.control))
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(title).dsText(.section)
-                            Text(subtitle).dsText(.meta)
-                        }
-                        Spacer()
-                        arrow("chevron.left", by: -1, scroller: scroller)
-                        arrow("chevron.right", by: 1, scroller: scroller)
-                        if let seeAll { Button("See all", action: seeAll).buttonStyle(.pill).controlSize(.small) }
+            VStack(alignment: .leading, spacing: DS.Space.s) {
+                HStack(spacing: DS.Space.s) {
+                    Image(systemName: symbol).font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(title == "Recommended themes" ? Color.pink : Color.white.opacity(0.8))
+                        .frame(width: 30, height: 30)
+                        .background(DS.Surface.raised, in: RoundedRectangle(cornerRadius: DS.Radius.control))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(title).dsText(.section)
+                        Text(subtitle).dsText(.meta)
                     }
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(spacing: DS.Space.s) {
-                            ForEach(sets) { set in
-                                RailCard(set: set, services: services, requestsPreview: previewsVisible).frame(width: cardWidth).id(set.id)
+                    Spacer()
+                }
+                LazyVGrid(columns: Array(repeating: GridItem(.fixed(cardWidth), spacing: DS.Space.s), count: columns),
+                          alignment: .leading, spacing: DS.Space.s) {
+                    ForEach(sets) { set in
+                        RailCard(set: set, services: services, requestsPreview: previewsVisible)
+                    }
+                }
+            }
+            .background {
+                if !previewsVisible {
+                    Color.clear.onGeometryChange(for: Bool.self) { proxy in
+                        let frame = proxy.frame(in: .named("themesViewport"))
+                        return frame.maxY > -160 && frame.minY < viewportHeight + 160
+                    } action: { visible in
+                        // Activate once, then remove the geometry observer:
+                        // scrolling back must not rebuild or reload every card.
+                        if visible, activation == nil {
+                            activation = Task {
+                                guard await services.themePreviews.waitUntilScrollSettles() else { return }
+                                previewsVisible = true
                             }
-                        }
-                        .scrollTargetLayout().padding(.vertical, DS.Space.xxs)
-                    }
-                    .scrollTargetBehavior(.viewAligned)
-                    .scrollPosition(id: $visibleID, anchor: .leading)
-                    // A stable shelf height prevents lazy vertical layout from
-                    // changing the scroll offset as horizontal cards appear.
-                    .frame(height: cardWidth / ThemePreviewVariant.desktop.aspect + DS.Space.xxs * 2)
-                }
-                .background {
-                    if !previewsVisible {
-                        Color.clear.onGeometryChange(for: Bool.self) { proxy in
-                            let frame = proxy.frame(in: .named("themesViewport"))
-                            return frame.maxY > -160 && frame.minY < viewportHeight + 160
-                        } action: { visible in
-                            // Activate once, then remove the geometry observer:
-                            // scrolling back must not rebuild or reload every card.
-                            if visible, activation == nil {
-                                activation = Task {
-                                    guard await services.themePreviews.waitUntilScrollSettles() else { return }
-                                    previewsVisible = true
-                                }
-                            } else if !visible {
-                                activation?.cancel()
-                                activation = nil
-                            }
+                        } else if !visible {
+                            activation?.cancel()
+                            activation = nil
                         }
                     }
                 }
-                .onDisappear {
-                    activation?.cancel()
-                    activation = nil
-                }
+            }
+            .onDisappear {
+                activation?.cancel()
+                activation = nil
             }
         }
     }
@@ -98,20 +87,6 @@ struct ThemeRail: View {
         case "Colour & Light": "A brighter way to make it yours."
         default: "\(sets.count) complete desktop experiences."
         }
-    }
-
-    private func arrow(_ symbol: String, by direction: Int, scroller: ScrollViewProxy) -> some View {
-        let current = sets.firstIndex { $0.id == visibleID } ?? 0
-        let target = min(max(current + direction, 0), max(sets.count - 1, 0))
-        return Button {
-            withAnimation(ThemesMotion(services.ui.performance).snap) {
-                scroller.scrollTo(sets[target].id, anchor: .leading)
-                visibleID = sets[target].id
-            }
-        } label: { Image(systemName: symbol) }
-        .buttonStyle(FloatingButtonStyle(diameter: 28)).disabled(target == current)
-        .help(direction < 0 ? "Previous themes" : "Next themes")
-        .accessibilityLabel(direction < 0 ? "Previous \(title)" : "Next \(title)")
     }
 }
 

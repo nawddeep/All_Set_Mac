@@ -136,9 +136,7 @@ struct ThemesPage: View {
                         banners
                         if browsing {
                             ThemeRail(title: "Recommended themes", sets: ThemeDiscovery.trending.sets(stats: services.themeStats),
-                                      services: services, availableWidth: geometry.size.width - margin * 2, viewportHeight: geometry.size.height) {
-                                discovery = ThemeDiscovery.trending.rawValue
-                            }
+                                      services: services, availableWidth: geometry.size.width - margin * 2, viewportHeight: geometry.size.height)
                             ThemeMoodboards(services: services, selection: $discovery,
                                            availableWidth: geometry.size.width - margin * 2)
                             Deferred {
@@ -260,15 +258,8 @@ struct ThemesPage: View {
         return (spotlight, shelves)
     }
 
-    @ViewBuilder
     private func railView(_ rail: Rail, width: CGFloat, viewportHeight: CGFloat) -> some View {
-        if let more = rail.more {
-            ThemeRail(title: rail.title, sets: rail.sets, services: services, availableWidth: width, viewportHeight: viewportHeight) {
-                discovery = more.rawValue
-            }
-        } else {
-            ThemeRail(title: rail.title, sets: rail.sets, services: services, availableWidth: width, viewportHeight: viewportHeight)
-        }
+        ThemeRail(title: rail.title, sets: rail.sets, services: services, availableWidth: width, viewportHeight: viewportHeight)
     }
 
     @ViewBuilder
